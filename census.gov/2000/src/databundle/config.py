@@ -8,19 +8,23 @@ class Config(object):
     '''
     classdocs
     '''
-    configFile = None
-    o = None
-
+    
     def __init__(self, configFile):
         '''
         Constructor
         '''
-        self.configFile = configFile
+        self._configFile = configFile
+        self._yaml = None
+        self.load()
         
     def load(self):
         import yaml
-        self.o = yaml.load(file(self.configFile, 'r'))
+        self._yaml = yaml.load(file(self._configFile, 'r'))
       
-        return self.o
+        return self._yaml
     
     
+    @property
+    def yaml(self):
+        """I'm the 'yaml' property."""
+        return self._yaml

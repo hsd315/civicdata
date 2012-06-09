@@ -4,7 +4,7 @@ Created on Jun 7, 2012
 @author: eric
 '''
 
-def rootDir(testFile='bundle.yaml'):
+def root_dir(testFile='bundle.yaml'):
         '''
         Find the parent directory that contains the bundle.yaml file
         '''
@@ -17,7 +17,7 @@ def rootDir(testFile='bundle.yaml'):
             test =  os.path.normpath(d+'/'+testFile)
             print "D "+test
             if(os.path.isfile(test)):
-                return d
+                return RootDir(d)
             d = os.path.dirname(d)
              
         return None
@@ -30,8 +30,19 @@ class RootDir:
         '''
         self.directory = directory
         
+    def __str__(self):
+        return self.directory
     
-
+    @property
+    def bundle_config(self):
+        from config import Config
+        import os.path
+        return Config(os.path.normpath(self.directory+'/'+'bundle.yaml'))
+ 
+    def absolute(self, relative):
+        import os.path
+        return os.path.normpath(self.directory+'/'+relative)
+ 
 class Files(object):
     '''
     classdocs
