@@ -4,6 +4,7 @@ identity:
   dataset: Population Census
   subset: SF1
   creator: clarinova.com
+  revision: 1
   
 partition:
    time: 2000

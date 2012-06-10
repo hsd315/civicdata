@@ -13,14 +13,14 @@ class Download:
         pass
     
     def run(self):
-        import databundle
+    
         import pprint
         import os.path
         import urllib
         import urlparse
         import zipfile
         
-        from databundle.config import Config
+        from databundles.config import Config
         from bs4 import BeautifulSoup
         
         configFile = os.path.normpath(os.path.dirname(__file__)+'/bundle.yaml')

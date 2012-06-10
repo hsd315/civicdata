@@ -20,7 +20,7 @@ class Download:
         import urlparse
         import zipfile
         
-        from databundle.config import Config
+        from databundles.config  import Config
         from bs4 import BeautifulSoup
         
         configFile = os.path.normpath(os.path.dirname(__file__)+'/bundle.yaml')
