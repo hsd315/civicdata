@@ -4,31 +4,33 @@ Created on Jun 10, 2012
 @author: eric
 '''
 
-from databundles.bundle  import Bundle
+from  databundles.bundle import Bundle as Base
   
-class MyClass(Bundle):
+class Bundle(Base):
     '''
     classdocs
     '''
 
 
-    def __init__(self,params):
+    def __init__(self,directory=None):
         '''
         Constructor
         '''
-        super(Bundle, self).__init__(params)
+        self.super_ = super(Bundle, self)
+        self.super_.__init__(directory)
         
     def prepare(self):
-        super(Bundle, self).prepare(params)
+        import processheaders
+        o = processheaders.ProcessHeaders(self).run()
     
     def download(self):
-        super(Bundle, self).download(params)  
+        self.super_.download()  
     
     def transform(self):
-        super(Bundle, self).transform(params)
+        self.super_.transform()
     
     def build(self):
-        super(Bundle, self).build(params)
+        self.super_.build()
     
     def submit(self):
-        super(Bundle, self).submit(params)
+        self.super_.submit()

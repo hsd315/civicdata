@@ -6,17 +6,17 @@ Created on Jun 7, 2012
 
 class ProcessHeaders:
        
-    def __init__(self):
+    def __init__(self, bundle):
         '''
         Constructor
         '''
-        pass
+        self.bundle = bundle
     
     def run(self):
-        from databundle import files
+        
         import pprint
         import csv
-        rd = files.root_dir()
+        rd = self.bundle.root_dir
         
         config = rd.bundle_config.yaml
         
@@ -36,7 +36,7 @@ class ProcessHeaders:
             tables.append(o)
            
 
-        column_index = 0
+       
         for row in reader:
            
             file_name = row['SF#']
@@ -62,7 +62,3 @@ class ProcessHeaders:
                 #tables[file_number]['header'].append(field_name)
                     
         pprint.pprint(tables)
-      
-if __name__ == '__main__':
-    o = ProcessHeaders();
-    o.run()
