@@ -11,4 +11,5 @@ partition:
    
 build:
   rootUrl: http://www2.census.gov/census_2000/datasets/Summary_File_1/
+  statesFile: States
   headers: sf1headers.csv
