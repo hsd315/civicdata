@@ -54,10 +54,17 @@ class Bundle(Base):
         return ds
         
     def get_manifest(self):
-    
+        '''Get all of the URLs of the zip files to download '''
         import urllib
         import urlparse
+        import yaml
         from bs4 import BeautifulSoup
+   
+        urls_file = self.path(self.URLS_FILE)
+        
+        # If the file has already been generated, return it. 
+        if os.path.exists(urls_file):
+            return  yaml.load(file(urls_file, 'r'))
    
         urls = []
         i = 0;
@@ -87,7 +94,13 @@ class Bundle(Base):
                         urls.append({'state': state.encode('ascii', 'ignore'),
                                      'url': urlparse.urljoin(stateUrl, link.get('href')).encode('ascii', 'ignore')
                                      })   
+        import yaml
+            
+        with open(urls_file,'w') as f:
+            f.write(yaml.dump(urls))
+            
         return urls
+         
         
     def pre_prepare(self):
         return True
@@ -96,40 +109,132 @@ class Bundle(Base):
         '''Create the prototype database'''
 
         if not self.protodb.exists():
-
+            print "Creating prototype database"
+            
             ds = self.process_headers()
             
             proto = self.protodb
             
             proto.delete()
             proto.create()
+            proto.load_sql(self.path('meta/tables.sql'))
+            #proto.add_schema(ds)
             
-            proto.add_schema(ds)
-            
-        urls_file = self.path(self.URLS_FILE)
-        
+        # Create the manifast file if it does not exist. 
+        urls = self.get_manifest()  
       
-        if not os.path.exists(urls_file):
-            urls = self.get_manifest();
-            
-            import yaml
-            
-            with open(urls_file,'w') as f:
-                f.write(yaml.dump(urls))
-                
-            
-            print yaml.dump(urls)
-
     
     def download(self):
         import download
+        import urllib
+        import urlparse
+        import zipfile
      
-        #o.get_manifest()
+        urls = self.get_manifest()  
+     
+        extractDir = self.directory('extracts')
+        downloadDir = self.directory('downloads')
+     
+        for e in urls:
+            state = e['state']
+            aurl = e['url']
+                    
+            path = urlparse.urlparse(aurl).path
+            webFilename = os.path.normpath(downloadDir+'/'+os.path.basename(path))
         
+            if(not os.path.exists(webFilename)):
+                print 'Downloading '+aurl+' to '+webFilename
+                webFilename, headers = urllib.urlretrieve(aurl, webFilename )
+            else:
+                print 'Using cached web file '+webFilename
+          
+            try :
+                with zipfile.ZipFile(webFilename) as zf:
+                    for name in  zf.namelist():
+                        extractFilename = os.path.join(extractDir,name)
+                        if(not os.path.exists(extractFilename)):
+                            print 'Extracting'+extractFilename+' from '+webFilename
+                            name = name.replace('/','').replace('..','')
+                            zf.extract(name,extractDir )
+                        else:
+                            print 'Using cached extract file '+extractFilename
+            except zipfile.BadZipfile:
+                os.unlink(webFilename)
+                print "ERROR: Not a zipfile: "+webFilename
+    
+    def pre_transform(self):
+        return True
     
     def transform(self):
-        self.super_.transform()
-    
+        import re
+        
+        extractDir = self.directory('extracts')
+        
+        dir_listing = [os.path.join(extractDir, f) for f in os.listdir(extractDir)]
+        
+        geo_regex = self.get_geo_regex()
+        
+       
+        for path in dir_listing:
+            if 'geo.uf1' in path:
+                #self.load_geo(path, geo_regex)
+                pass
+            elif re.match('.*/\w{2}\d{5}.uf1', path):
+                self.load_table(path)
+                pass
+            else:
+                raise ValueError, 'Bad path: '+path
+   
+    def load_table(self, path):
+        import re, pprint
+        state, number = re.match('.*/(\w{2})(\d{5}).uf1', path).groups()
+        number = int(number)
+        
+        import copy
+        bundle = copy.deepcopy(self)
+        bundle.partition.space = state
+        
+        table = 'sf100{:0d}'.format(number)
+        
+        
+        print "loading ",bundle.name, state, number, table
+        
+        print "sqlite3 -csv load '.import extracts/ak00001.uf1 SF10001' "
+        
+    def get_geo_regex(self):
+        '''Read the definition for the fixed positioins of the fields in the geo file and
+        construct a regular expresstion to parse the lines.'''
+        import csv, re
+        
+        def_file = self.path('meta/geoheaders.csv')
+        reader  = csv.DictReader(open(def_file, 'rbU') )
+        
+        pos = 0;
+        regex = ''
+        for row in reader:
+            start = int(row['start']) - 1
+            pos += int(row['length'])
+        
+            regex += "(?P<{}>.{{{}}})".format(row['column'],row['length'])
+            
+        print regex
+       
+        return re.compile(regex)
+            
+    def load_geo(self, path, regex):
+        import re, pprint
+        with open(path) as f:
+            for line in f:
+                print line
+                m = regex.match(line)
+                if m:
+                    pprint.pprint(m.groupdict())
+                else:
+                   raise ValueError
+        
+    def post_transform(self):
+        return True
+     
     def build(self):
         self.super_.build()
     
