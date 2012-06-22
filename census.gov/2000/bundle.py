@@ -177,29 +177,36 @@ class Bundle(Base):
        
         for path in dir_listing:
             if 'geo.uf1' in path:
-                #self.load_geo(path, geo_regex)
+                self.load_geo(path, geo_regex)
                 pass
             elif re.match('.*/\w{2}\d{5}.uf1', path):
-                self.load_table(path)
+                #self.load_table(path)
                 pass
             else:
                 raise ValueError, 'Bad path: '+path
    
+   
     def load_table(self, path):
-        import re, pprint
+        '''Copy the prototype db into a production table and load data into it.''' 
+        import re, pprint, copy, os
+        
         state, number = re.match('.*/(\w{2})(\d{5}).uf1', path).groups()
         number = int(number)
+        table = 'SF100{:02d}'.format(number)
         
-        import copy
+        # Copy the bundle so we change the partition, to create the correct partition name
         bundle = copy.deepcopy(self)
         bundle.partition.space = state
         
-        table = 'sf100{:0d}'.format(number)
+        #bundle.partition.table = table
         
+        pdb = bundle.productiondb_path
+
+        # Loading a CSV file into sqlite is really easy, and this is probably much faster. 
+        cmd = "/usr/bin/sqlite3 -csv {} '.import {} {}' ".format(pdb, path, table)
+        print cmd
         
-        print "loading ",bundle.name, state, number, table
-        
-        print "sqlite3 -csv load '.import extracts/ak00001.uf1 SF10001' "
+        os.system(cmd)
         
     def get_geo_regex(self):
         '''Read the definition for the fixed positioins of the fields in the geo file and
@@ -222,15 +229,33 @@ class Bundle(Base):
         return re.compile(regex)
             
     def load_geo(self, path, regex):
-        import re, pprint
+        import re, pprint, copy
+        
+        state = re.match('.*/(\w{2})geo.uf1', path).group(1)
+     
+        # Copy the bundle so we change the partition, to create the correct partition name
+        bundle = copy.deepcopy(self)
+        bundle.partition.space = state
+    
+   
+        d = bundle.database()
+        con = d.engine.connect()
+        
+        
         with open(path) as f:
+            con.begin()
+            print "Loading geo file "+ path
             for line in f:
-                print line
                 m = regex.match(line)
                 if m:
-                    pprint.pprint(m.groupdict())
+                    values = {k:v.strip() for k,v in m.groupdict().iteritems()}
+                    ins = d.table('SF1GEO').insert().values(values)
+                    con.execute(ins)
+                    
                 else:
-                   raise ValueError
+                    con.rollback()
+                    raise ValueError
+            con.commit()
         
     def post_transform(self):
         return True

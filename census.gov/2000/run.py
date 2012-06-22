@@ -37,10 +37,12 @@ def main(argv):
   
     if 'prepare' in phases:
         if b.pre_prepare():
+            print "Preparing"
             if b.prepare():
-                print "Preparing"
                 b.post_prepare()
-                print "Done Preparing"
+            print "Done Preparing"
+        else:
+            print "Skipping prepare"
             
     if 'download' in phases:
         if b.pre_download():
