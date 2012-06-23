@@ -15,12 +15,37 @@ class Bundle(Base):
     URLS_FILE = 'urls.yaml'
 
     def __init__(self,directory=None):
-        '''
-        Constructor
-        '''
+        '''Constructor'''
         self.super_ = super(Bundle, self)
         self.super_.__init__(directory)
       
+    def schemaGenerator(self):
+        '''Return schema rows'''
+        
+        from databundles.config.orm import Table, Column
+        import csv
+        
+        header_file = self.path(self.config['build']['headers'])
+        
+        reader  = csv.DictReader(open(header_file, 'rbU') )
+      
+        for row in reader:
+            # The first two rows for the table give information about the title
+            # and population universe. 
+            if( not row['FIELDNUM']):
+                if  row['TABNO']:
+                    # First of the two info rows. 
+                    table = Table(name=row['TABNO'].strip('.'),description=row['TEXT'])
+                  
+                    
+                elif row['TEXT']:
+                    #Second and last of the two info rows, so now is time to create the table. 
+                    table.universe = row['TEXT']
+                  
+            else:
+                table.add_column(Column(name=row['FIELDNUM'], description=row['TEXT'],
+                                         datatype=Column.DATATYPE_INTEGER))
+        return ds
     def process_headers(self):
         '''Process the sf1header.csv file and return a config.Database object that holds
         the schema'''
