@@ -15,7 +15,6 @@ class Bundle(Base):
     '''
 
     def __init__(self,directory=None):
-        '''Constructor'''
         self.super_ = super(Bundle, self)
         self.super_.__init__(directory)
         
