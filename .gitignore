@@ -1,4 +1,7 @@
 *.pyc
 *.zip
 *.uf1
+.*/build/.*
 
+
+census.gov/2000/build

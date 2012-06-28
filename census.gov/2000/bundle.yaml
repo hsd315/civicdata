@@ -2,6 +2,11 @@ build:
     headers: meta/columns.csv
     rootUrl: http://www2.census.gov/census_2000/datasets/Summary_File_1/
     statesFile: meta/States
+    geoheaderFile: meta/geoheaders.csv
+    tableCount: 286
+    columnCount: 8113
+    partitionCount: 14924
+    foo: 5
 identity:
     creator: clarinova.com
     dataset: 2000 Population
