@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>Census 2000</name>
+	<name>census.gov-2000_population-sf1-orig</name>
 	<comment></comment>
 	<projects>
 		<project>databundles</project>
