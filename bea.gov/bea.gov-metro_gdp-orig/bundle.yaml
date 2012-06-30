@@ -1,0 +1,11 @@
+identity:
+    creator: clarinova.com
+    dataset: Metro GDP
+    id: a13jOR
+    revision: '1'
+    source: bea.gov
+    subset: null
+    variation: orig
+files:
+    sourceUrl: http://bea.gov/regional/zip/GDPMetro.zip
+  
