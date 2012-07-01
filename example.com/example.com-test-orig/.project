@@ -3,6 +3,7 @@
 	<name>example.com-test-orig</name>
 	<comment></comment>
 	<projects>
+		<project>databundles</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

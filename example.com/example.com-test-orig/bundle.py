@@ -1,10 +1,8 @@
 '''
-
 '''
 
-
 from  databundles.bundle import Bundle as Base
- 
+from  databundles.orm import Table, Column
 
 class Bundle(Base):
     ''' '''
@@ -15,38 +13,57 @@ class Bundle(Base):
 
     ### Prepare is run before building, part of the devel process.  
 
-    def pre_prepare(self):
+    def schemaGenerator(self):
+        '''Get the first line of the file and make a schema from it. ''' 
+
+        tname = 'example'
+        yield Table(name=tname)
+        yield Column(table_name=tname,name='rand1',datatype=Column.DATATYPE_INTEGER)
+        yield Column(table_name=tname,name='rand2',datatype=Column.DATATYPE_REAL)
+        yield Column(table_name=tname,name='uuid',datatype=Column.DATATYPE_TEXT)
+        yield Column(table_name=tname,name='tag',datatype=Column.DATATYPE_TEXT)
+        yield Column(table_name=tname,name='flags',datatype=Column.DATATYPE_TEXT)       
+  
+    def prepare(self):
+        self.schema.generate()
         return True
 
-    def prepare(self):
-        return True
-    
-    def post_prepare(self):
-        return True
-   
-   
-    
     ### Build the final package
 
-    def pre_build(self):
-        return True
-        
+       
     def build(self):
-        return True
-    
-    def post_build(self):
-        return True
-    
+        '''Create a table full or random data'''
+        import random
+        import uuid
         
+        ins = self.database.inserter('example')
+        
+        tags = ['one','two','three','pizza','unicorn']
+        flags = ['a','b','c','d','e']
+        
+        for i in range(1,1000):
+            ins.insert([
+                   random.randint(1,10000),
+                   random.random()*1000,
+                   str(uuid.uuid4()),
+                   random.choice(tags),
+                   random.choice(flags)+random.choice(flags)
+                   ])
+
+        return True
+       
     ### Submit the package to the repository
  
-    def pre_submit(self):
-        return True
-    
-    def submit(self):
-        return True
+    def install(self):
         
-    def post_submit(self):
+        from databundles.library import  Library
+       
+        l = Library()
+     
+        self.log("Installing to library" + l.root)
+    
+        l.install_bundle(self)
+          
         return True
     
 import sys
