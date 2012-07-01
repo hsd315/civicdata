@@ -17,9 +17,7 @@ class Bundle(Base):
     def __init__(self,directory=None):
         self.super_ = super(Bundle, self)
         self.super_.__init__(directory)
-        
-        
-       
+
     def prepare(self):
         '''Create the prototype database'''
        

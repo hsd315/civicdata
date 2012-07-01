@@ -46,7 +46,6 @@ class Bundle(Base):
         
         tname = self.identity.dataset
         
-        print '!!!',tname
         
         yield Table(name=tname)
         
@@ -78,6 +77,7 @@ class Bundle(Base):
     def pre_build(self):
         return True
         
+  
     def build(self):
         with self.downloader() as f:
             
@@ -178,18 +178,8 @@ class Bundle(Base):
     def post_build(self):
         return True
     
-        
-    ### Submit the package to the repository
  
-    def pre_submit(self):
-        return True
-    
-    def submit(self):
-        return True
-        
-    def post_submit(self):
-        return True
-    
+   
 import sys
 
 if __name__ == '__main__':
