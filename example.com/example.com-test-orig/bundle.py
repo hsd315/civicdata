@@ -3,7 +3,7 @@
 
 from  databundles.bundle import Bundle as Base
 from  databundles.orm import Table, Column
-
+from databundles.exceptions import ConfigurationError
 class Bundle(Base):
     ''' '''
  
@@ -36,29 +36,33 @@ class Bundle(Base):
         import random
         import uuid
         
-        ins = self.database.inserter('example')
-        
+    
         tags = ['one','two','three','pizza','unicorn']
         flags = ['a','b','c','d','e']
         
-        for i in range(1,1000):
-            ins.insert([
-                   random.randint(1,10000),
-                   random.random()*1000,
-                   str(uuid.uuid4()),
-                   random.choice(tags),
-                   random.choice(flags)+random.choice(flags)
-                   ])
+        with self.database.inserter('example') as ins:
+            for i in range(1,1000):
+                ins.insert([
+                       random.randint(1,10000),
+                       random.random()*1000,
+                       str(uuid.uuid4()),
+                       random.choice(tags),
+                       random.choice(flags)+random.choice(flags)
+                       ])
 
         return True
        
     ### Submit the package to the repository
  
     def install(self):
-      
-        self.log("Installing to library" + self.library.root)
-        self.library.install_bundle(self)
-
+        
+        try:
+            self.log("Installing to library" + self.library.root)
+            self.library.install_bundle(self)
+        except ConfigurationError:
+            self.log("ERROR: Missing configuration for library root in bundle.yaml")
+            return False
+            
         return True
     
 import sys
