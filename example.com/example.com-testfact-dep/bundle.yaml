@@ -6,3 +6,7 @@ identity:
     source: example.com
     subset: null
     variation: dep
+
+requires:
+  test: {'source':'example.com','dataset':'test'}
+  dim: {'source':'example.com','dataset':'testdim'}

@@ -3,6 +3,7 @@
 	<name>example.com-testfact-dep</name>
 	<comment></comment>
 	<projects>
+		<project>databundles</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

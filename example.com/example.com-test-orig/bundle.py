@@ -55,15 +55,10 @@ class Bundle(Base):
     ### Submit the package to the repository
  
     def install(self):
-        
-        from databundles.library import  Library
-       
-        l = Library()
-     
-        self.log("Installing to library" + l.root)
-    
-        l.install_bundle(self)
-          
+      
+        self.log("Installing to library" + self.library.root)
+        self.library.install_bundle(self)
+
         return True
     
 import sys

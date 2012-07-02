@@ -1,0 +1,7 @@
+================
+example.com-testfact-deb Text Bundle Readme
+================
+
+
+This bundle generates a fact table basedon another bundle, testing dependencies 
+in building. 
