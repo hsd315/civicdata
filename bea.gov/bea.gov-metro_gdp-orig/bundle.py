@@ -71,6 +71,8 @@ class Bundle(Base):
         
     def prepare(self):
         self.schema.generate()
+        
+        return True
     
     ### Build the final package
 
@@ -90,14 +92,13 @@ class Bundle(Base):
             col_name_to_pos = { value: index for index, value in enumerate(header) } 
             col_pos_to_name = { index : value for index, value in enumerate(header) } 
 
-            ins = self.database.inserter('metro_gdp')
-
-            for row in reader:
-
-                if len(row) != len(header):
-                    break # exclude notes at end. 
-
-                ins.insert(row)
+            with self.database.inserter('metro_gdp') as ins:
+                for row in reader:
+    
+                    if len(row) != len(header):
+                        break # exclude notes at end. 
+    
+                    ins.insert(row)
                
                
         return True;
