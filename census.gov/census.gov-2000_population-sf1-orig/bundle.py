@@ -32,7 +32,7 @@ class Bundle(Base):
         if (len(self.schema.tables) != 286 or 
             len(self.schema.columns) != 9543 or
             self.filesystem.ref(header_file).changed):
-            self.log("Regenerating schema")
+            self.log("Regenerating schema. This could be slow ... ")
             self.schema.generate()
         else:
            self.log("Re-using schema")
@@ -58,6 +58,7 @@ class Bundle(Base):
     def schemaGenerator(self):
         '''Return schema rows from the  columns.csv file'''
     
+        self.log("T = Table, C = Column, 5 = Five geo columns")
         from databundles.orm import Table, Column
         import csv
         
@@ -91,6 +92,7 @@ class Bundle(Base):
                 # table name. 
                 if table:
                     table.data = {'segment':row['SEG']}
+                    self.progress("T")
                     yield table
                      
                     # First 5 fields for every record      
@@ -105,7 +107,8 @@ class Bundle(Base):
                     tn = row['TABLE']
                     dt = Column.DATATYPE_INTEGER
                     seg = row['SEG']
-              
+                    
+                    self.progress("5")
                     yield Column(name='FILEID',table_name=tn,datatype=dt,
                                  data={'source_col':0,'segment':seg})
                     yield Column(name='STUSAB',table_name=tn,datatype=dt,
@@ -124,6 +127,7 @@ class Bundle(Base):
                 else:
                     dt = Column.DATATYPE_INTEGER
                 
+                self.progress("C")
                 yield Column(name=row['FIELDNUM'],table_name=row['TABLE'],
                              description=row['TEXT'].strip(),
                               datatype=dt,data={'segment':int(row['SEG']),
@@ -170,6 +174,8 @@ class Bundle(Base):
         from bs4 import BeautifulSoup
         from databundles.partition import Partitions, Partition, PartitionId
         import sys
+
+        self.log("P = Whole table partition, p =  table/state partition, G = geo partition ")
 
         downloadDir = 'downloads'
    
@@ -239,6 +245,7 @@ class Bundle(Base):
                                     yield  Partition(self,p_id,data = data,state='deploy')
  
     def build(self):
+        self. repartition_csv()
         self.load_partitions()
 
         return True
@@ -269,6 +276,15 @@ class Bundle(Base):
                 table = deploy.table
                 f = self.filesystem.build_path('states',build.space,table.name,build.id_+".csv")
                 # Loading a CSV file into sqlite is really easy, and this is probably much faster. 
+                
+                if not os.path.exists(f):
+                    from databundles.exceptions import FilesystemError
+                    raise FilesystemError("Missing partition csv file: "+f)
+                
+                if not os.path.exists(db.path):
+                    from databundles.exceptions import FilesystemError
+                    raise FilesystemError("Missing partition db file: "+db.path)
+                
                 cmd = "/usr/bin/sqlite3 -csv {} '.import {} {}' ".format(db.path, f, table.name)
                 print cmd
                 os.system(cmd)
@@ -306,9 +322,7 @@ class Bundle(Base):
                 iset[p.data['source_url']] = []
             
             iset[p.data['source_url']].append(p)
-       
-            #self.progress(p.id_)
-        
+     
         
         # Now, download each of the source files and process them.         
 
