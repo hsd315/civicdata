@@ -240,14 +240,7 @@ class Bundle(Base):
  
     def build(self):
         self.load_partitions()
-        
-        #db =  pr.database
-        #metadata, at = self.schema.get_table_meta(p.table.name)
-        #print CreateTable(at)
-        #metadata.create_all(bind=db.engine)
-        #vi = db.inserter(p.table.name)
-                
-    
+
         return True
     
     def load_partitions(self):
@@ -261,7 +254,7 @@ class Bundle(Base):
             metadata, at = self.schema.get_table_meta(deploy.table.name)
             #print CreateTable(at)
             metadata.create_all(bind=db.engine)
-            #vi = db.inserter(p.table.name)
+
             
             q = self.partitions.query.filter(
                                             OrmPartition.state=='build',
