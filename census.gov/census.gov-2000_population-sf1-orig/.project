@@ -4,6 +4,7 @@
 	<comment></comment>
 	<projects>
 		<project>databundles</project>
+		<project>petl</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

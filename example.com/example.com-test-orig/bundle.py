@@ -16,13 +16,13 @@ class Bundle(Base):
     def schemaGenerator(self):
         '''Get the first line of the file and make a schema from it. ''' 
 
-        tname = 'example'
-        yield Table(name=tname)
-        yield Column(table_name=tname,name='rand1',datatype=Column.DATATYPE_INTEGER)
-        yield Column(table_name=tname,name='rand2',datatype=Column.DATATYPE_REAL)
-        yield Column(table_name=tname,name='uuid',datatype=Column.DATATYPE_TEXT)
-        yield Column(table_name=tname,name='tag',datatype=Column.DATATYPE_TEXT)
-        yield Column(table_name=tname,name='flags',datatype=Column.DATATYPE_TEXT)       
+       
+        yield Table(name='example')
+        yield Column(name='rand1',datatype=Column.DATATYPE_INTEGER)
+        yield Column(name='rand2',datatype=Column.DATATYPE_REAL)
+        yield Column(name='uuid',datatype=Column.DATATYPE_TEXT)
+        yield Column(name='tag',datatype=Column.DATATYPE_TEXT)
+        yield Column(name='flags',datatype=Column.DATATYPE_TEXT)       
   
     def prepare(self):
         self.schema.generate()
