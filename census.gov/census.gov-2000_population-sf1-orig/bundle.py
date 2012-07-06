@@ -151,10 +151,6 @@ class Bundle(Base):
                                                 'source_col':source_col}   )
                 
                 source_col += 1
-               
-
-
-
    
     def scrape_files(self):
         '''Extract all of the URLS from the Census website and store them'''
@@ -334,6 +330,10 @@ class Bundle(Base):
  
  
     def build(self):
+        '''Create data  partitions. 
+        FIrst, creates all of the state segments, one partition per segment per 
+        state. THen creates a partition for each of the geo files. '''
+        
         import yaml 
         
         self.partitions.delete_all()
@@ -353,112 +353,9 @@ class Bundle(Base):
             self.load_geo(state, source)
             self.log("Finished geo file {} of {} ".format(i, len(urls['geos'])))
             i += 1
-         
-        return True
-        
-        self.repartition_csv()
-        self.load_partitions()
 
         return True
-    
-    def load_partitions(self):
-        from databundles.orm import Partition as OrmPartition
-    
-        for deploy in self.partitions.query.filter(OrmPartition.state=='deploy').all():
-      
-            deploy_partition = self.partitions.partition(deploy)
-            db =  deploy_partition.database
-            metadata, at = self.schema.get_table_meta(deploy.table.name)
-            #print CreateTable(at)
-            metadata.create_all(bind=db.engine)
-
-            
-            q = self.partitions.query.filter(
-                                            OrmPartition.state=='build',
-                                            OrmPartition.t_id == deploy.t_id
-                                            )
-            if q.count() != 52:
-                raise Exception("Bad count:"+str(q.count))
-            
-            for build in q.all():
-                print '    ',build.id_
-                
-                table = deploy.table
-                f = self.filesystem.build_path('states',build.space,table.name,build.id_+".csv")
-                # Loading a CSV file into sqlite is really easy, and this is probably much faster. 
-                
-                if not os.path.exists(f):
-                    from databundles.exceptions import FilesystemError
-                    raise FilesystemError("Missing partition csv file: "+f)
-                
-                if not os.path.exists(db.path):
-                    from databundles.exceptions import FilesystemError
-                    raise FilesystemError("Missing partition db file: "+db.path)
-                
-                cmd = "/usr/bin/sqlite3 -csv {} '.import {} {}' ".format(db.path, f, table.name)
-                print cmd
-                os.system(cmd)
-                
-
-    @property
-    def source_to_partitions(self):
-        '''Map source files to the partitions generated from the file '''
-        
-        from databundles.orm import Partition as OrmPartition
-        
-        if self._source_to_partition:
-            return self._source_to_partition
-          
-        # Invert the relationship between source_urls and
-        # partitions, grouping all of the partitions under the source_url
-        # that has the data for the partions. 
    
-        iset = {} 
-        # We're just getting the 'build' partitions here. THese partitions
-        # break out both table and state. We'll create CSV files for those, 
-        # then combine them into the database in a more efficient manner
-        for p in self.partitions.query.filter(OrmPartition.state=='build').all():
-            partition = self.partitions.partition(p); # Convert from database Partition object     
-            if p.data['source_url'] not in iset:
-                iset[p.data['source_url']] = []
-            
-            # Creating a list of all partitions that are geenrated from a 
-            # source file
-            iset[p.data['source_url']].append(p)   
-            
-        self._source_to_partition = iset      
-        
-        return self._source_to_partition   
-    
-    def do_build(self,source, type):
-      
-        retry = 4
-        while retry > 0:
-            retry -= 1
-            try:  
-                with self.filesystem.download(source) as zip_file:
-                    with self.extract_zip(zip_file) as f:
-                        if type == 'geo':
-                            self.load_geo(path, geo_regex)
-                        elif type == 'table':
-                            self.log("Process tables: "+f)
-                            self.load_table(f, self.source_to_partitions[source])
-                            pass
-                        else:
-                            raise ValueError, 'Bad type: '+type
-                         
-                         
-
-            except zipfile.BadZipfile:
-                self.log("ERROR: Failed to get valid zip file: "+source)
-                self.log("Retry")
-                if os.path.exists(zip_file):
-                    os.remove(zip_file)
-        
-            return True
-      
-        self.error("Failed multiple retries for: "+source)
-        return False
 
     def load_table(self,seg_number,source, segmap):
         '''For a set of partitions and a path to a zip file, break the
@@ -468,6 +365,12 @@ class Bundle(Base):
         from databundles.partition import PartitionId
         import csv
         import petl
+                
+        self.log("#### "+source)
+        
+        if self.config.get_url(source):
+            self.log("Already processed, skipping: "+source)
+            return
          
         state, number = re.match('.*/(\w{2})(\d{5}).uf1', source).groups()
         number = int(number)
@@ -480,10 +383,13 @@ class Bundle(Base):
         range_map = {}
        
         for table_name in segmap[seg_number]:
-            #self.log("    Processing table {} ".format(table_name))
-            partition = self.partitions.new_partition(
-                                    PartitionId(table=table_name,space=state))
-        
+            pid = PartitionId(table=table_name,space=state)
+            
+            # Will not re-create the partition if it already exists. 
+            partition = self.partitions.new_partition(pid)
+   
+            partition.database.delete()
+            partition.database.create()
             partition.database.create_table(table_name)
         
             table = self.schema.table(table_name)
@@ -498,7 +404,8 @@ class Bundle(Base):
                              
             range_map[table.id_] = [start, column.data['source_col']+1, 
                                     table.name,partition.database.path]
-                
+
+            
         import time
         start_time = time.clock()
         count = 0
@@ -537,31 +444,13 @@ class Bundle(Base):
             table_name = range[2]
             db_path = range[3]
             self.log("Write {} rows to {}, table {}".format(len(rows),db_path, table_name))
-            petl.appendsqlite3(rows,db_path, table_name)           
+            petl.appendsqlite3(petl.progress(rows, 200000),db_path, table_name)           
+                
+        # WIll create if does not exist. 
+        self.config.get_or_new_url(source)
                 
         return True
 
-
-        # Map the Partition Database records to the Partition
-        # references
-        p_map = {}
-        for p in partitions:  
-            table = p.table
-            f = self.filesystem.build_path('states',p.space,table.name,p.id_+".csv")
-            p_map[p.id_] = { 'partition': self.partitions.partition(p),
-                             'writer':csv.writer(open(f, 'wb')) }
-
-           
-
-        import time
-        start_time = time.clock()
-        count = 0
-        
-     
-
-
-        self.log("CSV: {} records per second {}".format(count/(time.clock()-start_time), 
-                                                        int(time.clock()-start_time)))
   
     def get_geo_regex(self):
         '''Read the definition for the fixed positioins of the fields in the geo file and
