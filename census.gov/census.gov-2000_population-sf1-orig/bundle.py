@@ -25,8 +25,10 @@ class Bundle(Base):
         '''Create the prototype database'''
         from  databundles.database import Database
 
+        self.log("Scape files ")
         self.scrape_files()
      
+        self.log("Make the segment map")
         self.make_segment_map()
      
         header_file = self.config.group('build').get('headers')
