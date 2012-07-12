@@ -72,9 +72,14 @@ class Bundle(Base):
                 .addrownumbers(10)
                 .rename('value','flags')
                 .rename('row','flags_id')) 
-        
+
+
+        # Testing new petl code. 
+        #dummy, flags = table.unjoin('flags',autoincrement=(10, 1))
+        #print petl.look(flags)
+
         flags.tosqlite3(sink_db_path, 'flags')
-        
+     
          # Save again for the parition. 
         part = self.partitions.find(table='flags')
         tags.tosqlite3(part.database.path, 'flags')
@@ -82,14 +87,11 @@ class Bundle(Base):
         self.log('Wrote dimension tables to: '+sink_db_path)
         
         return True
-     
-   
-  
-     
+
     def install(self):
       
         self.log("Installing to library" + self.library.root)
-        self.library.install_bundle(self)
+        self.library.put(self)
 
         return True
      

@@ -3,6 +3,8 @@
 	<name>example.com-testdim-dep</name>
 	<comment></comment>
 	<projects>
+		<project>databundles</project>
+		<project>petl</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

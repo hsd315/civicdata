@@ -10,6 +10,9 @@ from  databundles.bundle import Bundle as Base
 
 import os.path  
 
+
+            
+
 class Bundle(Base):
     '''
     Bundle code for US 2000 Census, Summary File 1
@@ -333,10 +336,11 @@ class Bundle(Base):
  
     def build(self):
         '''Create data  partitions. 
-        FIrst, creates all of the state segments, one partition per segment per 
-        state. THen creates a partition for each of the geo files. '''
+        First, creates all of the state segments, one partition per segment per 
+        state. Then creates a partition for each of the geo files. '''
         
         import yaml 
+        import pp
         
         self.partitions.delete_all()
       
@@ -345,16 +349,24 @@ class Bundle(Base):
            
         segmap_file =  self.filesystem.path(self.config.group('build').get('segMap'))
         segmap = yaml.load(file(segmap_file, 'r'))         
+     
+        # Setup the parallelization
+        from multiprocessing import Pool
+        p = Pool(1)
             
         for state,segments in urls['tables'].items():
             for seg_number,source in segments.items():
                 self.load_table(seg_number,source, segmap)
+                #result = p.apply(load_table ,(seg_number,source, segmap,))
+                
+        
          
-        i = 1
+     
         for state, source in urls['geos'].items():
+            pass
             self.load_geo(state, source)
-            self.log("Finished geo file {} of {} ".format(i, len(urls['geos'])))
-            i += 1
+            #self.log("Finished geo file {} of {} ".format(i, len(urls['geos'])))
+          
 
         return True
    
@@ -404,8 +416,10 @@ class Bundle(Base):
                 if column.data['source_col'] >= 5 and start is None:
                     start = column.data['source_col']
                              
-            range_map[table.id_] = [start, column.data['source_col']+1, 
-                                    table.name,partition.database.path]
+            range_map[table.id_] = {'start':start,  
+                                    'source_col':column.data['source_col']+1, 
+                                    'table' : table.name,
+                                    'partition':partition }
 
             
         import time
@@ -424,7 +438,7 @@ class Bundle(Base):
                     common = row[:5]
             
                     for table_id, range in range_map.iteritems():
-                        partition_row = common + row[range[0]:range[1]]
+                        partition_row = common + row[range['start']:range['source_col']]
                         if not table_id in data:
                             data[table_id] = []
                             
@@ -443,11 +457,14 @@ class Bundle(Base):
         for table_id, range in range_map.iteritems():
             
             rows = data[table_id]
-            table_name = range[2]
-            db_path = range[3]
+            table_name = range['table']
+            db_path = range['partition'].database.path
             self.log("Write {} rows to {}, table {}".format(len(rows),db_path, table_name))
             petl.appendsqlite3(petl.progress(rows, 200000),db_path, table_name)           
                 
+            self.library.put(range['partition'])
+            range['partition'].database.delete()
+            
         # WIll create if does not exist. 
         self.config.get_or_new_url(source)
                 
@@ -512,17 +529,6 @@ class Bundle(Base):
                
                     return True
                         
-#            except zipfile.BadZipfile:
-#                self.error("ERROR: Failed to process file: "+source)
-#                self.error("Retry")
-#                if os.path.exists(zip_file):
-#                    os.remove(zip_file)
-#            except Exception as e:
-#                self.error("ERROR: other error: "+str(e))
-#                raise e
-#                return False
-
-        #return False
     
     @staticmethod
     def parsenumber(v, strict=False):
@@ -549,7 +555,12 @@ class Bundle(Base):
             if strict:
                 raise
         return v
-    
+   
+def load_table(seg_number,source, segmap):
+     b = Bundle();
+     b.load_table(seg_number,source, segmap)
+     
+ 
 import sys
 
 if __name__ == '__main__':

@@ -59,7 +59,7 @@ class Bundle(Base):
         
         print petl.look(fact)
         
-        fact.tosqlite3(self.database.path, 'example', create=False)
+        fact.tosqlite3(sink, 'example', create=False)
       
         self.log("Wrote fact table to: "+self.database.path)
       
@@ -68,7 +68,7 @@ class Bundle(Base):
     def install(self):
       
         self.log("Installing to library" + self.library.root)
-        self.library.install_bundle(self)
+        self.library.put(self)
 
         return True
      

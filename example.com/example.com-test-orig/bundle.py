@@ -58,7 +58,7 @@ class Bundle(Base):
         
         try:
             self.log("Installing to library" + self.library.root)
-            self.library.install_bundle(self)
+            self.library.put(self)
         except ConfigurationError:
             self.log("ERROR: Missing configuration for library root in bundle.yaml")
             return False

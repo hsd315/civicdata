@@ -7,6 +7,6 @@ identity:
     subset: null
     variation: dep
 
-requires:
+named_bundles:
   test: {'source':'example.com','dataset':'test'}
   dim: {'source':'example.com','dataset':'testdim'}
