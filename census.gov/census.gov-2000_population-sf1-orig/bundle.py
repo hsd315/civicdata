@@ -340,8 +340,7 @@ class Bundle(Base):
         state. Then creates a partition for each of the geo files. '''
         
         import yaml 
-        import pp
-        
+ 
         self.partitions.delete_all()
       
         urls_file =  self.filesystem.path(self.config.group('build').get('urlsFile'))
@@ -351,17 +350,12 @@ class Bundle(Base):
         segmap = yaml.load(file(segmap_file, 'r'))         
      
         # Setup the parallelization
-        from multiprocessing import Pool
-        p = Pool(1)
-            
+       
         for state,segments in urls['tables'].items():
             for seg_number,source in segments.items():
                 self.load_table(seg_number,source, segmap)
                 #result = p.apply(load_table ,(seg_number,source, segmap,))
-                
-        
-         
-     
+
         for state, source in urls['geos'].items():
             pass
             self.load_geo(state, source)
