@@ -18,8 +18,7 @@ class Bundle(UsCensusBundle):
     def __init__(self,directory=None):
         self.super_ = super(Bundle, self)
         self.super_.__init__(directory)
-        
-        self._source_to_partition = None
+
 
     def prepare(self):
         '''Create the prototype database'''
@@ -33,8 +32,10 @@ class Bundle(UsCensusBundle):
         self.build_partitions(range_map)
         
         return True
-       
- 
+    
+    def schemaGenerator(self):
+        return self.tableSchemaGenerator()
+    
     def build(self):
         '''Create data  partitions. 
         First, creates all of the state segments, one partition per segment per 
@@ -47,24 +48,18 @@ class Bundle(UsCensusBundle):
         urls = yaml.load(file(self.urls_file, 'r')) 
         range_map = yaml.load(file(self.rangemap_file, 'r'))   
   
+  
         # Process the state files. 
-        from multiprocessing import Pool
-        p = Pool(4)
+      
         for state,segments in urls['tables'].items():
             for seg_number,source in segments.items():  
-                
-                f = tempfile.NamedTemporaryFile(delete = False, prefix='bundle-range')    
-                yaml.dump(range_map[state][seg_number],f)     
-                #load_table_static(source,  f.name, self.filesystem.path('loadtable.py'))
-                     
-                #self.load_table(source, range_map[state][seg_number])
-                p.apply_async(load_table_static, (source,  f.name, self.filesystem.path('loadtable.py')))
-                
-            
-        # Process the geo files. 
+                self.load_table(source, range_map[state][seg_number])
+               
+          # Process the geo files. 
         for state, source in urls['geos'].items():
             self.load_geo(state, source)
-
+     
+    
         return True
 
     def load_table(self,source, range_map):
@@ -146,62 +141,6 @@ class Bundle(UsCensusBundle):
                 
         return True
         
-    def load_geo(self, state, source):
-        from databundles.partition import PartitionId
-        import re,  copy
-    
-        import petl.fluent as petl
-        header, regex = self.get_geo_regex()
-  
-        retry = 4
-        while retry > 0:
-            retry -= 1
-            #try:  
-            with self.filesystem.download(source) as zip_file:
-                with self.extract_zip(zip_file) as rf:
-                    self.log("Processing GEO file: "+rf)
- 
-                    # Create the partition
-                    partition = self.partitions.new_partition(
-                                    PartitionId(table='sf1geo',space=state))
- 
-                    partition.database.load_sql( self.filesystem.path('meta/sf1geo.sql'))
- 
- 
-                    # Load the data
-                              
-                    db_path = partition.database.path
-                    self.log("  Partion: "+str(partition))
-                    self.log("  To Database: "+db_path)
-                     
-                    t = petl.fromregex(rf, regex=regex, header=header)
- 
-                    if state == 'pr':
-                        t = t.convert('NAME', unicode)
- 
-                    t.progress(100000).appendsqlite3(db_path,'sf1geo')
-               
-               
-                    return True
-                        
-def load_table_static(source, range_map_file_name, cmd):
-    '''Adapter function to call a seperate process. It is outside of the class, 
-    because the multiprocessing module uses pickling, which can't deal with 
-    class methods. It then calls a sub process because doing the work directly results in 
-    incomplrehensible, opaque errors
-    
-    This is a complete, horrible hack.'''
-    import subprocess
-    import sys
-    import os
-      
-    print "Executing {} {} {} {} ".format(sys.executable, cmd, source, range_map_file_name)
-    args = [sys.executable, cmd, source, range_map_file_name]    
-         
-    subprocess.check_call(args)
-
-    os.remove(range_map_file_name)
-   
 
 import sys
 
