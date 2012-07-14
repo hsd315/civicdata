@@ -74,6 +74,10 @@ class Bundle(UsCensusBundle):
  
                     t.progress(100000).appendsqlite3(db_path,'sf1geo')
                           
+                    dest = self.library.put(partition)
+                    self.log("Install in library: "+dest)
+                    partition.database.delete()
+                                  
                     return True
     
 import sys
