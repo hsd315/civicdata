@@ -40,7 +40,7 @@ class Bundle(UsCensusBundle):
         '''Create data  partitions. 
         First, creates all of the state segments, one partition per segment per 
         state. Then creates a partition for each of the geo files. '''
-
+        import yaml
  
         urls = yaml.load(file(self.urls_file, 'r')) 
         range_map = yaml.load(file(self.rangemap_file, 'r'))   
