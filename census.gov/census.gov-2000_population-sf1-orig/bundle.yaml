@@ -1,10 +1,12 @@
 build:
-    headers: meta/columns.csv
+    headersFile: meta/columns.csv
     rootUrl: http://www2.census.gov/census_2000/datasets/Summary_File_1/
     statesFile: meta/States
     geoheaderFile: meta/geoheaders.csv
     urlsFile: meta/urls.yaml
-    segMap: meta/seg_map.yaml
+    segMapFile: meta/seg_map.yaml
+    rangeMapFile: meta/range_map.yaml
+    partitionsFile: meta/partitions.sql
     tableCount: 286
     columnCount: 8113
     partitionCount: 14924
