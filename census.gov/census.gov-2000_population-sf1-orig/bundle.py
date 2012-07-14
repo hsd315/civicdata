@@ -40,25 +40,15 @@ class Bundle(UsCensusBundle):
         '''Create data  partitions. 
         First, creates all of the state segments, one partition per segment per 
         state. Then creates a partition for each of the geo files. '''
-        
-        import yaml 
-        from multiprocessing import Pool
-        import tempfile
+
  
         urls = yaml.load(file(self.urls_file, 'r')) 
         range_map = yaml.load(file(self.rangemap_file, 'r'))   
   
-  
-        # Process the state files. 
-      
         for state,segments in urls['tables'].items():
             for seg_number,source in segments.items():  
                 self.load_table(source, range_map[state][seg_number])
-               
-          # Process the geo files. 
-        for state, source in urls['geos'].items():
-            self.load_geo(state, source)
-     
+      
     
         return True
 
