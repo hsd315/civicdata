@@ -111,6 +111,9 @@ class Bundle(UsCensusBundle):
             pid = PartitionId(table = table_name, space=state)
             partition = self.partitions.find(pid)
             
+            if not partition:
+                raise ResultCountError("")
+            
             partition.database.delete()
             partition.database.create()
             partition.database.create_table(table_name)

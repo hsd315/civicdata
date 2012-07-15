@@ -180,6 +180,11 @@ class Bundle(Base):
         return True
     
  
+    def install(self):
+        
+        self.library.put(self)
+        
+        return True
    
 import sys
 
