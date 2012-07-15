@@ -1,31 +1,36 @@
 '''
 '''
 
-from  databundles.bundle import Bundle as Base
+from  databundles.bundle import BuildBundle
 from  databundles.orm import Table, Column
 from databundles.exceptions import ConfigurationError
-class Bundle(Base):
+class Bundle(BuildBundle):
     ''' '''
  
-    def __init__(self,directory=None):
+    def __init__(self, directory=None):
         self.super_ = super(Bundle, self)
         self.super_.__init__(directory)
 
-    ### Prepare is run before building, part of the devel process.  
-
-    def schemaGenerator(self):
-        '''Get the first line of the file and make a schema from it. ''' 
-
-       
-        yield Table(name='example')
-        yield Column(name='rand1',datatype=Column.DATATYPE_INTEGER)
-        yield Column(name='rand2',datatype=Column.DATATYPE_REAL)
-        yield Column(name='uuid',datatype=Column.DATATYPE_TEXT)
-        yield Column(name='tag',datatype=Column.DATATYPE_TEXT)
-        yield Column(name='flags',datatype=Column.DATATYPE_TEXT)       
+  
   
     def prepare(self):
-        self.schema.generate()
+        
+        #self.database.delete()
+        self.database.create()
+        
+        s = self.schema 
+        s.clean()
+
+        t1 = s.add_table('example')
+                
+        s.add_column(t1,'rand1',datatype=Column.DATATYPE_INTEGER )
+        s.add_column(t1,'rand2',datatype=Column.DATATYPE_REAL)
+        s.add_column(t1,'uuid',datatype=Column.DATATYPE_TEXT)
+        s.add_column(t1,'tag',datatype=Column.DATATYPE_TEXT)
+        s.add_column(t1,'flags',datatype=Column.DATATYPE_TEXT)
+        
+        self.database.session.commit()
+        
         return True
 
     ### Build the final package
@@ -35,7 +40,7 @@ class Bundle(Base):
         '''Create a table full or random data'''
         import random
         import uuid
-        from databundles.partition import PartitionId
+        from databundles.partition import PartitionIdentity
         
     
         tags = ['one','two','three','pizza','unicorn']
@@ -56,7 +61,7 @@ class Bundle(Base):
         
         for space in ['space1', 'space2']:
             for time in ['time1','time2']:
-                pid = PartitionId(time=time, space=space)
+                pid = PartitionIdentity(self.identity, time=time, space=space)
                 partition = self.partitions.new_partition(pid)
                 self.database.session.commit()
                 print partition.identity.name

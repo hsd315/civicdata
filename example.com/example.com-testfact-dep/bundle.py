@@ -3,11 +3,11 @@
 '''
 
 
-from  databundles.bundle import Bundle as Base
+from  databundles.bundle import BuildBundle 
 from databundles.library import Library
 import petl.fluent as petl
 
-class Bundle(Base):
+class Bundle(BuildBundle):
     ''' '''
  
     def __init__(self,directory=None):

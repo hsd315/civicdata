@@ -82,7 +82,7 @@ class Bundle(UsCensusBundle):
         rows = 0;
         data = {}
         with self.filesystem.download(source) as zip_file:
-            with self.extract_zip(zip_file) as rf:
+            with self.filesystem.unzip(zip_file) as rf:
                 for row in csv.reader(open(rf, 'rbU') ):            
                     # Pull off the common fields. 
                     common = row[:5]

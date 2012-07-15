@@ -3,45 +3,57 @@ Generates dimentsion tables for the original dataset.
 '''
 
 
-from  databundles.bundle import Bundle as Base
+from  databundles.bundle import BuildBundle
 from databundles.library import Library
 import petl.fluent as petl
 
-class Bundle(Base):
+class Bundle(BuildBundle):
     ''' '''
  
     def __init__(self,directory=None):
         self.super_ = super(Bundle, self)
         self.super_.__init__(directory)
+       
 
-    ### Prepare is run before building, part of the devel process.  
 
-    def schemaGenerator(self):
-        '''Get the first line of the file and make a schema from it. ''' 
-        from  databundles.orm import Table, Column
-        
-        yield Table(name='tags')
-        yield Column(name='tags_id',datatype=Column.DATATYPE_INTEGER)
-        yield Column(name='tag',datatype=Column.DATATYPE_TEXT)
-     
-        yield Table(name='flags')
-        yield Column(name='flags_id',datatype=Column.DATATYPE_INTEGER)
-        yield Column(name='flags',datatype=Column.DATATYPE_TEXT)
-
-    def partitionGenerator(self):
-        '''The Tags and Flags dimensions get created in both the
-        main db and in partitions '''    
-        from databundles.partition import  Partition, PartitionId
-        
-        yield Partition(self,PartitionId(table='tags'))
-        yield Partition(self,PartitionId(table='flags'))
-        
     def prepare(self):
         # Get any dependencies. Doing it here just to get error in pre_prepare
+        
+        self.clean()
+        self.database.create()
+        
         test_bundle = self.library.require('test')
-        self.schema.generate() # Add the schema information to the metadata tables
+        
+        from databundles.orm import Table, Column
+        from databundles.partition import PartitionIdentity
+        
+        #
+        # Build the Schema
+        s = self.schema
+        s.clean()
+        t = s.add_table('tags')
+        s.add_column(t, 'tags_id',datatype=Column.DATATYPE_INTEGER)
+        s.add_column(t, 'tag',datatype=Column.DATATYPE_TEXT)
+     
+        t = s.add_table('flags')
+        s.add_column(t, 'flags_id',datatype=Column.DATATYPE_INTEGER)
+        s.add_column(t, 'flags',datatype=Column.DATATYPE_TEXT)
+        
         self.schema.create_tables() # Create the tables in the database. Normally done in the inserter
-        self.partitions.generate()
+        
+        #
+        # Build partitions
+        #
+        
+        p = self.partitions
+        p.clean()
+        p.new_partition(PartitionIdentity(self.identity, table='tags'))
+        p.new_partition(PartitionIdentity(self.identity, table='flags'))
+        
+        self.database.commit()
+        
+        print self.database.path
+        
         return True
 
     ### Build the final package
