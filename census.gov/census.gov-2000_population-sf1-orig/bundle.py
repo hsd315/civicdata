@@ -57,13 +57,13 @@ class Bundle(UsCensusBundle):
         data in the zip file into seperate partition files. ''' 
         import re,  copy, os, csv
         from sqlalchemy.schema import CreateTable
-        from databundles.partition import PartitionId
+        from databundles.partition import PartitionIdentity
         import csv
         import petl
                 
         self.log("#### "+source)
         
-        if self.config.get_url(source):
+        if self.filesystem.get_url(source):
             self.log("Already processed, skipping: "+source)
             return
          
@@ -108,11 +108,12 @@ class Bundle(UsCensusBundle):
             
             table_name = range['table']
             
-            pid = PartitionId(table = table_name, space=state)
+            pid = PartitionIdentity(self.identity, table = table_name, space=state)
             partition = self.partitions.find(pid)
             
             if not partition:
-                raise ResultCountError("")
+                from databundles.exceptions import ResultCountError
+                raise ResultCountError("Didn't get partition for "+pid.name)
             
             partition.database.delete()
             partition.database.create()
@@ -129,7 +130,7 @@ class Bundle(UsCensusBundle):
             partition.database.delete()
             
         # Will create if does not exist. 
-        self.config.get_or_new_url(source)
+        self.filesystem.get_or_new_url(source)
         self.database.close()
                 
         return True

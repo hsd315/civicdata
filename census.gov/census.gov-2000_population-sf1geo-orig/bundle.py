@@ -40,7 +40,7 @@ class Bundle(UsCensusBundle):
         return True
     
     def load_geo(self, state, source):
-        from databundles.partition import PartitionId
+        from databundles.partition import PartitionIdentity
         import re,  copy
     
     
@@ -52,12 +52,12 @@ class Bundle(UsCensusBundle):
             retry -= 1
             #try:  
             with self.filesystem.download(source) as zip_file:
-                with self.extract_zip(zip_file) as rf:
+                with self.filesystem.unzip(zip_file) as rf:
                     self.log("Processing GEO file: "+rf)
  
                     # Create the partition
                     partition = self.partitions.new_partition(
-                                    PartitionId(table='sf1geo',space=state))
+                                    PartitionIdentity(self.identity, table='sf1geo',space=state))
  
                     partition.database.load_sql( self.filesystem.path('meta/sf1geo.sql'))
  

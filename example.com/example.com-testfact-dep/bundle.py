@@ -14,26 +14,26 @@ class Bundle(BuildBundle):
         self.super_ = super(Bundle, self)
         self.super_.__init__(directory)
 
-    ### Prepare is run before building, part of the devel process.  
-
-    def schemaGenerator(self):
-        '''Get the first line of the file and make a schema from it. ''' 
-        from  databundles.orm import Table, Column
-    
-        tname = 'example'
-        yield Table(name=tname)
-        yield Column(table_name=tname,name='rand1',datatype=Column.DATATYPE_INTEGER)
-        yield Column(table_name=tname,name='rand2',datatype=Column.DATATYPE_REAL)
-        yield Column(table_name=tname,name='uuid',datatype=Column.DATATYPE_TEXT)     
-        yield Column(table_name=tname,name='tag_id',datatype=Column.DATATYPE_INTEGER)  
-        yield Column(table_name=tname,name='flags_id',datatype=Column.DATATYPE_INTEGER)   
-         
     def prepare(self):
+        self.clean()
+        self.database.create()
+        
         # Get any dependencies. Doing it here just to get error in pre_prepare
         self.library.require('test')
         self.library.require('dim')
-        
-        self.schema.generate() # Add the schema information to the metadata tables
+       
+        from  databundles.orm import Column
+    
+        s = self.schema
+        s.clean()
+        t = s.add_table('example')
+        s.add_column(t,'rand1',datatype=Column.DATATYPE_INTEGER)
+        s.add_column(t,'rand2',datatype=Column.DATATYPE_REAL)
+        s.add_column(t,'uuid',datatype=Column.DATATYPE_TEXT)     
+        s.add_column(t,'tag_id',datatype=Column.DATATYPE_INTEGER)  
+        s.add_column(t,'flags_id',datatype=Column.DATATYPE_INTEGER)           
+        self.database.commit()
+
         self.schema.create_tables() # Create the tables in the database. Normally dont in the inserter
         return True
 
