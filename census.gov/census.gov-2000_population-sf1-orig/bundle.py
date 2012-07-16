@@ -24,17 +24,20 @@ class Bundle(UsCensusBundle):
         '''Create the prototype database'''
         from  databundles.database import Database
 
+        self.database.create()
+
      
         self.scrape_files()
         self.make_segment_map()
-        self.build_schema()
+
+        self.generate_table_schema()
+
         range_map = self.build_range_map()
         self.build_partitions(range_map)
         
         return True
     
-    def schemaGenerator(self):
-        return self.tableSchemaGenerator()
+
     
     def build(self):
         '''Create data  partitions. 
