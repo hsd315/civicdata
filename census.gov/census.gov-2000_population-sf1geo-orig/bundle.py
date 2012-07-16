@@ -13,15 +13,13 @@ class Bundle(UsCensusBundle):
         
     def prepare(self):
         '''Create the prototype database'''
-        from  databundles.database import Database
-
+       
         self.scrape_files()
-        self.build_schema()
+        self.generate_geo_schema()
         
         return True
        
-    def schemaGenerator(self):
-        return self.geoSchemaGenerator()
+    
        
     def build(self):
         '''Create data  partitions. 
@@ -41,9 +39,7 @@ class Bundle(UsCensusBundle):
     
     def load_geo(self, state, source):
         from databundles.partition import PartitionIdentity
-        import re,  copy
-    
-    
+       
         import petl.fluent as petl
         header, regex = self.get_geo_regex()
   
