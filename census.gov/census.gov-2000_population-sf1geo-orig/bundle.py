@@ -14,6 +14,8 @@ class Bundle(UsCensusBundle):
     def prepare(self):
         '''Create the prototype database'''
        
+        self.database.create()
+
         self.scrape_files()
         self.generate_geo_schema()
         
