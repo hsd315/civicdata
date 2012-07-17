@@ -48,6 +48,13 @@ class Bundle(UsCensusBundle):
         urls = yaml.load(file(self.urls_file, 'r')) 
         range_map = yaml.load(file(self.rangemap_file, 'r'))   
   
+        # Install the main bundle first to get the schem in place in the 
+        # library, so subsequent partition installations have something to 
+        # refer to
+        self.log("Put main bundle to Database")
+        self.library.put(self)
+        self.log("Get started building")
+        
         for state,segments in urls['tables'].items():
             for seg_number,source in segments.items():  
                 self.load_table(source, range_map[state][seg_number])
@@ -106,6 +113,7 @@ class Bundle(UsCensusBundle):
                                  )
                         
         self.log("Done compiling. Writing files")
+     
      
         for table_id, range in range_map.iteritems():
             
