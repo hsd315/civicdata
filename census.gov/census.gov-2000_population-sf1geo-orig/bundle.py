@@ -20,9 +20,7 @@ class Bundle(UsCensusBundle):
         self.generate_geo_schema()
         
         return True
-       
-    
-       
+ 
     def build(self):
         '''Create data  partitions. 
         First, creates all of the state segments, one partition per segment per 
@@ -45,6 +43,11 @@ class Bundle(UsCensusBundle):
         import petl.fluent as petl
         header, regex = self.get_geo_regex()
   
+        # First install the bundle main database into the library
+        # so all of the tables will be there for installing the
+        # partitions. 
+        self.library.put(self)
+        
         retry = 4
         while retry > 0:
             retry -= 1
@@ -55,8 +58,10 @@ class Bundle(UsCensusBundle):
  
                     # Create the partition
                     partition = self.partitions.new_partition(
-                                    PartitionIdentity(self.identity, table='sf1geo',space=state))
+                                    PartitionIdentity(self.identity, space=state))
  
+                    partition.database.delete()
+                    partition.database.create()
                     partition.database.load_sql( self.filesystem.path('meta/sf1geo.sql'))
  
                     # Load the data
