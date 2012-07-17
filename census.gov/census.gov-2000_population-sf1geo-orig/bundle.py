@@ -13,11 +13,31 @@ class Bundle(UsCensusBundle):
         
     def prepare(self):
         '''Create the prototype database'''
-       
+        from databundles.partition import PartitionIdentity 
+        import yaml
+        
         self.database.create()
 
         self.scrape_files()
         self.generate_geo_schema()
+        
+        
+        # Generate all of the partitions
+        urls = yaml.load(file(self.urls_file, 'r')) 
+        for state, source in urls['geos'].items(): #@UnusedVariable
+            self.log("Create partition for "+state)
+            # Create the partition
+            partition = self.partitions.new_partition(
+                           PartitionIdentity(self.identity, space=state))
+
+            partition.database.delete()
+            partition.database.create()
+            partition.database.load_sql( self.filesystem.path('meta/sf1geo.sql'))
+            
+        # First install the bundle main database into the library
+        # so all of the tables will be there for installing the
+        # partitions. 
+        self.library.put(self)
         
         return True
  
@@ -26,10 +46,13 @@ class Bundle(UsCensusBundle):
         First, creates all of the state segments, one partition per segment per 
         state. Then creates a partition for each of the geo files. '''
         
+        from databundles.partition import PartitionIdentity 
         import yaml 
       
         urls = yaml.load(file(self.urls_file, 'r')) 
-  
+        
+       
+            
         # Process the geo files. 
         for state, source in urls['geos'].items():
             self.load_geo(state, source)
@@ -38,15 +61,12 @@ class Bundle(UsCensusBundle):
         return True
     
     def load_geo(self, state, source):
-        from databundles.partition import PartitionIdentity
+        from databundles.partition import PartitionIdentity 
        
         import petl.fluent as petl
         header, regex = self.get_geo_regex()
   
-        # First install the bundle main database into the library
-        # so all of the tables will be there for installing the
-        # partitions. 
-        self.library.put(self)
+
         
         retry = 4
         while retry > 0:
@@ -56,13 +76,7 @@ class Bundle(UsCensusBundle):
                 with self.filesystem.unzip(zip_file) as rf:
                     self.log("Processing GEO file: "+rf)
  
-                    # Create the partition
-                    partition = self.partitions.new_partition(
-                                    PartitionIdentity(self.identity, space=state))
- 
-                    partition.database.delete()
-                    partition.database.create()
-                    partition.database.load_sql( self.filesystem.path('meta/sf1geo.sql'))
+                    partition = self.partitions.find(PartitionIdentity(self.identity, space=state))
  
                     # Load the data
                               
