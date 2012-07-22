@@ -26,7 +26,6 @@ class Bundle(UsCensusBundle):
 
         self.database.create()
 
-     
         self.scrape_files()
         self.make_segment_map()
 
@@ -36,9 +35,7 @@ class Bundle(UsCensusBundle):
         self.build_partitions(range_map)
         
         return True
-    
 
-    
     def build(self):
         '''Create data  partitions. 
         First, creates all of the state segments, one partition per segment per 
@@ -59,7 +56,6 @@ class Bundle(UsCensusBundle):
             for seg_number,source in segments.items():  
                 self.load_table(source, range_map[state][seg_number])
       
-    
         return True
 
     def load_table(self,source, range_map):
@@ -70,9 +66,7 @@ class Bundle(UsCensusBundle):
         from databundles.partition import PartitionIdentity
         import csv
         import petl
-                
-        self.log("#### "+source)
-        
+      
         if self.filesystem.get_url(source):
             self.log("Already processed, skipping: "+source)
             return
@@ -101,6 +95,9 @@ class Bundle(UsCensusBundle):
                         partition_row = common + row[range['start']:range['source_col']]
                         if not table_id in data:
                             data[table_id] = []
+                            # Duplicate the first row. PETL will strip this one
+                            # off, assuming that it is the header row. 
+                            data[table_id].append(partition_row)
                             
                         data[table_id].append(partition_row)
                        

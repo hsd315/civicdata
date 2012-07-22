@@ -1,0 +1,10 @@
+build:
+  geoheaders: https://docs.google.com/spreadsheet/pub?key=0ArbzmEJc20_QdDU0WTBRd3paa3FZYkJRTmhJMENVcGc&single=true&gid=0&output=csv
+identity:
+    creator: clarinova.com
+    dataset: Geography
+    id: a1aKVH
+    revision: '1'
+    source: census.gov
+    subset: dim
+    variation: orig

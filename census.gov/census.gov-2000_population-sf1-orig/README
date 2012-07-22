@@ -8,6 +8,7 @@ provided by the Census.gov:
 
 	http://www.census.gov/support/2000/SF1/Access97.zip
 
+
 Use mdb-tools to extract schema and data from this file, including 
 information about tables and columns. 
 

@@ -21,7 +21,6 @@ class Bundle(UsCensusBundle):
         self.scrape_files()
         self.generate_geo_schema()
         
-        
         # Generate all of the partitions
         urls = yaml.load(file(self.urls_file, 'r')) 
         for state, source in urls['geos'].items(): #@UnusedVariable
@@ -34,6 +33,7 @@ class Bundle(UsCensusBundle):
             partition.database.create()
             partition.database.load_sql( self.filesystem.path('meta/sf1geo.sql'))
             
+        self.database.commit() 
         # First install the bundle main database into the library
         # so all of the tables will be there for installing the
         # partitions. 
@@ -50,13 +50,10 @@ class Bundle(UsCensusBundle):
         import yaml 
       
         urls = yaml.load(file(self.urls_file, 'r')) 
-        
-       
-            
+          
         # Process the geo files. 
         for state, source in urls['geos'].items():
             self.load_geo(state, source)
-     
     
         return True
     
@@ -65,9 +62,7 @@ class Bundle(UsCensusBundle):
        
         import petl.fluent as petl
         header, regex = self.get_geo_regex()
-  
 
-        
         retry = 4
         while retry > 0:
             retry -= 1
@@ -86,7 +81,7 @@ class Bundle(UsCensusBundle):
                      
                     t = petl.fromregex(rf, regex=regex, header=header) #@UndefinedVariable
  
-                    if state == 'pr':
+                    if state == 'pr': # Some unicode characters, but only in this file
                         t = t.convert('NAME', unicode)
  
                     t.progress(100000).appendsqlite3(db_path,'sf1geo')
