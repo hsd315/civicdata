@@ -2,8 +2,6 @@
 
 '''
 
-import os.path
-
 from databundles.bundle import BuildBundle
 
 import databundles.library
@@ -15,8 +13,6 @@ class Bundle(BuildBundle):
     def __init__(self,directory=None):
         self.super_ = super(Bundle, self)
         self.super_.__init__(directory)
-        
-        
 
     ### Prepare is run before building, part of the devel process.  
   
@@ -26,7 +22,6 @@ class Bundle(BuildBundle):
         from databundles.orm import Column
         import csv
     
-
         if len(self.schema.tables) > 0 and len(self.schema.columns) > 0:
             self.log("Reusing schema")
             return True
@@ -56,7 +51,6 @@ class Bundle(BuildBundle):
             
             row = { k:v.encode('ascii','ignore').strip() for k,v in row.items()}
 
-         
             if not row['table']:
                 new_table = True
                 continue
@@ -66,7 +60,7 @@ class Bundle(BuildBundle):
                 t = self.schema.add_table(row['table'], **row)
                 new_table = False
               
-            # Ensure that the default diesn't get quotes if it is a number. 
+            # Ensure that the default doesnt get quotes if it is a number. 
             if row['default']:
                 try:
                     default = int(row['default'])
@@ -133,7 +127,6 @@ class Bundle(BuildBundle):
         return
         
         from databundles.partition import PartitionIdentity
-        from databundles.orm import Column
 
         #
         # Get the original geo files from the library
@@ -217,7 +210,6 @@ class Bundle(BuildBundle):
                  .partition(any=True) # Get partitions, not just root bundle. 
             )
 
-        i = 0
         n = 0;
         for result in q.all:   
  
@@ -246,7 +238,7 @@ class Bundle(BuildBundle):
                             .format(
                                  table=table,
                                  columns =','.join(ti[table]['columns']),
-                                 values = ','.join(['?' for i in ti[table]['columns']])
+                                 values = ','.join(['?' for i in ti[table]['columns']]) #@UnusedVariable
                             )
                          )
                 
@@ -267,7 +259,6 @@ class Bundle(BuildBundle):
     def split_geo_sqlite(self):
                 
         from databundles.partition import PartitionIdentity
-        from databundles.orm import Column
 
         #
         # Get the original geo files from the library
