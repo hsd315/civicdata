@@ -49,7 +49,9 @@ class Bundle(BuildBundle):
         new_table = True
         for row in reader:
             
-            row = { k:v.encode('ascii','ignore').strip() for k,v in row.items()}
+            # If the spreadsheet gets downloaded rom Google Spreadsheets, it is
+            # in UTF-8
+            row = { k:v.decode('utf8').encode('ascii','ignore').strip() for k,v in row.items()}
 
             if not row['table']:
                 new_table = True
