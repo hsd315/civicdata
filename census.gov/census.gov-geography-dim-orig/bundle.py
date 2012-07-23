@@ -66,14 +66,32 @@ class Bundle(BuildBundle):
                 t = self.schema.add_table(row['table'], **row)
                 new_table = False
               
+            # Ensure that the default diesn't get quotes if it is a number. 
+            if row['default']:
+                try:
+                    default = int(row['default'])
+                except:
+                    default = row['default']
           
+            # Create extra indexes based on which source this shows up in 
+            source_cols = ['c_2000', 'c_2010', 'acs_2010']
+            
+            # Remove empty fields
+            indexes = [i for i in row['indexes'].strip().split(',') if i]
+            
+            for c in source_cols:
+                if row[c].strip:
+                    idx_name = row['table']+'_'+c
+                    indexes.append(idx_name)
+      
             #print 'Column',row['table'], row['column']
             self.schema.add_column(t,row['column'],
                                    is_primary_key=row['is_pk'],
                                    description=row['description'].strip(),
                                    datatype=tm[row['type'].strip()],
                                    unique_constraints = row['unique_constraints'].strip(),
-                                   indexes = row['indexes'].strip()
+                                   indexes = ','.join(indexes),
+                                   default = default
                                    )
 
         self.database.commit()
@@ -111,6 +129,9 @@ class Bundle(BuildBundle):
         """Combine all of the serverate geo files into a single database, and
         trim all of the values """
         
+        
+        return
+        
         from databundles.partition import PartitionIdentity
         from databundles.orm import Column
 
@@ -134,15 +155,16 @@ class Bundle(BuildBundle):
         # Copy from the indidual partitions into the combined geo file, 
         # by attaching and copying within sqlite. 
         cdb = combined.database
-        for result in q.all:
+
+        for result in q.all:   
+ 
             geo = l.get(result.Partition)
             print "GEO",geo.database.path 
 
             name = cdb.attach(geo.database)
             
             sf1t = geo.schema.table('sf1geo')
-            geo_col_names = [ c.name for c in sf1t.columns ]
-            
+           
             map_ = { "TRIM({})".format(c.name): c.name for  c in sf1t.columns}
             
             cdb.copy_from_attached(('sf1geo','sf1geo2000'), 
@@ -150,9 +172,103 @@ class Bundle(BuildBundle):
                                    columns=map_,
                                     on_conflict = 'IGNORE')
             cdb.detach(name)
-            
+ 
     def split_geo(self):
+        from databundles.partition import PartitionIdentity
+        import sqlite3
+
+        sf1t = self.schema.table('sf1geo2000')
+        source_cols = [ c.name for c in sf1t.columns ]
+
+        ti = {} 
+        for table in self.schema.tables:
+ 
+            if table.name in ['sf1geo','record_code', 'geo_compat', 'release','usgs']:
+                continue
+            
+            if not table.name in ti:
+                ti[table.name] = { 'columns':[]}
+            
+            p = self.partitions.find(
+                        PartitionIdentity(self.identity, table=table.id_))
+               
+            ti[table.name]['partition'] = p
+       
+            if not  p.database.exists():
+                p.database.create();
+                p.database.copy_table_from(self.database, table.name)
+                p.schema.create_tables()
         
+            for column in table.columns:
+                if column.name in source_cols:
+                    ti[table.name]['columns'].append(column.name)
+        
+            ti[table.name]['meta'] =  p.database.table(table.name)
+            ti[table.name]['path'] = p.database.path
+            ti[table.name]['connection'] = sqlite3.connect(p.database.path)
+            ti[table.name]['cursor'] = ti[table.name]['connection'].cursor()
+           
+
+               
+        l = databundles.library.get_library()
+        q = (l.query()
+                 .identity(creator='clarinova.com', dataset='2000 Population',
+                           subset = 'sf1geo', variation='orig')
+                 .partition(any=True) # Get partitions, not just root bundle. 
+            )
+
+        i = 0
+        n = 0;
+        for result in q.all:   
+ 
+            geo = l.get(result.Partition)
+            print "\nGEO",geo.database.path  
+         
+         
+            for row in geo.database.connection.execute("SELECT * FROM sf1geo"):
+                
+                n = n + 1
+                
+                if n % 100 == 0:
+                    self.ptick('.')
+         
+                ids = {}
+                for table in ti.keys():  
+                    if table in ['sf1geo2000','sf1geo','record_code', 'geo_compat', 'release','usgs']:
+                        continue
+   
+               
+                    trow = []
+                    for column in ti[table]['columns']:
+                        trow.append(row[column])
+                      
+                    ins = ("""INSERT OR IGNORE INTO {table} ({columns}) VALUES ({values})"""
+                            .format(
+                                 table=table,
+                                 columns =','.join(ti[table]['columns']),
+                                 values = ','.join(['?' for i in ti[table]['columns']])
+                            )
+                         )
+                
+               
+
+                    values = [row[c] if not isinstance(row[c],basestring) else row[c].strip()
+                                 for c in ti[table]['columns']]                       
+  
+                    ti[table]['cursor'].execute(ins,values) 
+
+                    ids[table] = ti[table]['cursor'].lastrowid
+
+                    ti[table]['connection'].commit()
+                    
+                print ids
+               
+ 
+    def split_geo_sqlite(self):
+                
+        from databundles.partition import PartitionIdentity
+        from databundles.orm import Column
+
         #
         # Get the original geo files from the library
         #
@@ -162,8 +278,15 @@ class Bundle(BuildBundle):
                            subset = 'sf1geo', variation='orig')
                  .partition(any=True) # Get partitions, not just root bundle. 
             )
-        
+
+ 
         for result in q.all:   
+
+            geo = l.get(result.Partition)
+            print "GEO",geo.database.path 
+
+            geo_col_names = [ c.name for c in geo.schema.table('sf1geo').columns ]
+
             
             for table in self.schema.tables:
            
@@ -194,7 +317,9 @@ class Bundle(BuildBundle):
 
     def build(self):
     
-        self.combine_geo()
+        #self.combine_geo()
+        
+        self.split_geo()
         
         return True
 
