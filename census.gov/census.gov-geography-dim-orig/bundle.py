@@ -5,6 +5,7 @@
 from databundles.bundle import BuildBundle
 
 import databundles.library
+
  
 
 class Bundle(BuildBundle):
@@ -36,8 +37,7 @@ class Bundle(BuildBundle):
         reader  = csv.DictReader(headers)
     
         self.log("Generating main table schemas")
-        self.log("T = Table, C = Column")
-    
+       
         t = None
 
         tm = {
@@ -100,7 +100,6 @@ class Bundle(BuildBundle):
                                    default = default,
                                    illegal_value = illegal_value,
                                    size = size
-                                   
                                    )
 
         self.database.commit()
@@ -137,8 +136,7 @@ class Bundle(BuildBundle):
     def combine_geo(self):
         """Combine all of the serverate geo files into a single database, and
         trim all of the values """
-        
-    
+
         from databundles.partition import PartitionIdentity
 
         #
@@ -182,8 +180,29 @@ class Bundle(BuildBundle):
     def split_geo(self):
         '''Split the geo file into seperate tables'''
         from databundles.partition import PartitionIdentity
+        from databundles.database import  insert_or_ignore
         import sqlite3
+        import time
+        
 
+    
+        def set_default(column, v):
+            # The 'illegal' value is usually a string of '9'
+            if str(v) == column.illegal_value or  ( v == '' or v is None):
+                if column.datatype == 'text':
+                    v = column.default
+                else: # Ignoring case for REAL, since there aren't any. 
+                    v = int(column.default)
+                    
+            return v
+
+        def coerce_int(v):
+            try:
+                return int(v)
+            except:
+                return v
+
+       
         sf1t = self.schema.table('sf1geo2000')
         source_cols = [ c.name for c in sf1t.columns ]
 
@@ -191,14 +210,16 @@ class Bundle(BuildBundle):
         # Construct a dict for information about the tables we are going to split
         # split into
         ti = {} 
+   
         for table in self.schema.tables:
  
             # These tables have other sources, or will get processed later. 
-            if table.name in ['sf1geo','record_code', 'geo_compat', 'release','usgs']:
+            if table.name in ['sf1geo2000','sf1geo','record_code', 'geo_compat', 'release','usgs']:
                 continue
-            
+      
+      
             if not table.name in ti:
-                ti[table.name] = { 'columns':[]}
+                ti[table.name] = { 'columns':[], 'f':[]}
             
             p = self.partitions.find(
                         PartitionIdentity(self.identity, table=table.id_))
@@ -212,18 +233,40 @@ class Bundle(BuildBundle):
                 p.database.copy_table_from(self.database, table.name)
                 p.schema.create_tables()
         
+            
             for column in table.columns:
                 if column.name in source_cols:
                     ti[table.name]['columns'].append(column)
                     
+                    # Strip test values, but not numbers
+                    f = lambda v:  v.strip() if isinstance(v,basestring) else v
+                    
+                    # for numbers try to coerce to an integer. Doesn't work for None
+                    # so we use an intermediate function
+                    if column.datatype == 'integer':
+                        f = lambda v, f=f: coerce_int(f(v))
+ 
+                    # Set the default value. 
+                    f = lambda v, column=column, f=f : set_default(column,f(v) )
+             
+                    # Extract the value from a position in the row
+                    f = lambda row, column=column, f=f: f(row[column.name])
+
+                    ti[table.name]['f'].append(f) 
+                    
+                if not column.default:
+                    raise Exception("Column {} does not have a default value".format(column.name))
+                
+                   
+            # Get rid of any tables that don't recieve any columns 
             if len(ti[table.name]['columns']) == 0:
                 del ti[table.name]
                 continue
         
+            ti[table.name]['ins'] = insert_or_ignore(table.name, ti[table.name]['columns'])
             ti[table.name]['meta'] =  p.database.table(table.name)
-            ti[table.name]['path'] = p.database.path
-            ti[table.name]['connection'] = sqlite3.connect(p.database.path)
-            ti[table.name]['cursor'] = ti[table.name]['connection'].cursor()
+            ti[table.name]['db'] = p.database
+        
            
 
         # Now get all of the state partitions fro the library. 
@@ -234,77 +277,48 @@ class Bundle(BuildBundle):
                  .partition(any=True) # Get partitions, not just root bundle. 
             )
 
-        n = 0;
-        illegals = {}
-        for result in q.all:   
+        
+        geo_i = 0;
+ 
+        print ti.keys()
+ 
+        for result in q.all:
  
             geo = l.get(result.Partition)
-            print "\nGEO",geo.database.path  
-   
-            for table in ti.keys():  
-                # Skip these, since they are either not generated fro the SF1geo file, or they
-                # will be generated later. 
-                if table in ['sf1geo2000','sf1geo','record_code', 'geo_compat', 'release','usgs']:
-                    continue
-    
-                self.ptick(table)
-                ins = ("""INSERT OR IGNORE INTO {table} ({columns}) VALUES ({values})"""
-                            .format(
-                                 table=table,
-                                 columns =','.join([c.name for c in ti[table]['columns']]),
-                                 values = ','.join(['?' for i in ti[table]['columns']]) #@UnusedVariable
-                            )
-                         )
-    
-                value_set = []
-                for row in geo.database.connection.execute("SELECT * FROM sf1geo"):
-                    
-                    n = n + 1
-                    
-                    if n % 5000 == 0:
-                        self.ptick('.')
-             
-                    values = []
- 
+            geo_i += 1
 
- 
-                    for column in ti[table]['columns']:
-                        
-                        v = row[column.name]
-                        
-                        if isinstance(v,basestring):
-                            v = v.strip()
-                        
-                       
-                        # The 'illegal' value is usually a string of '9'
-                        if str(v) == column.illegal_value:
-                           
-                            if column.datatype == 'integer':
-                                v = int(column.default)
-                            else: # Ignoring case for REAL, since there aren't any. 
-                                v = column.default
-                         
-                        
-                        # Doesn't have the illecal value, just no value. 
-                        if ( v == '' or v is None):
-                            if column.datatype == 'text':
-                                v = 'NONE'
-                            else:
-                                v = -1                             
+            value_set = {}
+            row_i = 0;
+            t_start = time.clock()
+            
+            print "\nGEO {} ".format(geo_i),geo.database.path  
+            for row in geo.database.connection.execute("SELECT * FROM sf1geo"):
+                row_i += 1
                 
-                        values.append(v)
+                if row_i % 1000 == 0:
+                    self.ptick('.')
+                
+                for table in ti.keys():  
+                 
+                    if table not in value_set:
+                        value_set[table] = []
+                 
+                    values =[ f(row) for f in ti[table]['f'] ]
+                    value_set[table].append(values)
 
-                      
-                    value_set.append(values)
-
-                self.ptick('-')
-                ti[table]['cursor'].executemany(ins,value_set) 
-
-                ti[table]['connection'].commit()
+            self.ptick(' {}/s '.format(int( row_i/(time.clock()-t_start))))
+            
+            for table in ti.keys(): 
+                db =  ti[table]['db']
+                db.dbapi_cursor.executemany( ti[table]['ins'] , value_set[table])
+                db.dbapi_connection.commit()
+                
+        for table in ti.keys():
+            db.dbapi_close()
 
  
     def split_geo_sqlite(self):
-        '''SPlit the geo file using attachment and table copy'''  
+        '''Split the geo file using attachment and table copy'''  
     
                 
         from databundles.partition import PartitionIdentity
