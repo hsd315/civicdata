@@ -71,6 +71,7 @@ class Bundle(BuildBundle):
           
             # Build the index and unique constraint values. 
             indexes = [ row['table']+'_'+c for c in row.keys() if (re.match('i\d+', c) and row[c].strip())]  
+            uindexes = [ row['table']+'_'+c for c in row.keys() if (re.match('ui\d+', c) and row[c].strip())]  
             uniques = [ row['table']+'_'+c for c in row.keys() if (re.match('u\d+', c) and  row[c].strip())]  
     
             datatype = tm[row['type'].strip()]
@@ -95,6 +96,7 @@ class Bundle(BuildBundle):
                                    datatype=datatype,
                                    unique_constraints = ','.join(uniques),
                                    indexes = ','.join(indexes),
+                                   uindexes = ','.join(uindexes),
                                    default = default,
                                    illegal_value = illegal_value,
                                    size = size
@@ -136,9 +138,7 @@ class Bundle(BuildBundle):
         """Combine all of the serverate geo files into a single database, and
         trim all of the values """
         
-        
-        return
-        
+    
         from databundles.partition import PartitionIdentity
 
         #
@@ -264,8 +264,9 @@ class Bundle(BuildBundle):
                     if n % 5000 == 0:
                         self.ptick('.')
              
-
                     values = []
+ 
+
  
                     for column in ti[table]['columns']:
                         
@@ -274,6 +275,7 @@ class Bundle(BuildBundle):
                         if isinstance(v,basestring):
                             v = v.strip()
                         
+                       
                         # The 'illegal' value is usually a string of '9'
                         if str(v) == column.illegal_value:
                            
@@ -291,17 +293,19 @@ class Bundle(BuildBundle):
                                 v = -1                             
                 
                         values.append(v)
+
                       
                     value_set.append(values)
 
+                self.ptick('-')
                 ti[table]['cursor'].executemany(ins,value_set) 
 
                 ti[table]['connection'].commit()
 
  
     def split_geo_sqlite(self):
-             
-        return True
+        '''SPlit the geo file using attachment and table copy'''  
+    
                 
         from databundles.partition import PartitionIdentity
 
