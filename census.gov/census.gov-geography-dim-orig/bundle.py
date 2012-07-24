@@ -48,7 +48,7 @@ class Bundle(BuildBundle):
 
         new_table = True
         for row in reader:
-            
+          
             # If the spreadsheet gets downloaded rom Google Spreadsheets, it is
             # in UTF-8
             row = { k:v.decode('utf8').encode('ascii','ignore').strip() for k,v in row.items()}
@@ -87,9 +87,7 @@ class Bundle(BuildBundle):
                 illegal_value = '9' * size
             else:
                 illegal_value = None
-    
-        
-                
+   
             #print 'Column',row['table'], row['column']
             self.schema.add_column(t,row['column'],
                                    is_primary_key=row['is_pk'],
@@ -182,15 +180,20 @@ class Bundle(BuildBundle):
             cdb.detach(name)
  
     def split_geo(self):
+        '''Split the geo file into seperate tables'''
         from databundles.partition import PartitionIdentity
         import sqlite3
 
         sf1t = self.schema.table('sf1geo2000')
         source_cols = [ c.name for c in sf1t.columns ]
 
+        #
+        # Construct a dict for information about the tables we are going to split
+        # split into
         ti = {} 
         for table in self.schema.tables:
  
+            # These tables have other sources, or will get processed later. 
             if table.name in ['sf1geo','record_code', 'geo_compat', 'release','usgs']:
                 continue
             
@@ -202,6 +205,8 @@ class Bundle(BuildBundle):
                
             ti[table.name]['partition'] = p
        
+            # Create database if they don't exist. We are only creating
+            # the one table mentioned in the partition. 
             if not  p.database.exists():
                 p.database.create();
                 p.database.copy_table_from(self.database, table.name)
@@ -211,6 +216,9 @@ class Bundle(BuildBundle):
                 if column.name in source_cols:
                     ti[table.name]['columns'].append(column)
                     
+            if len(ti[table.name]['columns']) == 0:
+                del ti[table.name]
+                continue
         
             ti[table.name]['meta'] =  p.database.table(table.name)
             ti[table.name]['path'] = p.database.path
@@ -218,7 +226,7 @@ class Bundle(BuildBundle):
             ti[table.name]['cursor'] = ti[table.name]['connection'].cursor()
            
 
-               
+        # Now get all of the state partitions fro the library. 
         l = databundles.library.get_library()
         q = (l.query()
                  .identity(creator='clarinova.com', dataset='2000 Population',
@@ -244,11 +252,15 @@ class Bundle(BuildBundle):
                 ids = {}
               
                 for table in ti.keys():  
+                    # Skip these, since they are either not generated fro the SF1geo file, or they
+                    # will be generated later. 
                     if table in ['sf1geo2000','sf1geo','record_code', 'geo_compat', 'release','usgs']:
                         continue
-   
-               
+
+                    
+
                     values = []
+ 
                     for column in ti[table]['columns']:
                         
                         v = row[column.name]
@@ -256,21 +268,22 @@ class Bundle(BuildBundle):
                         if isinstance(v,basestring):
                             v = v.strip()
                         
+                        # The 'illegal' value is usually a string of '9'
                         if str(v) == column.illegal_value:
-                            pass
-                            
-                        if str(v) != column.illegal_value  and  (str(v) == '999' or str(v) == '999' or str(v) == '99999' or str(v) == '999999'
-                                                                  or str(v) == '9999999'):
-                            if column.name not in illegals:
-                                illegals[column.name] = 0;
-                                
-                            print column.name, v
-                            illegals[column.name] = illegals[column.name] +1
-                            
-                        if column.datatype == 'integer' and (
-                            not v or v is None):
-                                v = -1
+                           
+                            if column.datatype == 'integer':
+                                v = int(column.default)
+                            else: # Ignoring case for REAL, since there aren't any. 
+                                v = column.default
+                         
                         
+                        # Doesn't have the illecal value, just no value. 
+                        if ( v == '' or v is None):
+                            if column.datatype == 'text':
+                                v = 'NONE'
+                            else:
+                                v = -1                             
+                
                         values.append(v)
                       
                     ins = ("""INSERT OR IGNORE INTO {table} ({columns}) VALUES ({values})"""
@@ -280,17 +293,15 @@ class Bundle(BuildBundle):
                                  values = ','.join(['?' for i in ti[table]['columns']]) #@UnusedVariable
                             )
                          )
+                    
+                 
 
                     ti[table]['cursor'].execute(ins,values) 
 
                     ids[table] = ti[table]['cursor'].lastrowid
 
                     ti[table]['connection'].commit()
-                    
-                    print illegals
-                    
-                #print ids
-               
+
  
     def split_geo_sqlite(self):
              
