@@ -247,7 +247,7 @@ class Bundle(BuildBundle):
                 if table in ['sf1geo2000','sf1geo','record_code', 'geo_compat', 'release','usgs']:
                     continue
     
-                print "Table",table
+                self.ptick(table)
                 ins = ("""INSERT OR IGNORE INTO {table} ({columns}) VALUES ({values})"""
                             .format(
                                  table=table,
@@ -261,7 +261,7 @@ class Bundle(BuildBundle):
                     
                     n = n + 1
                     
-                    if n % 1000 == 0:
+                    if n % 5000 == 0:
                         self.ptick('.')
              
 
