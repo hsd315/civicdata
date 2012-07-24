@@ -20,7 +20,7 @@ class Bundle(BuildBundle):
         '''Return schema rows from the geoschema.csv file, 
         fetched from Google Docs '''
         from databundles.orm import Column
-        import csv
+        import csv, re
     
         if len(self.schema.tables) > 0 and len(self.schema.columns) > 0:
             self.log("Reusing schema")
@@ -69,25 +69,38 @@ class Bundle(BuildBundle):
                 except:
                     default = row['default']
           
-            # Create extra indexes based on which source this shows up in 
-            source_cols = ['c_2000', 'c_2010', 'acs_2010']
-            
-            # Remove empty fields
-            indexes = [i for i in row['indexes'].strip().split(',') if i]
-            
-            for c in source_cols:
-                if row[c].strip:
-                    idx_name = row['table']+'_'+c
-                    indexes.append(idx_name)
-      
+            # Build the index and unique constraint values. 
+            indexes = [ row['table']+'_'+c for c in row.keys() if (re.match('i\d+', c) and row[c].strip())]  
+            uniques = [ row['table']+'_'+c for c in row.keys() if (re.match('u\d+', c) and  row[c].strip())]  
+    
+            datatype = tm[row['type'].strip()]
+    
+            if row['size'].strip():
+                try:
+                    size = int(row['size'])
+                except:
+                    size = None
+            else:
+                size = None
+    
+            if  size and size > 0:
+                illegal_value = '9' * size
+            else:
+                illegal_value = None
+    
+        
+                
             #print 'Column',row['table'], row['column']
             self.schema.add_column(t,row['column'],
                                    is_primary_key=row['is_pk'],
                                    description=row['description'].strip(),
-                                   datatype=tm[row['type'].strip()],
-                                   unique_constraints = row['unique_constraints'].strip(),
+                                   datatype=datatype,
+                                   unique_constraints = ','.join(uniques),
                                    indexes = ','.join(indexes),
-                                   default = default
+                                   default = default,
+                                   illegal_value = illegal_value,
+                                   size = size
+                                   
                                    )
 
         self.database.commit()
@@ -196,7 +209,8 @@ class Bundle(BuildBundle):
         
             for column in table.columns:
                 if column.name in source_cols:
-                    ti[table.name]['columns'].append(column.name)
+                    ti[table.name]['columns'].append(column)
+                    
         
             ti[table.name]['meta'] =  p.database.table(table.name)
             ti[table.name]['path'] = p.database.path
@@ -213,12 +227,13 @@ class Bundle(BuildBundle):
             )
 
         n = 0;
+        illegals = {}
         for result in q.all:   
  
             geo = l.get(result.Partition)
             print "\nGEO",geo.database.path  
          
-         
+          
             for row in geo.database.connection.execute("SELECT * FROM sf1geo"):
                 
                 n = n + 1
@@ -227,38 +242,59 @@ class Bundle(BuildBundle):
                     self.ptick('.')
          
                 ids = {}
+              
                 for table in ti.keys():  
                     if table in ['sf1geo2000','sf1geo','record_code', 'geo_compat', 'release','usgs']:
                         continue
    
                
-                    trow = []
+                    values = []
                     for column in ti[table]['columns']:
-                        trow.append(row[column])
+                        
+                        v = row[column.name]
+                        
+                        if isinstance(v,basestring):
+                            v = v.strip()
+                        
+                        if str(v) == column.illegal_value:
+                            pass
+                            
+                        if str(v) != column.illegal_value  and  (str(v) == '999' or str(v) == '999' or str(v) == '99999' or str(v) == '999999'
+                                                                  or str(v) == '9999999'):
+                            if column.name not in illegals:
+                                illegals[column.name] = 0;
+                                
+                            print column.name, v
+                            illegals[column.name] = illegals[column.name] +1
+                            
+                        if column.datatype == 'integer' and (
+                            not v or v is None):
+                                v = -1
+                        
+                        values.append(v)
                       
                     ins = ("""INSERT OR IGNORE INTO {table} ({columns}) VALUES ({values})"""
                             .format(
                                  table=table,
-                                 columns =','.join(ti[table]['columns']),
+                                 columns =','.join([c.name for c in ti[table]['columns']]),
                                  values = ','.join(['?' for i in ti[table]['columns']]) #@UnusedVariable
                             )
                          )
-                
-               
 
-                    values = [row[c] if not isinstance(row[c],basestring) else row[c].strip()
-                                 for c in ti[table]['columns']]                       
-  
                     ti[table]['cursor'].execute(ins,values) 
 
                     ids[table] = ti[table]['cursor'].lastrowid
 
                     ti[table]['connection'].commit()
                     
-                print ids
+                    print illegals
+                    
+                #print ids
                
  
     def split_geo_sqlite(self):
+             
+        return True
                 
         from databundles.partition import PartitionIdentity
 
