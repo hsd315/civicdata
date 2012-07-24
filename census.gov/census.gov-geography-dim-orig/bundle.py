@@ -240,24 +240,30 @@ class Bundle(BuildBundle):
  
             geo = l.get(result.Partition)
             print "\nGEO",geo.database.path  
-         
-          
-            for row in geo.database.connection.execute("SELECT * FROM sf1geo"):
-                
-                n = n + 1
-                
-                if n % 100 == 0:
-                    self.ptick('.')
-         
-                ids = {}
-              
-                for table in ti.keys():  
-                    # Skip these, since they are either not generated fro the SF1geo file, or they
-                    # will be generated later. 
-                    if table in ['sf1geo2000','sf1geo','record_code', 'geo_compat', 'release','usgs']:
-                        continue
-
+   
+            for table in ti.keys():  
+                # Skip these, since they are either not generated fro the SF1geo file, or they
+                # will be generated later. 
+                if table in ['sf1geo2000','sf1geo','record_code', 'geo_compat', 'release','usgs']:
+                    continue
+    
+                print "Table",table
+                ins = ("""INSERT OR IGNORE INTO {table} ({columns}) VALUES ({values})"""
+                            .format(
+                                 table=table,
+                                 columns =','.join([c.name for c in ti[table]['columns']]),
+                                 values = ','.join(['?' for i in ti[table]['columns']]) #@UnusedVariable
+                            )
+                         )
+    
+                value_set = []
+                for row in geo.database.connection.execute("SELECT * FROM sf1geo"):
                     
+                    n = n + 1
+                    
+                    if n % 1000 == 0:
+                        self.ptick('.')
+             
 
                     values = []
  
@@ -286,21 +292,11 @@ class Bundle(BuildBundle):
                 
                         values.append(v)
                       
-                    ins = ("""INSERT OR IGNORE INTO {table} ({columns}) VALUES ({values})"""
-                            .format(
-                                 table=table,
-                                 columns =','.join([c.name for c in ti[table]['columns']]),
-                                 values = ','.join(['?' for i in ti[table]['columns']]) #@UnusedVariable
-                            )
-                         )
-                    
-                 
+                    value_set.append(values)
 
-                    ti[table]['cursor'].execute(ins,values) 
+                ti[table]['cursor'].executemany(ins,value_set) 
 
-                    ids[table] = ti[table]['cursor'].lastrowid
-
-                    ti[table]['connection'].commit()
+                ti[table]['connection'].commit()
 
  
     def split_geo_sqlite(self):
