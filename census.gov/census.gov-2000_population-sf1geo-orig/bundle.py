@@ -89,6 +89,8 @@ class Bundle(UsCensusBundle):
         for state, source in urls['geos'].items():
             self.load_geo(state, source)
     
+        self.split_geo_sqlite()
+    
         return True
     
     def load_geo(self, state, source):
@@ -193,15 +195,24 @@ class Bundle(UsCensusBundle):
                  .partition(any=True) # Get partitions, not just root bundle. 
             )
 
+        i = 0
+        
         for result in q.all:   
 
-            geo = l.get(result.Partition)
-            print "GEO",geo.database.path 
+            i += 1
 
+            geo = l.get(result.Partition)
+            print i, "GEO",geo.database.path 
+            
+            # Doing this in the loop means not having to do a seperate query
+            # outsize of the loop
             geo_col_names = [ c.name for c in geo.schema.table('sf1geo').columns ]
 
-            
             for table in self.schema.tables:
+        
+                if table.name in ['sf1geo']:
+                    continue
+           
            
                 p = self.partitions.find(
                         PartitionIdentity(self.identity, table=table.id_))
