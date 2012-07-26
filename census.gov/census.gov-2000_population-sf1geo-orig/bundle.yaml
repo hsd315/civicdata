@@ -10,7 +10,7 @@ build:
     headersFile: meta/columns.csv
     rootUrl: http://www2.census.gov/census_2000/datasets/Summary_File_1/
     statesFile: meta/States
-    geoheaderFile: meta/geoheaders.csv
+    geoheaderFile: meta/geoschema.csv
     urlsFile: meta/urls.yaml
     segMapFile: meta/seg_map.yaml
     rangeMapFile: meta/range_map.yaml
