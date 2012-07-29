@@ -69,21 +69,7 @@ class Bundle(BuildBundle):
         import sqlite3
         import time
 
-        def set_default(column, v):
-            # The 'illegal' value is usually a string of '9'
-            if str(v) == column.illegal_value or  ( v == '' or v is None):
-                if column.datatype == 'text':
-                    v = column.default
-                else: # Ignoring case for REAL, since there aren't any. 
-                    v = int(column.default)
-                    
-            return v
-
-        def coerce_int(v):
-            try:
-                return int(v)
-            except:
-                return v
+    
 
        
         sf1t = self.schema.table('sf1geo2000')
@@ -117,24 +103,8 @@ class Bundle(BuildBundle):
          
             for column in table.columns:
                 if column.name in source_cols:
-                    ti[table.name]['columns'].append(column)
-                    
-                    # Strip test values, but not numbers
-                    f = lambda v:  v.strip() if isinstance(v,basestring) else v
-                    
-                    # for numbers try to coerce to an integer. Doesn't work for None
-                    # so we use an intermediate function
-                    if column.datatype == 'integer':
-                        f = lambda v, f=f: coerce_int(f(v))
- 
-                    # Set the default value. 
-                    if column.default.strip():
-                        f = lambda v, column=column, f=f : set_default(column,f(v) )
-             
-                    # Extract the value from a position in the row
-                    f = lambda row, column=column, f=f: f(row[column.name])
-
-                    ti[table.name]['f'].append(f) 
+                    ti[table.name]['columns'].append(column)      
+                    ti[table.name]['f'].append(column.processor()) 
                     
                 if not column.default:
                     raise Exception("Column {} does not have a default value".format(column.name))

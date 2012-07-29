@@ -210,6 +210,7 @@ class Bundle(UsCensusBundle):
 
             for table in self.schema.tables:
         
+                continue
                 if table.name in ['sf1geo']:
                     continue
            
@@ -237,7 +238,22 @@ class Bundle(UsCensusBundle):
                                             on_conflict = 'IGNORE')
                 
                 pdb.detach(attach_name)
+        #
+        # Now that all of the bundles are done, install them in the library. 
 
+        for table in self.schema.tables:
+        
+            if table.name in ['sf1geo']:
+                continue  
+            
+            pid = PartitionIdentity(self.identity, table=table.id_)
+            p = self.partitions.find(pid)
+            
+            self.log("Install in library: "+p.name)
+            dest = self.library.put(p)
+            self.log("Installed in library: "+dest)
+            p.database.delete()
+            
     
 import sys
 
