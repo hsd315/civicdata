@@ -202,7 +202,7 @@ class Bundle(UsCensusBundle):
             i += 1
 
             geo = l.get(result.Partition)
-            print i, "GEO",geo.database.path 
+            self.log("--------- "+geo.database.path);
             
             # Doing this in the loop means not having to do a seperate query
             # outsize of the loop
@@ -221,7 +221,7 @@ class Bundle(UsCensusBundle):
                 if not pdb.exists():
                     pdb.create();
   
-                print "PARTITION", p.name, p.identity.name, p.database.path
+                self.log("Loading {} into {} ".format(geo.database.path, p.database.path) )
                 
                 pdb.create_table(table.name)
                 attach_name = pdb.attach(geo.database)
