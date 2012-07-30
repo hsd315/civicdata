@@ -103,7 +103,7 @@ class Bundle(UsCensusBundle):
         partition = self.partitions.find(pid)
        
         if self.library.get(partition.identity.id_):
-            self.log("Found in library, skipping. "+str(pid))
+            self.log("Found in library, skipping. "+pid.name)
             return
    
         if not partition.database.exists():
@@ -221,7 +221,7 @@ class Bundle(UsCensusBundle):
                 if not pdb.exists():
                     pdb.create();
   
-                self.log("Loading {} into {} ".format(geo.database.path, p.database.path) )
+                self.log("Loading {} into {} ".format(geo.identity.name, p.identity.name) )
                 
                 pdb.create_table(table.name)
                 attach_name = pdb.attach(geo.database)
