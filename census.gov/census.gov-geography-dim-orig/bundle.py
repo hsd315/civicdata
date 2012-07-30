@@ -40,19 +40,25 @@ class Bundle(BuildBundle):
         self.partitions.new_partition(pid)
         
         for table in self.schema.tables:
+            
+            if table.name in ['sf1geo2000','sf1geo','record_code', 'geo_compat', 'release','usgs']:
+                continue
+            
             pid = PartitionIdentity(self.identity, table=table.name)
-            self.partitions.new_partition(pid)
+            
+            if not self.partitions.find(pid):
+                self.log("Create partition for "+pid.name)
+                p = self.partitions.new_partition(pid)
+                p.create_with_tables(table.id_)
+            else:
+                self.log("Found partition; Skipping "+pid.name)
         
         self.database.commit()
         
-  
     def prepare(self):
         
         if not self.database.exists():
             self.database.create()
-        
-        self.database.delete()
-        self.database.create()
         
         self.generate_schema()
         self.schema.create_tables()
@@ -66,12 +72,8 @@ class Bundle(BuildBundle):
         '''Split the geo file into seperate tables'''
         from databundles.partition import PartitionIdentity
         from databundles.database import  insert_or_ignore
-        import sqlite3
         import time
 
-    
-
-       
         sf1t = self.schema.table('sf1geo2000')
         source_cols = [ c.name for c in sf1t.columns ]
 
@@ -80,12 +82,61 @@ class Bundle(BuildBundle):
         # split into
         ti = {} 
    
+        l = databundles.library.get_library()
+        q = (l.query()
+                 .identity(creator='clarinova.com', dataset='2000 Population',
+                           subset = 'sf1geo', variation='orig')
+                 .partition(any=True) # Get partitions, not just root bundle. 
+            )
+   
+        for local_partition in self.partitions.all:
+            
+            if not local_partition.table:
+                continue
+            
+            q = q.table(name=local_partition.table.name)
+            
+            try :
+                remote_partition_result = q.one
+                print local_partition.name, remote_partition_result.Partition.name
+            except:
+                self.error("Missing corresponding local_partition for: "+local_partition.name)
+                continue
+
+            remote_partition = l.get(remote_partition_result.Partition)
+            
+            row_i = 0
+            t_start = time.clock()
+            value_set = {}
+            self.ptick(local_partition.table.name)
+            table = local_partition.table.columns
+            
+            processors = [ c.processor() for c in table if c.name in source_cols ]
+            columns = [c for c in table if c.name in source_cols ]
+          
+            for row in remote_partition.database.connection.execute(
+                                    "SELECT * FROM {}".format(local_partition.table.name)):
+                row_i += 1
+                
+                if row_i % 50000 == 0:
+                    self.ptick('.')
+                    value_set = {}
+                if row_i % 1000000 == 0:
+                    self.ptick(str(row_i/1000000)+"M")
+                print "KEYS",row.keys()
+                values =[ f(row) for f in processors ]
+                
+                print values
+
+            self.ptick(' {}/s '.format(int( row_i/(time.clock()-t_start))))
+    
+        return True
+      
         for table in self.schema.tables:
  
             # These tables have other sources, or will get processed later. 
             if table.name in ['sf1geo2000','sf1geo','record_code', 'geo_compat', 'release','usgs']:
                 continue
-      
       
             if not table.name in ti:
                 ti[table.name] = { 'columns':[], 'f':[]}
@@ -93,14 +144,6 @@ class Bundle(BuildBundle):
             p = self.partitions.find(
                         PartitionIdentity(self.identity, table=table.id_))
 
-       
-            # Create database if they don't exist. We are only creating
-            # the one table mentioned in the partition. 
-            if not  p.database.exists():
-                p.database.create();
-                p.database.copy_table_from(self.database, table.id_)
-                p.schema.create_tables()
-         
             for column in table.columns:
                 if column.name in source_cols:
                     ti[table.name]['columns'].append(column)      
@@ -109,7 +152,6 @@ class Bundle(BuildBundle):
                 if not column.default:
                     raise Exception("Column {} does not have a default value".format(column.name))
                 
-                   
             # Get rid of any tables that don't recieve any columns 
             if len(ti[table.name]['columns']) == 0:
                 del ti[table.name]
@@ -118,15 +160,6 @@ class Bundle(BuildBundle):
             ti[table.name]['ins'] = insert_or_ignore(table.name, ti[table.name]['columns'])
             ti[table.name]['meta'] =  p.database.table(table.name)
             ti[table.name]['db'] = p.database
-
-
-        # Now get all of the state partitions fro the library. 
-        l = databundles.library.get_library()
-        q = (l.query()
-                 .identity(creator='clarinova.com', dataset='2000 Population',
-                           subset = 'sf1geo', variation='orig')
-                 .partition(any=True) # Get partitions, not just root bundle. 
-            )
 
         
         geo_i = 0;
@@ -173,9 +206,9 @@ class Bundle(BuildBundle):
     
         #self.combine_geo()
         
-        #self.split_geo()
+        self.split_geo()
         
-        self.split_geo_sqlite()
+        #self.split_geo_sqlite()
         
         return True
 

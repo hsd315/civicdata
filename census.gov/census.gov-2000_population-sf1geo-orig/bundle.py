@@ -52,7 +52,7 @@ class Bundle(UsCensusBundle):
             pid = PartitionIdentity(self.identity, space=state)
             if not self.partitions.find(pid):
                 self.log("Create partition for "+state)
-                partition = self.partitions.new_partition(pid)
+                self.partitions.new_partition(pid)
                
             else:
                 self.log("Already created partition, skipping "+state)
@@ -67,7 +67,7 @@ class Bundle(UsCensusBundle):
             pid = PartitionIdentity(self.identity, table=table.name)
             if not self.partitions.find(pid):
                 self.log("Create partition for "+table.name)
-                p = self.partitions.new_partition(pid)
+                self.partitions.new_partition(pid)
                 #p.create_with_tables(table.name)
             else:
                 self.log("Already created partition, skipping "+table.name)
@@ -209,12 +209,10 @@ class Bundle(UsCensusBundle):
             geo_col_names = [ c.name for c in geo.schema.table('sf1geo').columns ]
 
             for table in self.schema.tables:
-        
-                continue
+                
                 if table.name in ['sf1geo']:
                     continue
-           
-           
+
                 p = self.partitions.find(
                         PartitionIdentity(self.identity, table=table.id_))
                 
