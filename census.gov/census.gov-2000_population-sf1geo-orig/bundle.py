@@ -202,7 +202,7 @@ class Bundle(UsCensusBundle):
             i += 1
 
             geo = l.get(result.Partition)
-            self.log("--------- "+geo.database.path);
+            self.log(str(i)+" --------- "+geo.database.path);
             
             # Doing this in the loop means not having to do a seperate query
             # outsize of the loop
