@@ -71,7 +71,7 @@ class Bundle(BuildBundle):
         '''Split the geo file into seperate tables'''
         from databundles.database import  insert_or_ignore
         import time
-
+ 
         l = databundles.library.get_library()
         q = (l.query()
                  .identity(creator='clarinova.com', dataset='2000 Population',
@@ -98,40 +98,49 @@ class Bundle(BuildBundle):
             row_i = 0
             t_start = time.clock()
             value_set = {}
+      
             self.ptick(local_partition.table.name)
   
-            sf1t = self.schema.table('sf1geo2000')
-            source_cols = [ c.name for c in sf1t.columns ]
-            table = local_partition.table
-            processors = [c.processor() for c in table.columns if c.name in source_cols ]
-            
-            columns = [c for c in table.columns if c.name in source_cols ]
-            ins = insert_or_ignore(table.name, columns)
-            db = local_partition.database
-            
+            ltable = local_partition.table
+            rtable = remote_partition.table
+            rcolumns = remote_partition.table.columns
+            source_cols = [c.name for c in rcolumns if not c.is_primary_key ]
+            processors = [c.processor() for c in ltable.columns if c.name in source_cols ]       
+            columns = [c for c in ltable.columns if c.name in source_cols ]
+            ins = insert_or_ignore(ltable.name, columns)
+  
+            if not local_partition.database.exists():
+                local_partition.create_with_tables()
+          
             for row in remote_partition.database.connection.execute(
                                     "SELECT * FROM {}".format(local_partition.table.name)):
+
                 row_i += 1
                 
-                if row_i % 50000 == 0:
+                if row_i % 10000 == 0:
                     self.ptick('.')
+    
+                if row_i % 100000 == 0:
+                    self.ptick(str(row_i/100000))
+                    self.ptick("E5 ")
+                    self.ptick(str(int( row_i/(time.clock()-t_start))))
+                    self.ptick(' ')
+                    self.ptick(str(len(value_set)))
                     
-                    db.dbapi_cursor.executemany(ins, value_set)
-                    db.dbapi_connection.commit()
-                    
-                    value_set = []
-                if row_i % 1000000 == 0:
-                    self.ptick(str(row_i/1000000)+"M")
-                    
-                print "KEYS",row.keys()
-                values =[ f(row) for f in processors ]
-                value_set.append(values)
-                print values
+                values=[ f(row) for f in processors ]
+            
+                if values not in value_set:
+                    value_set[values] = [(row['stusab'],row['logrecno'])]
+                else:
+                    value_set[values].append((row['stusab'],row['logrecno']))
 
-                continue
-                
-
-            self.ptick(' {}/s '.format(int( row_i/(time.clock()-t_start))))
+            self.log(' {}/s '.format(int( row_i/(time.clock()-t_start))))
+            self.log(len(value_set))             
+            
+            db = local_partition.database
+        
+            db.dbapi_cursor.executemany(ins, value_set.iterkeys())
+            db.dbapi_connection.commit()
     
         return True
 

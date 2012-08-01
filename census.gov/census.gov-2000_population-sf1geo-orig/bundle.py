@@ -71,7 +71,14 @@ class Bundle(UsCensusBundle):
                 #p.create_with_tables(table.name)
             else:
                 self.log("Already created partition, skipping "+table.name)
-                
+           
+        # create the combined partition
+        pid = PartitionIdentity(self.identity, table='sf1geo')   
+        if not self.partitions.find(pid):
+            self.log("Create partition for "+table.name)
+            self.partitions.new_partition(pid)
+        else:
+            self.log("Already created partition, skipping "+table.name)
             
             
         self.database.commit() 
@@ -88,6 +95,8 @@ class Bundle(UsCensusBundle):
         # Process the geo files. 
         for state, source in urls['geos'].items():
             self.load_geo(state, source)
+    
+        self.combine_geo()
     
         self.split_geo_sqlite()
     
@@ -134,11 +143,24 @@ class Bundle(UsCensusBundle):
                                   
                     return True
                 
+        return False
+                
     def combine_geo(self):
         """Combine all of the seperate geo files into a single database, and
         trim all of the values """
 
         from databundles.partition import PartitionIdentity
+
+
+        combined = self.partitions.find(PartitionIdentity(self.identity, table='sf1geo'))
+     
+        if not combined.database.exists():
+            combined.create_with_tables(combined.table.name)
+
+        if self.library.get(combined.identity.id_):
+            self.log("Found in library, skipping. "+combined.identity.name)
+            return True
+
 
         #
         # Get the original geo files from the library
@@ -150,21 +172,21 @@ class Bundle(UsCensusBundle):
                  .partition(any=True) # Get partitions, not just root bundle. 
             )
 
-        combined = self.partitions.find(PartitionIdentity(self.identity, time='2000'))
-     
-        combined.database.create()
-        combined.database.create_table('sf1geo2000')
-
-        print "COMBINED", combined.database.path
-  
         # Copy from the indidual partitions into the combined geo file, 
         # by attaching and copying within sqlite. 
         cdb = combined.database
 
+        row_i = 0
         for result in q.all:   
  
+            row_i += 1
+ 
             geo = l.get(result.Partition)
-            print "GEO",geo.database.path 
+            self.log(str(row_i)+" Loading: "+geo.database.path)
+
+            if not geo.identity.space:
+                continue; # Only take state file; ignore national split files
+            
 
             name = cdb.attach(geo.database)
             
@@ -172,12 +194,15 @@ class Bundle(UsCensusBundle):
            
             map_ = { "TRIM({})".format(c.name): c.name for  c in sf1t.columns}
             
-            cdb.copy_from_attached(('sf1geo','sf1geo2000'), 
+            cdb.copy_from_attached(('sf1geo','sf1geo'), 
                                    name=name,
                                    columns=map_,
-                                    on_conflict = 'IGNORE')
+                                on_conflict = 'ABORT')
             cdb.detach(name)
  
+
+        dest = self.library.put(combined)
+        self.log("Installed combined file in library: "+dest)
 
     def split_geo_sqlite(self):
         '''Split the geo file using attachment and table copy'''  
@@ -186,7 +211,8 @@ class Bundle(UsCensusBundle):
         from databundles.partition import PartitionIdentity
 
         #
-        # Get the original geo files from the library
+        # Get the original geo files from the library. These are the ones we 
+        # just stored in load_geo
         #
         l =  databundles.library.get_library()
         q = (l.query()
@@ -204,7 +230,11 @@ class Bundle(UsCensusBundle):
             geo = l.get(result.Partition)
             self.log(str(i)+" --------- "+geo.database.path);
             
+            if not geo.identity.space:
+                continue; # Only take state file; ignore the ones this routine produces
+            
             # Doing this in the loop means not having to do a seperate query
+    
             # outsize of the loop
             geo_col_names = [ c.name for c in geo.schema.table('sf1geo').columns ]
 
