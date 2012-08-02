@@ -102,7 +102,7 @@ class Bundle(BuildBundle):
             self.ptick(local_partition.table.name)
   
             ltable = local_partition.table
-            rtable = remote_partition.table
+            rtable = remote_partition.table #@UnusedVariable
             rcolumns = remote_partition.table.columns
             source_cols = [c.name for c in rcolumns if not c.is_primary_key ]
             processors = [c.processor() for c in ltable.columns if c.name in source_cols ]       

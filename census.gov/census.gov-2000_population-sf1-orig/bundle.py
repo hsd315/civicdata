@@ -19,7 +19,6 @@ class Bundle(UsCensusBundle):
         self.super_ = super(Bundle, self)
         self.super_.__init__(directory)
 
-
     def prepare(self):
         '''Create the prototype database'''
         from  databundles.database import Database

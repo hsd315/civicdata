@@ -104,9 +104,12 @@ class Bundle(UsCensusBundle):
     
     def load_geo(self, state, source):
         from databundles.partition import PartitionIdentity 
+        import databundles.dbpetl
         import petl.fluent as petl
-        
-        header, regex, regex_str = self.schema.table('sf1geo').get_fixed_regex() #@UnusedVariable
+        from databundles.transform import CensusTransform
+
+        table = self.schema.table('sf1geo')
+        header, regex, regex_str = table.get_fixed_regex() #@UnusedVariable
 
         pid = PartitionIdentity(self.identity, space=state)
         partition = self.partitions.find(pid)
@@ -117,6 +120,14 @@ class Bundle(UsCensusBundle):
    
         if not partition.database.exists():
             partition.create_with_tables('sf1geo')
+
+        def print_follow(row):
+            print row
+            
+        processors = [CensusTransform(c, useIndex = True) for c in table.columns ]
+            
+        def process_row(row):
+            return [ f(row) for f in processors ]
 
         retry = 4
         while retry > 0:
@@ -134,8 +145,11 @@ class Bundle(UsCensusBundle):
  
                     if state == 'pr': # Some unicode characters, but only in this file
                         t = t.convert('name', unicode)
- 
-                    t.progress(100000).appendsqlite3(db_path,'sf1geo')
+
+                    (t
+                     .mogrify(lambda row: process_row(row))
+                     .progress(100000)
+                     .appendsqlite3(db_path,'sf1geo'))
                           
                     dest = self.library.put(partition)
                     self.log("Install in library: "+dest)
