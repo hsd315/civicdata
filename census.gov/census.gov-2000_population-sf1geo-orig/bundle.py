@@ -347,8 +347,12 @@ class Bundle(UsCensusBundle):
             value_set = OrderedDict()
             id_set = {}
 
-            partition = self.partitions.find(
-                    PartitionIdentity(self.identity, table=table.id_))
+            pid = PartitionIdentity(self.identity, table=table.id_)
+            partition = self.partitions.find(pid) # Find puts id_ into partition.identity
+            
+            if self.library.get(partition.identity):
+                self.log("Found in library, skipping. "+pid.name)
+                continue
             
             if not partition.database.exists():
                 partition.create_with_tables(table.name)
@@ -378,9 +382,6 @@ class Bundle(UsCensusBundle):
                     self.ptick(str(int( row_i/(time.clock()-t_start))))
                     self.ptick(' ')
                     self.ptick(str(len(value_set)))   
-
-                if row_i % 500000 == 0:
-                    break
 
                 values=[ f(row) for f in processors ]
                
@@ -417,6 +418,11 @@ class Bundle(UsCensusBundle):
             db.dbapi_close()
             self.log('Db Write {}/s '.format(int( len(value_set)/(time.clock()-t_start+.01))))
         
+            self.log("Install in library: "+partition.name)
+            dest = self.library.put(partition)
+            self.log("Installed in library: "+dest)
+            partition.database.delete()
+        
             if table.name != 'record_code':
                 #
                 # Update the record_codes table to make the logrecno and stusab
@@ -443,6 +449,18 @@ class Bundle(UsCensusBundle):
                 db.dbapi_connection.commit()
                 db.dbapi_close()
                 self.log('Record Code Write {}/s '.format(int( len(value_set)/(time.clock()-t_start+.01))))
+
+
+                # Also install the record code into the library. We will end up doing
+                # this multiple times, bu it will ensure that the library is in a useful
+                # state if the program crashes and has to be restarted. 
+
+                self.log("Install in library: "+rcp.name)
+                dest = self.library.put(rcp)
+                self.log("Installed in library: "+dest)
+                rcp.database.delete()
+        
+
 
         return True
 
