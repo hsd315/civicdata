@@ -399,7 +399,7 @@ class Bundle(UsCensusBundle):
             
             self.log(' ')
             self.log("Length: "+str(len(value_set)))  
-            self.log('Collection Write {}/s '.format(int( len(value_set)/(time.clock()-t_start))))
+            self.log('Collection Write {}/s '.format(int( len(value_set)/(time.clock()-t_start+.01))))
 
 
             # This generator expressions replaces the first value in the row, the placeholder
@@ -409,14 +409,13 @@ class Bundle(UsCensusBundle):
 
             ins = insert_or_ignore(table.name, columns)
           
-            t_start = time.clock()
             db = partition.database
             self.log('Write to db: '+db.path)
             t_start = time.clock()
             db.dbapi_cursor.executemany(ins, ins_gen)
             db.dbapi_connection.commit()
             db.dbapi_close()
-            self.log('Db Write {}/s '.format(int( len(value_set)/(time.clock()-t_start))))
+            self.log('Db Write {}/s '.format(int( len(value_set)/(time.clock()-t_start+.01))))
         
             if table.name != 'record_code':
                 #
@@ -443,7 +442,7 @@ class Bundle(UsCensusBundle):
                 db.dbapi_cursor.executemany(update, g)
                 db.dbapi_connection.commit()
                 db.dbapi_close()
-                self.log('Record Code Write {}/s '.format(int( len(value_set)/(time.clock()-t_start))))
+                self.log('Record Code Write {}/s '.format(int( len(value_set)/(time.clock()-t_start+.01))))
 
         return True
 
