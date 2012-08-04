@@ -1,8 +1,0 @@
-identity:
-    creator: clarinova.com
-    dataset: 2000 Population
-    id: a1azol
-    revision: '1'
-    source: census.gov
-    subset: geodim
-    variation: orig
