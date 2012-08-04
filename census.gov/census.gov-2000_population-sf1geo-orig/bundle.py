@@ -382,6 +382,7 @@ class Bundle(UsCensusBundle):
                     self.ptick(str(int( row_i/(time.clock()-t_start))))
                     self.ptick(' ')
                     self.ptick(str(len(value_set)))   
+                    break
 
                 values=[ f(row) for f in processors ]
                
@@ -397,11 +398,9 @@ class Bundle(UsCensusBundle):
                 else:
                     id_set[hash].append((row['stusab'],row['logrecno']))
            
-            
             self.log(' ')
             self.log("Length: "+str(len(value_set)))  
             self.log('Collection Write {}/s '.format(int( len(value_set)/(time.clock()-t_start+.01))))
-
 
             # This generator expressions replaces the first value in the row, the placeholder
             # primary key, with an acualt key. 
