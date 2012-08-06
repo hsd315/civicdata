@@ -8,6 +8,7 @@ identity:
     variation: orig
 build:
     headersFile: meta/columns.csv
+    summaryLevelsFile: meta/summary_levels.csv
     rootUrl: http://www2.census.gov/census_2000/datasets/Summary_File_1/
     statesFile: meta/States
     geoheaderFile: meta/geoschema.csv
