@@ -5,7 +5,16 @@
 from  sourcesupport.uscensus import UsCensusBundle
 
 class Bundle(UsCensusBundle):
-    ''' '''
+    '''
+    Build a bundle for the US 200 Census, SF1 File, geographic components
+    
+    Build Options
+    
+    Build options can be asses with the -b option. 
+    
+        split-reset. In the split_geo reutine, ignore the partitions in the library
+    
+    '''
  
     def __init__(self,directory=None):
         self.super_ = super(Bundle, self)
@@ -91,7 +100,13 @@ class Bundle(UsCensusBundle):
         state. Then creates a partition for each of the geo files. '''
 
         import yaml 
-          
+         
+        # Need to install the bundle in the library to get all of the tables, 
+        # required to install  split partitions in the library. 
+        
+        dest = self.library.put(self, remove=self.run_args.reset)
+        self.log("Installed main bundle in library: "+dest)
+        
         # Process the geo files. 
         urls = yaml.load(file(self.urls_file, 'r')) 
         for state, source in urls['geos'].items():
@@ -100,15 +115,16 @@ class Bundle(UsCensusBundle):
         self.combine_geo()
     
         #self.split_geo_sqlite()
-    
+   
         self.split_geo()
     
         return True
     
     def load_geo(self, state, source):
         from databundles.partition import PartitionIdentity 
-        import databundles.dbpetl
         import petl.fluent as petl
+        import databundles.dbpetl
+        
         from databundles.transform import CensusTransform
 
         table = self.schema.table('sf1geo')
@@ -143,11 +159,12 @@ class Bundle(UsCensusBundle):
                     self.log("Processing GEO file: "+rf)
                               
                     db_path = partition.database.path
-                    self.log("  Partion: "+partition.name)
-                    self.log("  To Database: "+db_path)
+                    self.log("Partion: "+partition.name)
+                    self.log("To Database: "+db_path)
                                
-                    t = petl.fromregex(rf, regex=regex, header=header) #@UndefinedVariable
- 
+                    t = databundles.dbpetl.wrap(databundles.dbpetl.fromregex)(
+                                            rf, regex=regex, header=header) #@UndefinedVariable
+
                     if state == 'pr': # Some unicode characters, but only in this file
                         t = t.convert('name', unicode)
 
@@ -175,14 +192,15 @@ class Bundle(UsCensusBundle):
         from databundles.partition import PartitionIdentity
 
 
-        combined = self.partitions.find(PartitionIdentity(self.identity, table='sf1geo'))
-     
-        combined.database.delete()
-        combined.create_with_tables(combined.table.name)
+        pid = PartitionIdentity(self.identity, table='sf1geo')
+        combined = self.partitions.find(pid)
 
         if self.library.get(combined.identity.id_):
-            self.log("Found in library, skipping. "+combined.identity.name)
+            self.log("Found combined partition in library, skipping. "+combined.identity.name)
             return True
+
+        combined.database.delete()
+        combined.create_with_tables(combined.table.name)
 
 
         #
@@ -341,7 +359,7 @@ class Bundle(UsCensusBundle):
 
       
         for table in tables:
-           
+
             row_i = 0
             t_start = time.clock()
             value_set = OrderedDict()
@@ -350,12 +368,19 @@ class Bundle(UsCensusBundle):
             pid = PartitionIdentity(self.identity, table=table.id_)
             partition = self.partitions.find(pid) # Find puts id_ into partition.identity
             
+            if 'split-reset' in self.run_args.build_opt:
+                self.log("split-reset, ignoring Library.")
             if self.library.get(partition.identity):
-                self.log("Found in library, skipping. "+pid.name)
-                continue
+                self.log("Found in library, skipping. "+partition.name)
+            
+            
+            self.log("Processing table {} in partition {}  ".format(table.name, partition.identity.name))
             
             if not partition.database.exists():
+                self.log("Create database with table "+table.name)
                 partition.create_with_tables(table.name)
+            else:
+                self.log("Database exists: "+partition.database.path)
          
             # Get all of the source columns, but exclude the foriegn keys
             source_cols = ([c.name for c in table.columns 
@@ -375,14 +400,14 @@ class Bundle(UsCensusBundle):
                 
                 if row_i % 10000 == 0:
                     self.ptick('.')
-               
+                    
                 if row_i % 100000 == 0:
                     self.ptick(str(row_i/100000))
                     self.ptick("E5 ")
                     self.ptick(str(int( row_i/(time.clock()-t_start))))
                     self.ptick(' ')
                     self.ptick(str(len(value_set)))   
-                    break
+                    
 
                 values=[ f(row) for f in processors ]
                
@@ -420,9 +445,11 @@ class Bundle(UsCensusBundle):
             self.log("Install in library: "+partition.name)
             dest = self.library.put(partition)
             self.log("Installed in library: "+dest)
-            partition.database.delete()
+            
         
             if table.name != 'record_code':
+                
+                partition.database.delete()
                 #
                 # Update the record_codes table to make the logrecno and stusab
                 # keys to the new table rows. 
@@ -449,18 +476,14 @@ class Bundle(UsCensusBundle):
                 db.dbapi_close()
                 self.log('Record Code Write {}/s '.format(int( len(value_set)/(time.clock()-t_start+.01))))
 
-
                 # Also install the record code into the library. We will end up doing
                 # this multiple times, bu it will ensure that the library is in a useful
                 # state if the program crashes and has to be restarted. 
 
-                self.log("Install in library: "+rcp.name)
+                self.log("Install record_code in library: "+rcp.name)
                 dest = self.library.put(rcp)
                 self.log("Installed in library: "+dest)
-                rcp.database.delete()
-        
-
-
+               
         return True
 
 import sys
