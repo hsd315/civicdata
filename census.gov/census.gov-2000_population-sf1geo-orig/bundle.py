@@ -22,9 +22,11 @@ class Bundle(UsCensusBundle):
         
         bg = self.config.build
         self.geoheaders_file = self.filesystem.path(bg.geoheaderFile)
+        self.sumlev_file =  self.filesystem.path(bg.summaryLevelsFile)
         
     def prepare(self):
         '''Create the prototype database'''
+        from databundles.orm import Column
   
         #self.clean()
   
@@ -35,6 +37,16 @@ class Bundle(UsCensusBundle):
 
         if not self.schema.table('sf1geo'):
             self.schema.schema_from_file(open(self.geoheaders_file, 'rbU'))
+
+            # Add extra fields to all of the split_tables
+            for table in self.schema.tables:
+                if not table.data.get('split_table', False):
+                    continue;
+            
+                table.add_column('hash',  datatype=Column.DATATYPE_INTEGER,
+                                  uindexes = 'uihash')
+                                
+            
 
         self.database.commit()
         
@@ -90,6 +102,22 @@ class Bundle(UsCensusBundle):
             self.partitions.new_partition(pid)
         else:
             self.log("Already created partition, skipping "+table.name)
+            
+        # Create summary level partitions
+        if False:
+            sumlevs = yaml.load(file(self.sumlev_file, 'r')) 
+            for table in self.schema.tables:
+                if table.name in ['sf1geo']:
+                    continue;
+                for sumlev in sumlevs:
+                    pid = PartitionIdentity(self.identity, table=table.name, grain=sumlev)
+                    if not self.partitions.find(pid):
+                        self.log("Create sumlev partition for "+pid.name)
+                        self.partitions.new_partition(pid)
+                        #p.create_with_tables(table.name)
+                    else:
+                        self.log("Already created sumlev , skipping "+pid.name)
+        
             
             
         self.database.commit() 
@@ -229,8 +257,6 @@ class Bundle(UsCensusBundle):
                 continue; # Only take state file; ignore national split files
             
             name = cdb.attach(geo.database)
-            
-            sf1t = geo.schema.table('sf1geo')
         
             cdb.copy_from_attached(('sf1geo','sf1geo'), 
                                    name=name,
@@ -241,7 +267,7 @@ class Bundle(UsCensusBundle):
         dest = self.library.put(combined)
         self.log("Installed combined file in library: "+dest)
 
-    def split_geo_sqlite(self):
+    def split_geo_sumlev(self):
         '''Split the geo file using attachment and table copy'''         
         from databundles.partition import PartitionIdentity
 
@@ -256,83 +282,125 @@ class Bundle(UsCensusBundle):
                  .partition(any=True) # Get partitions, not just root bundle. 
             )
 
-        i = 0
+        pid = PartitionIdentity(self.identity, table='sf1geo')
+        p = self.partitions.find(pid) # Identity needs to have id_
+        combined = self.library.get(p.identity)
+
         
-        skips = set()
-        
-        for table in self.schema.tables:
-            p = self.partitions.find(
-                        PartitionIdentity(self.identity, table=table.id_))
-        
-            if self.library.get(p):
-                skips.add(table)
-            
-        if len(skips) == len(self.schema.tables):
-            self.log("All Split tables alreay in library, skipping" )
-            return True
-
-    
-        for result in q.all:   
-
-            i += 1
-
-            geo = l.get(result.Partition)
-            self.log(str(i)+" --------- "+geo.database.path);
-            
-            if not geo.identity.space:
-                continue; # Only take state file; ignore the ones this routine produces
-            
-            # Doing this in the loop means not having to do a seperate query
-    
-            # outsize of the loop
-            geo_col_names = [ c.name for c in geo.schema.table('sf1geo').columns ]
-
-            for table in self.schema.tables:
-                
-              
-                if table.name in ['sf1geo'] or table in skips:
+        for row in combined.database.connection.execute("SELECT * FROM sf1geo"):
+            for partition in self.partitions.all:
+                if partition.identity.grain is None:
                     continue
-
-                p = self.partitions.find(
-                        PartitionIdentity(self.identity, table=table.id_))
                 
-                pdb = p.database
-                
-                if not pdb.exists():
-                    pdb.create();
-  
-                self.log("Loading {} into {} ".format(geo.identity.name, p.identity.name) )
-                
-                pdb.create_table(table.name)
-                attach_name = pdb.attach(geo.database)
-                map_ = {}
-                for c in table.columns:
-                    if c.name in geo_col_names:
-                        map_["TRIM({})".format(c.name)] = c.name
-                
-                if map_.items():
-                    pdb.copy_from_attached(('sf1geo', table.name),
-                                            columns=map_, name=attach_name,
-                                            on_conflict = 'IGNORE')
-                
-                pdb.detach(attach_name)
-        #
-        # Now that all of the bundles are done, install them in the library. 
-
-        for table in self.schema.tables:
+                db = partition.database
+ 
+    def get_processors(self, table):
+        from databundles.transform import PassthroughTransform
         
-            if table.name in ['sf1geo']:
-                continue  
-            
-            pid = PartitionIdentity(self.identity, table=table.id_)
-            p = self.partitions.find(pid)
-            
-            self.log("Install in library: "+p.name)
-            dest = self.library.put(p)
-            self.log("Installed in library: "+dest)
-            p.database.delete()
-  
+        source_cols = ([c.name for c in table.columns 
+                            if not ( c.name.endswith('_id') and not c.is_primary_key)
+                            and c.name != 'hash'
+                           ])
+        
+        columns = [c for c in table.columns if c.name in source_cols  ]  
+        processors = [PassthroughTransform(c) for c in columns]
+        processors[0] = lambda row : None # Primary key column
+        
+        if table.name != 'record_code':
+            print table.column
+            columns += [ table.column('hash')]
+            processors += [lambda row : None]
+ 
+        return columns, processors
+ 
+    def get_split_partition(self, table):
+        from databundles.partition import PartitionIdentity
+        pid = PartitionIdentity(self.identity, table=table.id_)
+        partition = self.partitions.find(pid) # Find puts id_ into partition.identity
+        
+        self.log("Processing table {} in partition {}  ".format(table.name, partition.identity.name))
+        
+        if not partition.database.exists():
+            partition.create_with_tables(table.name)
+         
+        return partition
+
     def split_geo(self):
+        '''Split the geo file into seperate tables'''
+        from databundles.database import  insert_or_ignore
+        from databundles.partition import PartitionIdentity
+        
+        import time
+        import hashlib
+    
+        pid = PartitionIdentity(self.identity, table='sf1geo')
+        p = self.partitions.find(pid) # Identity needs to have id_
+        combined = self.library.get(p.identity)
+   
+        if not combined:
+            raise Exception("Didn't get Combined bundle from library "+pid.path)
+      
+        for table in self.schema.tables:
+
+            if not table.data.get('split_table', False) and table.name != 'record_code':
+                continue
+
+            # Get all of the source columns, but exclude the foriegn keys
+            columns, processors = self.get_processors(table)
+ 
+            self.log(" ---- " + table.name)
+            
+            def row_gen():
+                row_i = 0
+                
+                # The hashes set keeps track of which hashes we've seen, so we don't
+                # send everything to the database. 
+                hashes = set()
+                
+                lt_start = time.clock()
+                for row in combined.database.connection.execute("SELECT * FROM sf1geo WHERE sumlev = 91"):
+                
+                    row_i += 1
+                
+                    if row_i % 10000 == 0:
+                        self.ptick('.')
+                    
+                    if row_i % 500000 == 0:
+                        self.ptick(str(float(row_i) / 1000000))
+                        self.ptick(' ')
+                        self.ptick(str(int( row_i/(time.clock()-lt_start+.01))) + "/s")
+                      
+                    values=[ f(row) for f in processors ]
+                   
+                    m = hashlib.md5()
+                    for x in values[1:]:  m.update(str(x))   
+                    hash = int(m.hexdigest()[:8], 16) # First 8 hex digits = 32 bit
+             
+                    values[-1] = hash
+                    
+                    if hash not in hashes:
+                        hashes.add(hash)
+                        yield values
+
+            ins_gen = row_gen()
+
+            ins = insert_or_ignore(table.name, columns)
+          
+            partition = self.get_split_partition(table)
+          
+            db = partition.database
+            self.log('Write to db: '+db.path)
+          
+            db.dbapi_cursor.executemany(ins, ins_gen)
+            db.dbapi_connection.commit()
+            db.dbapi_close()
+
+            self.log("Install in library: "+partition.name)
+            dest = self.library.put(partition)
+            self.log("Installed in library: "+dest)
+            
+  
+    def split_geo_hash(self):
         '''Split the geo file into seperate tables'''
         from databundles.database import  insert_or_ignore
         from databundles.partition import PartitionIdentity
