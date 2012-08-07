@@ -247,14 +247,14 @@ class Bundle(UsCensusBundle):
 
         row_i = 0
         for result in q.all:   
- 
             row_i += 1
  
             geo = l.get(result.Partition)
-            self.log(str(row_i)+" Loading: "+geo.database.path)
 
             if not geo.identity.space:
                 continue; # Only take state file; ignore national split files
+            
+            self.log(str(row_i)+" Loading: "+geo.database.path)
             
             name = cdb.attach(geo.database)
         
@@ -307,7 +307,6 @@ class Bundle(UsCensusBundle):
         processors[0] = lambda row : None # Primary key column
         
         if table.name != 'record_code':
-            print table.column
             columns += [ table.column('hash')]
             processors += [lambda row : None]
  
@@ -327,11 +326,9 @@ class Bundle(UsCensusBundle):
 
     def split_geo(self):
         '''Split the geo file into seperate tables'''
+        import time
         from databundles.database import  insert_or_ignore
         from databundles.partition import PartitionIdentity
-        
-        import time
-        import hashlib
     
         pid = PartitionIdentity(self.identity, table='sf1geo')
         p = self.partitions.find(pid) # Identity needs to have id_
@@ -347,60 +344,62 @@ class Bundle(UsCensusBundle):
 
             # Get all of the source columns, but exclude the foriegn keys
             columns, processors = self.get_processors(table)
- 
-            self.log(" ---- " + table.name)
-            
-            def row_gen():
-                row_i = 0
-                
-                # The hashes set keeps track of which hashes we've seen, so we don't
-                # send everything to the database. 
-                hashes = set()
-                
-                lt_start = time.clock()
-                for row in combined.database.connection.execute("SELECT * FROM sf1geo"):
-                
-                    row_i += 1
-                
-                    if row_i % 10000 == 0:
-                        self.ptick(str(int( row_i/(time.clock()-lt_start+.01))/1000))
-                    
-                    if row_i % 500000 == 0:
-                        self.ptick(str(float(row_i) / 1000000))
-                        self.ptick(' ')
-                        self.ptick(str(int( row_i/(time.clock()-lt_start+.01))) + "/s")
-                      
-                    values=[ f(row) for f in processors ]
-                   
-                    m = hashlib.md5()
-                    for x in values[1:]:  m.update(str(x))   
-                    hash = int(m.hexdigest()[:8], 16) # First 8 hex digits = 32 bit
              
-                    values[-1] = hash
-                    
-                    if hash not in hashes:
-                        hashes.add(hash)
-                        yield values
-
-            ins_gen = row_gen()
-
+            ins_gen = self.row_gen(combined, processors)
             ins = insert_or_ignore(table.name, columns)
           
             partition = self.get_split_partition(table)
           
             db = partition.database
-            self.log(' ')
+            
+            self.log(" ---- " + table.name)
             self.log('Write to db: '+db.path)
-          
+           
             db.dbapi_cursor.executemany(ins, ins_gen)
             db.dbapi_connection.commit()
             db.dbapi_close()
-
+           
             self.log("Install in library: "+partition.name)
             dest = self.library.put(partition)
             self.log("Installed in library: "+dest)
+        
+    def row_gen(self, combined, processors):
+        import hashlib
+        import time
+        row_i = 0
+        
+        # The hashes set keeps track of which hashes we've seen, so we don't
+        # send everything to the database. 
+        hashes = set()
+        t_start = time.clock()
+        for row in combined.database.connection.execute("SELECT * FROM sf1geo where sumlev = 91"):
+        
+            row_i += 1
+        
+            if row_i % 25000 == 0:
+                # Prints a number representing the processing rate, 
+                # in 1,000 records per sec.
+                self.ptick(' ')
+                self.ptick(str(int( row_i/(time.clock()-t_start)/1000)))
             
+            if row_i % 500000 == 0:
+                self.ptick(' ')
+                self.ptick(str(float(row_i) / 1000000)+'M')
+    
+            values=[ f(row) for f in processors ]
+           
+            m = hashlib.md5()
+            for x in values[1:]:  m.update(str(x))   
+            hash = int(m.hexdigest()[:15], 16) # First 8 hex digits = 32 bit @ReservedAssignment
+     
+            values[-1] = hash
+            
+            if hash not in hashes:
+                hashes.add(hash)
+                yield values    
   
+        self.ptick("\n")
+            
     def split_geo_hash(self):
         '''Split the geo file into seperate tables'''
         from databundles.database import  insert_or_ignore
