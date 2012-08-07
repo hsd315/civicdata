@@ -230,7 +230,6 @@ class Bundle(UsCensusBundle):
         combined.database.delete()
         combined.create_with_tables(combined.table.name)
 
-
         #
         # Get the original geo files from the library
         #
@@ -247,13 +246,13 @@ class Bundle(UsCensusBundle):
 
         row_i = 0
         for result in q.all:   
-            row_i += 1
- 
+
             geo = l.get(result.Partition)
 
             if not geo.identity.space:
                 continue; # Only take state file; ignore national split files
             
+            row_i += 1
             self.log(str(row_i)+" Loading: "+geo.database.path)
             
             name = cdb.attach(geo.database)
