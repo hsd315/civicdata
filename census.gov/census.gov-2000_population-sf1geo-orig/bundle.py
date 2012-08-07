@@ -389,6 +389,7 @@ class Bundle(UsCensusBundle):
             partition = self.get_split_partition(table)
           
             db = partition.database
+            self.log(' ')
             self.log('Write to db: '+db.path)
           
             db.dbapi_cursor.executemany(ins, ins_gen)
