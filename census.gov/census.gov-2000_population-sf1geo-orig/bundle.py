@@ -358,12 +358,12 @@ class Bundle(UsCensusBundle):
                 hashes = set()
                 
                 lt_start = time.clock()
-                for row in combined.database.connection.execute("SELECT * FROM sf1geo WHERE sumlev = 91"):
+                for row in combined.database.connection.execute("SELECT * FROM sf1geo"):
                 
                     row_i += 1
                 
                     if row_i % 10000 == 0:
-                        self.ptick('.')
+                        self.ptick(str(int( row_i/(time.clock()-lt_start+.01))/1000))
                     
                     if row_i % 500000 == 0:
                         self.ptick(str(float(row_i) / 1000000))
