@@ -245,7 +245,7 @@ class Bundle(BuildBundle):
         return processor_set
     
     def build_get_fact_table_processors(self):
-        '''Generate a complete set of e processors for all of the fact tables'''
+        '''Generate a complete set of processors for all of the fact tables'''
         from databundles.transform import PassthroughTransform, CensusTransform
         
         processor_set = {}
@@ -321,9 +321,7 @@ class Bundle(BuildBundle):
         
         for table in self.schema.tables:
             pass
-            
-        
-    
+
     def get_geo_record_id(self, table_id, hash):
         '''Return the primary key Id for a table, givn the hash of the values'''
         pass
@@ -372,24 +370,14 @@ class Bundle(BuildBundle):
             
         #print ins
             
-    def build_state(self):
-        pass
-       
-    def track_sum_levels(self, summary_levels, geo, geo_ids):
+  
+
+    def run_state(self, state):
         
-        sl = geo['sumlev']
-        if sl not in summary_levels:
-            summary_levels[sl] = {}
-            
-        
-            
-     
-    def build(self):
-        '''Create data  partitions. 
-        First, creates all of the state segments, one partition per segment per 
-        state. Then creates a partition for each of the geo files. '''
         import time
         from databundles.transform import PassthroughTransform, CensusTransform
+        
+        row_i = 0
         
         header, regex, regex_str = self.schema.table('sf1geo').get_fixed_regex()
    
@@ -398,135 +386,69 @@ class Bundle(BuildBundle):
         table_processors = self.build_get_split_geo_processors()
 
         geo_partitions = self.geo_partition_map()
-
-        row_i = 0
-     
-        for state in urls['geos'].keys():
-            for state, logrecno, geo, segments in self.generate_rows(state, urls ):
-              
-                if row_i == 0:
-                    t_start = time.time()
-              
-                if row_i % 1000 == 0:
-                    # Prints a number representing the processing rate, 
-                    # in 1,000 records per sec.
-                    
-                    self.log(state+" "+str(int( row_i/(time.time()-t_start)))+" "+str(row_i)+" "+str(int((time.time()-t_start)/60)))
-                    
-                row_i += 1
-                
-                geo_ids = {}
-                for table_id, cp in table_processors.items():
-                    table, columns, processors = cp
-
-                    values=[ f(geo) for f in processors ]
-                    values[-1] = self.row_hash(values)
-                    
-                    partition = geo_partitions[table_id]
-                    geo_ids[table.name] = self.write_geo_row(partition, table, columns, values)
-                     
-
-                 
-                for seg_number, segment in segments.items():
-                    for table_id, range in range_map[seg_number].iteritems():
-                        values = ([geo['stusab'], geo['sumlev'], geo['geocomp'], geo['chariter'], geo['cifsn'], geo['logrecno'] ] +
-                                       segment[range['start']:range['source_col']] )
-                        
-                        self.write_fact_row(self.get_table_by_table_id(table_id), geo,  values)
-                        
-
-
-        return True
-
-    def load_table(self,source, range_map):
-        '''For a set of partitions and a path to a zip file, break the
-        data in the zip file into seperate partition files. ''' 
-        import re,  copy, os, csv
-        from sqlalchemy.schema import CreateTable
-        from databundles.partition import PartitionIdentity
-        import csv
-        import petl
-      
-        if self.filesystem.get_url(source):
-            self.log("Already processed, skipping: "+source)
-            return
-         
-        state, number = re.match('.*/(\w{2})(\d{5}).uf1', source).groups()
-        number = int(number)
-         
-        self.log("Loading tables from {}, segment {}, state {}"
-                 .format(source,number, state))
         
-        import time
-        start_time = time.clock()
-        count = 0
+        for state, logrecno, geo, segments in self.generate_rows(state, urls ):
+             
+               if row_i == 0:
+                   t_start = time.time()
+             
+               if row_i % 1000 == 0:
+                   # Prints a number representing the processing rate, 
+                   # in 1,000 records per sec.
+                   
+                   self.log(state+" "+str(int( row_i/(time.time()-t_start)))+" "+str(row_i)+" "+str(int((time.time()-t_start)/60)))
+                   
+               row_i += 1
+               
+               geo_ids = {}
+               for table_id, cp in table_processors.items():
+                   table, columns, processors = cp
         
-        # Now, for each row, we can use the range map to take slices of columns
-        # and write those to csv file partitions. 
-        rows = 0;
-        data = {}
-        with self.filesystem.download(source) as zip_file:
-            with self.filesystem.unzip(zip_file) as rf:
-                for row in csv.reader(open(rf, 'rbU') ):            
-                    # Pull off the common fields. 
-                    common = row[:5]
-            
-                    for table_id, range in range_map.iteritems():
-                        partition_row = common + row[range['start']:range['source_col']]
-                        if not table_id in data:
-                            data[table_id] = []
-                            # Duplicate the first row. PETL will strip this one
-                            # off, assuming that it is the header row. 
-                            data[table_id].append(partition_row)
-                            
-                        data[table_id].append(partition_row)
+                   values=[ f(geo) for f in processors ]
+                   values[-1] = self.row_hash(values)
+                   
+                   partition = geo_partitions[table_id]
+                   geo_ids[table.name] = self.write_geo_row(partition, table, columns, values)
+   
+               for seg_number, segment in segments.items():
+                   for table_id, range in range_map[seg_number].iteritems():
+                       values = ([geo['stusab'], geo['sumlev'], geo['geocomp'], geo['chariter'], geo['cifsn'], geo['logrecno'] ] +
+                                      segment[range['start']:range['source_col']] )
                        
-                    rows += 1
-                    
-                    if rows % 10000 == 0:
-                        elapsed = time.clock() - start_time
-                        self.log("{} rows in {} sec: {:.2f} rows per sec "
-                                 .format(rows, elapsed, rows/elapsed)
-                                 )
-                        
-        self.log("Done compiling. Writing files")
+                       self.write_fact_row(self.get_table_by_table_id(table_id), geo,  values)
+                       
      
-        #
-        # Write the CSV files to the database. 
-        #
-        for table_id, range in range_map.iteritems():
+    def build(self):
+        '''Create data  partitions. 
+        First, creates all of the state segments, one partition per segment per 
+        state. Then creates a partition for each of the geo files. '''
+       
+        from multiprocessing import Pool
+
+        self.multi = True
+
+        urls = yaml.load(file(self.urls_file, 'r')) 
+        
+        if self.run_args.multi:
+            p = Pool(int(self.run_args.multi))
             
-            table_name = range['table']
+            p.map(run_state, urls['geos'].keys())
             
-            pid = PartitionIdentity(self.identity, table = table_name, space=state)
-            partition = self.partitions.find(pid)
-            
-            if not partition:
-                from databundles.exceptions import ResultCountError
-                raise ResultCountError("Didn't get partition for "+pid.name)
-            
-            partition.database.delete()
-            partition.database.create()
-            partition.database.create_table(table_name)
-            
-            rows = data[table_id]
-           
-            db_path = partition.database.path
-            self.log("Write {} rows to {}, table {}".format(len(rows),db_path, table_name))
-            petl.appendsqlite3(petl.progress(rows, 200000),db_path, table_name)           
-            
-            dest = self.library.put(partition)
-            self.log("Install in library: "+dest)
-            partition.database.delete()
-            
-        # Will create if does not exist. 
-        self.filesystem.get_or_new_url(source)
-        self.database.close()
-                
+        else:
+            for state in urls['geos'].keys():
+                self.run_state(state)
+
         return True
+
         
 
 import sys
+
+def run_state(state):
+    b = Bundle()
+    
+    b.log("Running State "+state)
+    b.run_state(state)
 
 if __name__ == '__main__':
     import databundles.run
