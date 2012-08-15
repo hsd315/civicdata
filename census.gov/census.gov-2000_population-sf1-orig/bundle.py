@@ -450,7 +450,7 @@ import sys
 
 def run_state(state):
     b = Bundle()
-    b.log("Starting process for {}", state)
+    b.log("Starting process for {}".format(state))
     b.run_state(state)
 
 if __name__ == '__main__':
