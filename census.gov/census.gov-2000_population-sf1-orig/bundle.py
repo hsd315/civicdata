@@ -345,22 +345,20 @@ class Bundle(BuildBundle):
             ins = insert_or_ignore(table.name, columns)
             self._table_iori_cache[table.name] = ins
             
-        #print ins
-    
-        db = partition.database
       
         #self.log('Write {} to {}: '.format(table.name, db.path))
+        db = partition.database
         cur = db.dbapi_cursor
         cur.execute(ins, values)
         lastrowid =  cur.lastrowid
         db.dbapi_connection.commit()
-     
+        
         cur.execute("SELECT {} FROM {} WHERE hash = ?".format(table.name+"_id", table.name), 
                     (values[-1],) )
     
         return  cur.fetchone()
     
-    def write_fact_row(self, table, geo, values):
+    def write_fact_row(self, table, geo, geo_ids, values):
         from databundles.database import  insert_or_ignore
         
         ins = self._table_iori_cache.get(table.name, False)
@@ -376,6 +374,7 @@ class Bundle(BuildBundle):
         
         import time
         from databundles.transform import PassthroughTransform, CensusTransform
+        import random
         
         row_i = 0
         
@@ -401,7 +400,11 @@ class Bundle(BuildBundle):
                row_i += 1
                
                geo_ids = {}
-               for table_id, cp in table_processors.items():
+               # Shuffle so multiple processes are less likely to contend for
+               # databases. 
+               tps = [ (table_id, cp) for table_id, cp in table_processors.items()]
+               random.shuffle(tps)
+               for table_id, cp in tps:
                    table, columns, processors = cp
         
                    values=[ f(geo) for f in processors ]
@@ -415,8 +418,9 @@ class Bundle(BuildBundle):
                        values = ([geo['stusab'], geo['sumlev'], geo['geocomp'], geo['chariter'], geo['cifsn'], geo['logrecno'] ] +
                                       segment[range['start']:range['source_col']] )
                        
-                       self.write_fact_row(self.get_table_by_table_id(table_id), geo,  values)
-                       
+                       self.write_fact_row(self.get_table_by_table_id(table_id), geo, geo_ids, values)
+ 
+            
      
     def build(self):
         '''Create data  partitions. 
@@ -446,7 +450,7 @@ import sys
 
 def run_state(state):
     b = Bundle()
-    
+    b.log("Starting process for {}", state)
     b.run_state(state)
 
 if __name__ == '__main__':
