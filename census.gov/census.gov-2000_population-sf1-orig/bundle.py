@@ -7,7 +7,7 @@ Created on Jun 10, 2012
 '''
 import  sourcesupport.uscensus
 from  databundles.bundle import BuildBundle
-
+from databundles.util import lfu_cache
 import os.path  
 import yaml
 
@@ -29,6 +29,9 @@ class Bundle(BuildBundle):
         self.rangemap_file =  self.filesystem.path(bg.rangeMapFile)
         self.urls_file =  self.filesystem.path(bg.urlsFile)
         self.states_file =  self.filesystem.path(bg.statesFile)
+        
+        self._table_id_cache = {}
+        self._table_iori_cache = {}
         
     def scrape_urls(self):
 
@@ -108,8 +111,7 @@ class Bundle(BuildBundle):
         
         self.make_range_map()
 
-    
-        if not self.schema.table('sf1geo'):
+        if not self.schema.table('sf1geo'): # Do this only once for the database
             from databundles.orm import Column
             self.schema.schema_from_file(open(self.geoschema_file, 'rbU'))
     
@@ -153,57 +155,56 @@ class Bundle(BuildBundle):
                  
         return
                      
-    def generate_rows(self):
+    def generate_rows(self, state, urls):
         ''' '''
         import csv
         
         table = self.schema.table('sf1geo')
         header, regex, regex_str = table.get_fixed_regex()
-        urls = yaml.load(file(self.urls_file, 'r')) 
          
-        for state,geo_source in urls['geos'].items():
-              
-            gens = [self.generate_seg_rows(n,source) for n,source in urls['tables'][state].items() ]
+        geo_source = urls['geos'][state]
+      
+        gens = [self.generate_seg_rows(n,source) for n,source in urls['tables'][state].items() ]
+
+        with self.filesystem.download(geo_source) as geo_zip_file:
+            with self.filesystem.unzip(geo_zip_file) as grf:
+                with open(grf, 'rbU') as geofile:
+                    first = True
+                    for line in geofile.readlines():
+                        
+                        m = regex.match(line)
+                         
+                        if not m:
+                            raise ValueError("Failed to match regex on line: "+line) 
     
-            with self.filesystem.download(geo_source) as geo_zip_file:
-                with self.filesystem.unzip(geo_zip_file) as grf:
-                    with open(grf, 'rbU') as geofile:
-                        first = True
-                        for line in geofile.readlines():
-                            
-                            m = regex.match(line)
-                             
-                            if not m:
-                                raise ValueError("Failed to match regex on line: "+line) 
-        
-                            segments = {}
-                            geo = m.groups()
-                            lrn = geo[6]
-                            for g in gens:
-                                try:
-                                    seg_number,  row = g.send(None if first else lrn)
-                                    segments[seg_number] = row
-                                    # The logrecno must match up across all files, except
-                                    # when ( in PCT tables ) there is no entry
-                                    if len(row) > 5 and row[4] != lrn:
-                                        raise Exception("Logrecno mismatch for seg {} : {} != {}"
-                                                        .format(seg_number, row[4],lrn))
-                                except StopIteration:
-                                    # Apparently, the StopIteration exception, raised in
-                                    # a generator function, gets propagated all the way up, 
-                                    # ending all higher level generators. thanks for nuthin. 
-                                    break
-    
-                            yield state,  segments[1][4], dict(zip(header,geo)), segments
-                            first = False
-                            
-                        # Check that there are no extra lines. 
+                        segments = {}
+                        geo = m.groups()
+                        lrn = geo[6]
                         for g in gens:
                             try:
-                                while g.next(): 
-                                    raise Exception("Should not have extra items left")
+                                seg_number,  row = g.send(None if first else lrn)
+                                segments[seg_number] = row
+                                # The logrecno must match up across all files, except
+                                # when ( in PCT tables ) there is no entry
+                                if len(row) > 5 and row[4] != lrn:
+                                    raise Exception("Logrecno mismatch for seg {} : {} != {}"
+                                                    .format(seg_number, row[4],lrn))
                             except StopIteration:
-                                pass
+                                # Apparently, the StopIteration exception, raised in
+                                # a generator function, gets propagated all the way up, 
+                                # ending all higher level generators. thanks for nuthin. 
+                                break
+
+                        yield state,  segments[1][4], dict(zip(header,geo)), segments
+                        first = False
+                        
+                    # Check that there are no extra lines. 
+                    for g in gens:
+                        try:
+                            while g.next(): 
+                                raise Exception("Should not have extra items left")
+                        except StopIteration:
+                            pass
 
         return
         
@@ -216,30 +217,55 @@ class Bundle(BuildBundle):
         
     def build_get_geo_processors(self, table):
         '''Return the processor functions for a table. '''
-        
-        from databundles.transform import PassthroughTransform, CensusTransform
-        
-        source_cols = ([c.name for c in table.columns 
-                            if not ( c.name.endswith('_id') and not c.is_primary_key)
-                            and c.name != 'hash'
-                           ])
-        
-        columns = [c for c in table.columns if c.name in source_cols  ]  
-        processors = [CensusTransform(c) for c in columns]
-        processors[0] = lambda row : None # Primary key column
-        
-        if table.name != 'record_code':
-            columns += [ table.column('hash')]
-            processors += [lambda row : None]
- 
-        return columns, processors
+
                
     def build_get_split_geo_processors(self):
         '''Generate a complete set of geo processors for all of the split tables'''
-            
+        from databundles.transform import PassthroughTransform, CensusTransform
+        
         processor_set = {}
         for table in self.build_split_geo_tables():
-            processor_set[table.id_] = (table,)+self.build_get_geo_processors(table)  
+          
+            source_cols = ([c.name for c in table.columns 
+                                if not ( c.name.endswith('_id') and not c.is_primary_key)
+                                and c.name != 'hash'
+                               ])
+            
+            columns = [c for c in table.columns if c.name in source_cols  ]  
+            processors = [CensusTransform(c) for c in columns]
+            processors[0] = lambda row : None # Primary key column
+            
+            if table.name != 'record_code':
+                columns += [ table.column('hash')]
+                processors += [lambda row : None]
+     
+            processor_set[table.id_] = (table, columns, processors )         
+             
+            
+        return processor_set
+    
+    def build_get_fact_table_processors(self):
+        '''Generate a complete set of e processors for all of the fact tables'''
+        from databundles.transform import PassthroughTransform, CensusTransform
+        
+        processor_set = {}
+        for table in self.build_split_geo_tables():
+          
+            source_cols = ([c.name for c in table.columns 
+                                if not ( c.name.endswith('_id') and not c.is_primary_key)
+                                and c.name != 'hash'
+                               ])
+            
+            columns = [c for c in table.columns if c.name in source_cols  ]  
+            processors = [CensusTransform(c) for c in columns]
+            processors[0] = lambda row : None # Primary key column
+            
+            if table.name != 'record_code':
+                columns += [ table.column('hash')]
+                processors += [lambda row : None]
+     
+            processor_set[table.id_] = (table, columns, processors )         
+             
             
         return processor_set
     
@@ -270,38 +296,94 @@ class Bundle(BuildBundle):
             partition.create_with_tables(table.name)
             
             # Ensure that the first record is the one with all of the null values
-            ins = insert_or_ignore(table.name, [table.columns[0]])
+            vals = [c.default for c in table.columns]
+            vals[-1] = self.row_hash(vals)
+            vals[0] = 0;
+            
+            ins = insert_or_ignore(table.name, table.columns)
             db = partition.database
-            db.dbapi_cursor.execute(ins, [None])
+            db.dbapi_cursor.execute(ins, vals)
             db.dbapi_connection.commit()
             db.dbapi_close()
             
         return partition
       
     def geo_partition_map(self):
-        '''Create a map from table it to partition for the geo split table'''
+        '''Create a map from table id to partition for the geo split table'''
         partitions = {}
         for table in self.build_split_geo_tables():
             partitions[table.id_] = self.split_geo_get_partition(table)
             
         return partitions
     
+    def insertion_map(self):
+        from databundles.database import  insert_or_ignore
+        
+        for table in self.schema.tables:
+            pass
+            
+        
     
     def get_geo_record_id(self, table_id, hash):
         '''Return the primary key Id for a table, givn the hash of the values'''
         pass
     
-    
+
     def get_table_by_table_id(self,table_id):  
         '''Get the table definition from the schema'''
-        pass
+        t = self._table_id_cache.get(table_id, False)
         
-    def write_geo_row(self, table, values):
-        pass
+        if not t:
+            t = self.schema.table(table_id)
+            self._table_id_cache[table_id] = t
+
+        return t
+        
+    def write_geo_row(self, partition, table, columns,values):
+        from databundles.database import  insert_or_ignore
+        
+        ins = self._table_iori_cache.get(table.name, False)
+        if not ins:
+            ins = insert_or_ignore(table.name, columns)
+            self._table_iori_cache[table.name] = ins
+            
+        #print ins
     
-    def write_fact_row(self, table_id, geo, values):
+        db = partition.database
+      
+        #self.log('Write {} to {}: '.format(table.name, db.path))
+        cur = db.dbapi_cursor
+        cur.execute(ins, values)
+        lastrowid =  cur.lastrowid
+        db.dbapi_connection.commit()
+     
+        cur.execute("SELECT {} FROM {} WHERE hash = ?".format(table.name+"_id", table.name), 
+                    (values[-1],) )
+    
+        return  cur.fetchone()
+    
+    def write_fact_row(self, table, geo, values):
+        from databundles.database import  insert_or_ignore
+        
+        ins = self._table_iori_cache.get(table.name, False)
+        if not ins:
+            ins = insert_or_ignore(table.name, table.columns)
+            self._table_iori_cache[table.name] = ins
+            
+        #print ins
+            
+    def build_state(self):
         pass
-             
+       
+    def track_sum_levels(self, summary_levels, geo, geo_ids):
+        
+        sl = geo['sumlev']
+        if sl not in summary_levels:
+            summary_levels[sl] = {}
+            
+        
+            
+     
     def build(self):
         '''Create data  partitions. 
         First, creates all of the state segments, one partition per segment per 
@@ -312,39 +394,47 @@ class Bundle(BuildBundle):
         header, regex, regex_str = self.schema.table('sf1geo').get_fixed_regex()
    
         range_map = yaml.load(file(self.rangemap_file, 'r')) 
-   
+        urls = yaml.load(file(self.urls_file, 'r')) 
         table_processors = self.build_get_split_geo_processors()
 
         geo_partitions = self.geo_partition_map()
 
         row_i = 0
-        t_start = time.time()
-        for state, logrecno, geo, segments in self.generate_rows():
-          
-            for table_id, cp in table_processors.items():
-                table, columns, processors = cp
- 
-                
-                values=[ f(geo) for f in processors ]
-                values[-1] = self.row_hash(values)
-                
-                partition = geo_partitions[table_id]
-                self.write_geo_row(table, values)
-               
-            
-            for seg_number, segment in segments.items():
-                for table_id, range in range_map[seg_number].iteritems():
-                    values = ([geo['stusab'], geo['sumlev'], geo['geocomp'], geo['chariter'], geo['cifsn'], geo['logrecno'] ] +
-                                   segment[range['start']:range['source_col']] )
-                    self.write_fact_row(table_id, geo,  values)
+     
+        for state in urls['geos'].keys():
+            for state, logrecno, geo, segments in self.generate_rows(state, urls ):
+              
+                if row_i == 0:
+                    t_start = time.time()
+              
+                if row_i % 1000 == 0:
+                    # Prints a number representing the processing rate, 
+                    # in 1,000 records per sec.
                     
-            if row_i % 1000 == 0:
-                # Prints a number representing the processing rate, 
-                # in 1,000 records per sec.
+                    self.log(state+" "+str(int( row_i/(time.time()-t_start)))+" "+str(row_i)+" "+str(int((time.time()-t_start)/60)))
+                    
+                row_i += 1
                 
-                self.log(str(int( row_i/(time.time()-t_start)))+" "+str(row_i)+" "+str(int((time.time()-t_start)/60)))
+                geo_ids = {}
+                for table_id, cp in table_processors.items():
+                    table, columns, processors = cp
 
-            row_i += 1
+                    values=[ f(geo) for f in processors ]
+                    values[-1] = self.row_hash(values)
+                    
+                    partition = geo_partitions[table_id]
+                    geo_ids[table.name] = self.write_geo_row(partition, table, columns, values)
+                     
+
+                 
+                for seg_number, segment in segments.items():
+                    for table_id, range in range_map[seg_number].iteritems():
+                        values = ([geo['stusab'], geo['sumlev'], geo['geocomp'], geo['chariter'], geo['cifsn'], geo['logrecno'] ] +
+                                       segment[range['start']:range['source_col']] )
+                        
+                        self.write_fact_row(self.get_table_by_table_id(table_id), geo,  values)
+                        
+
 
         return True
 
