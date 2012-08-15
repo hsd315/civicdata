@@ -11,6 +11,7 @@ from  databundles.bundle import BuildBundle
 import os.path  
 import yaml
 
+
 class Bundle(BuildBundle):
     '''
     Bundle code for US 2000 Census, Summary File 1
@@ -77,6 +78,20 @@ class Bundle(BuildBundle):
        sourcesupport.uscensus.generate_table_schema(self.headers_file, self.schema,  
                                                     self.log, self.ptick)
 
+    def generate_partitions(self):
+        from databundles.partition import PartitionIdentity
+        #
+        # Geo split files
+        for table in self.build_split_geo_tables():
+            pid = PartitionIdentity(self.identity, table=table.name)
+            partition = self.partitions.find(pid) # Find puts id_ into partition.identity
+            
+            if not partition:
+                self.log("Create partition for "+table.name)
+                partition = self.partitions.new_partition(pid)
+            else:
+                self.log("Already created partition, skipping "+table.name)
+
     def prepare(self):
         '''Create the prototype database'''
         from  databundles.database import Database
@@ -86,6 +101,7 @@ class Bundle(BuildBundle):
             self.database.create()
 
         self.scrape_urls()
+        
         self.make_seg_map()
         
         self.generate_schema()
@@ -94,7 +110,7 @@ class Bundle(BuildBundle):
 
     
         if not self.schema.table('sf1geo'):
-            import  schema.Column
+            from databundles.orm import Column
             self.schema.schema_from_file(open(self.geoschema_file, 'rbU'))
     
             # Add extra fields to all of the split_tables
@@ -104,6 +120,17 @@ class Bundle(BuildBundle):
             
                 table.add_column('hash',  datatype=Column.DATATYPE_INTEGER,
                                   uindexes = 'uihash')
+        
+        self.generate_partitions()
+        
+        # First install the bundle main database into the library
+        # so all of the tables will be there for installing the
+        # partitions. 
+        self.log("Install bundle")
+        if self.library.get(self.identity.id_):
+            self.log("Found in bundle library, skipping. ")
+        else:
+            self.library.put(self)
         
         return True
 
@@ -134,7 +161,6 @@ class Bundle(BuildBundle):
         header, regex, regex_str = table.get_fixed_regex()
         urls = yaml.load(file(self.urls_file, 'r')) 
          
-         
         for state,geo_source in urls['geos'].items():
               
             gens = [self.generate_seg_rows(n,source) for n,source in urls['tables'][state].items() ]
@@ -150,13 +176,13 @@ class Bundle(BuildBundle):
                             if not m:
                                 raise ValueError("Failed to match regex on line: "+line) 
         
-                            out = {}
-                            out['geo'] = dict(zip(header,m.groups()))
-                            lrn = out['geo']['logrecno']
+                            segments = {}
+                            geo = m.groups()
+                            lrn = geo[6]
                             for g in gens:
                                 try:
                                     seg_number,  row = g.send(None if first else lrn)
-                                    out[seg_number] = row
+                                    segments[seg_number] = row
                                     # The logrecno must match up across all files, except
                                     # when ( in PCT tables ) there is no entry
                                     if len(row) > 5 and row[4] != lrn:
@@ -168,7 +194,7 @@ class Bundle(BuildBundle):
                                     # ending all higher level generators. thanks for nuthin. 
                                     break
     
-                            yield state, out[1][4], out
+                            yield state,  segments[1][4], dict(zip(header,geo)), segments
                             first = False
                             
                         # Check that there are no extra lines. 
@@ -180,33 +206,146 @@ class Bundle(BuildBundle):
                                 pass
 
         return
-                                
+        
+    def build_split_geo_tables(self):
+        
+        for table in self.schema.tables:
+            
+            if table.data.get('split_table', '') == 'A':
+                yield table
+        
+    def build_get_geo_processors(self, table):
+        '''Return the processor functions for a table. '''
+        
+        from databundles.transform import PassthroughTransform, CensusTransform
+        
+        source_cols = ([c.name for c in table.columns 
+                            if not ( c.name.endswith('_id') and not c.is_primary_key)
+                            and c.name != 'hash'
+                           ])
+        
+        columns = [c for c in table.columns if c.name in source_cols  ]  
+        processors = [CensusTransform(c) for c in columns]
+        processors[0] = lambda row : None # Primary key column
+        
+        if table.name != 'record_code':
+            columns += [ table.column('hash')]
+            processors += [lambda row : None]
+ 
+        return columns, processors
+               
+    def build_get_split_geo_processors(self):
+        '''Generate a complete set of geo processors for all of the split tables'''
+            
+        processor_set = {}
+        for table in self.build_split_geo_tables():
+            processor_set[table.id_] = (table,)+self.build_get_geo_processors(table)  
+            
+        return processor_set
+    
+    def row_hash(self, values):
+        '''Calculate a hash from a database row, for geo split tables '''  
+        import hashlib
+        
+        m = hashlib.md5()
+        for x in values[1:]:  # The first record is the primary key
+            m.update(str(x))   
+        hash = int(m.hexdigest()[:15], 16) # First 8 hex digits = 32 bit @ReservedAssignment
+     
+        return hash
+          
+    def split_geo_get_partition(self, table):
+        '''Called in geo_partition_map to fetch, and create, the partition for a
+        table ''' 
+        from databundles.partition import PartitionIdentity
+        from databundles.database import  insert_or_ignore
+        
+        pid = PartitionIdentity(self.identity, table=table.name)
+        partition = self.partitions.find(pid) # Find puts id_ into partition.identity
+        
+        if not partition:
+            raise Exception("Failed to get partition: "+str(pid.name))
+        
+        if not partition.database.exists():
+            partition.create_with_tables(table.name)
+            
+            # Ensure that the first record is the one with all of the null values
+            ins = insert_or_ignore(table.name, [table.columns[0]])
+            db = partition.database
+            db.dbapi_cursor.execute(ins, [None])
+            db.dbapi_connection.commit()
+            db.dbapi_close()
+            
+        return partition
+      
+    def geo_partition_map(self):
+        '''Create a map from table it to partition for the geo split table'''
+        partitions = {}
+        for table in self.build_split_geo_tables():
+            partitions[table.id_] = self.split_geo_get_partition(table)
+            
+        return partitions
+    
+    
+    def get_geo_record_id(self, table_id, hash):
+        '''Return the primary key Id for a table, givn the hash of the values'''
+        pass
+    
+    
+    def get_table_by_table_id(self,table_id):  
+        '''Get the table definition from the schema'''
+        pass
+        
+    def write_geo_row(self, table, values):
+        pass
+    
+    def write_fact_row(self, table_id, geo, values):
+        pass
+             
     def build(self):
         '''Create data  partitions. 
         First, creates all of the state segments, one partition per segment per 
         state. Then creates a partition for each of the geo files. '''
+        import time
+        from databundles.transform import PassthroughTransform, CensusTransform
         
-        import pprint
+        header, regex, regex_str = self.schema.table('sf1geo').get_fixed_regex()
    
-        for state, logrecno, segments in self.generate_rows():
-            print state, logrecno, segments[12]
+        range_map = yaml.load(file(self.rangemap_file, 'r')) 
+   
+        table_processors = self.build_get_split_geo_processors()
+
+        geo_partitions = self.geo_partition_map()
+
+        row_i = 0
+        t_start = time.time()
+        for state, logrecno, geo, segments in self.generate_rows():
+          
+            for table_id, cp in table_processors.items():
+                table, columns, processors = cp
  
-        return True
- 
-        urls = yaml.load(file(self.urls_file, 'r')) 
-        range_map = yaml.load(file(self.rangemap_file, 'r'))   
-  
-        # Install the main bundle first to get the schem in place in the 
-        # library, so subsequent partition installations have something to 
-        # refer to
-        self.log("Put main bundle to Database")
-        self.library.put(self)
-        self.log("Get started building")
-        
-        for state,segments in urls['tables'].items():
-            for seg_number,source in segments.items():  
-                self.load_table(source, range_map[state][seg_number])
-      
+                
+                values=[ f(geo) for f in processors ]
+                values[-1] = self.row_hash(values)
+                
+                partition = geo_partitions[table_id]
+                self.write_geo_row(table, values)
+               
+            
+            for seg_number, segment in segments.items():
+                for table_id, range in range_map[seg_number].iteritems():
+                    values = ([geo['stusab'], geo['sumlev'], geo['geocomp'], geo['chariter'], geo['cifsn'], geo['logrecno'] ] +
+                                   segment[range['start']:range['source_col']] )
+                    self.write_fact_row(table_id, geo,  values)
+                    
+            if row_i % 1000 == 0:
+                # Prints a number representing the processing rate, 
+                # in 1,000 records per sec.
+                
+                self.log(str(int( row_i/(time.time()-t_start)))+" "+str(row_i)+" "+str(int((time.time()-t_start)/60)))
+
+            row_i += 1
+
         return True
 
     def load_table(self,source, range_map):

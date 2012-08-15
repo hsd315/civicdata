@@ -324,25 +324,6 @@ class Bundle(UsCensusBundle):
         dest = self.library.put(combined)
         self.log("Installed combined file in library: "+dest)
 
- 
-    def split_geo_get_processors(self, table):
-        from databundles.transform import PassthroughTransform
-        
-        source_cols = ([c.name for c in table.columns 
-                            if not ( c.name.endswith('_id') and not c.is_primary_key)
-                            and c.name != 'hash'
-                           ])
-        
-        columns = [c for c in table.columns if c.name in source_cols  ]  
-        processors = [PassthroughTransform(c) for c in columns]
-        processors[0] = lambda row : None # Primary key column
-        
-        if table.name != 'record_code':
-            columns += [ table.column('hash')]
-            processors += [lambda row : None]
- 
-        return columns, processors
- 
 
     
     def split_geo_row_gen(self, combined, processors):
@@ -413,12 +394,7 @@ class Bundle(UsCensusBundle):
          
         return partition
 
-    def split_geo_tables(self):
-        
-        for table in self.schema.tables:
-            
-            if table.data.get('split_table', '') == 'A':
-                yield table
+
     
 
     def split_geo(self):
