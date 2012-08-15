@@ -400,6 +400,9 @@ class Bundle(BuildBundle):
                    
                row_i += 1
                
+               if row_i < 40000:
+                   continue
+               
                geo_ids = {}
                for table_id, cp in table_processors.items():
                    table, columns, processors = cp
@@ -447,7 +450,6 @@ import sys
 def run_state(state):
     b = Bundle()
     
-    b.log("Running State "+state)
     b.run_state(state)
 
 if __name__ == '__main__':
