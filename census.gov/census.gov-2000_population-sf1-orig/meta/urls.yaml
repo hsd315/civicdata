@@ -1,7 +1,56 @@
 geos:
-    ct: http://www2.census.gov/census_2000/datasets/Summary_File_1/Connecticut/ctgeo_uf1.zip
-    in: http://www2.census.gov/census_2000/datasets/Summary_File_1/Indiana/ingeo_uf1.zip
+    ak: http://www2.census.gov/census_2000/datasets/Summary_File_1/Alaska/akgeo_uf1.zip
+    al: http://www2.census.gov/census_2000/datasets/Summary_File_1/Alabama/algeo_uf1.zip
     ar: http://www2.census.gov/census_2000/datasets/Summary_File_1/Arkansas/argeo_uf1.zip
+    az: http://www2.census.gov/census_2000/datasets/Summary_File_1/Arizona/azgeo_uf1.zip
+    ca: http://www2.census.gov/census_2000/datasets/Summary_File_1/California/cageo_uf1.zip
+    co: http://www2.census.gov/census_2000/datasets/Summary_File_1/Colorado/cogeo_uf1.zip
+    ct: http://www2.census.gov/census_2000/datasets/Summary_File_1/Connecticut/ctgeo_uf1.zip
+    dc: http://www2.census.gov/census_2000/datasets/Summary_File_1/District_of_Columbia/dcgeo_uf1.zip
+    de: http://www2.census.gov/census_2000/datasets/Summary_File_1/Delaware/degeo_uf1.zip
+    fl: http://www2.census.gov/census_2000/datasets/Summary_File_1/Florida/flgeo_uf1.zip
+    ga: http://www2.census.gov/census_2000/datasets/Summary_File_1/Georgia/gageo_uf1.zip
+    hi: http://www2.census.gov/census_2000/datasets/Summary_File_1/Hawaii/higeo_uf1.zip
+    ia: http://www2.census.gov/census_2000/datasets/Summary_File_1/Iowa/iageo_uf1.zip
+    id: http://www2.census.gov/census_2000/datasets/Summary_File_1/Idaho/idgeo_uf1.zip
+    il: http://www2.census.gov/census_2000/datasets/Summary_File_1/Illinois/ilgeo_uf1.zip
+    in: http://www2.census.gov/census_2000/datasets/Summary_File_1/Indiana/ingeo_uf1.zip
+    ks: http://www2.census.gov/census_2000/datasets/Summary_File_1/Kansas/ksgeo_uf1.zip
+    ky: http://www2.census.gov/census_2000/datasets/Summary_File_1/Kentucky/kygeo_uf1.zip
+    la: http://www2.census.gov/census_2000/datasets/Summary_File_1/Louisiana/lageo_uf1.zip
+    ma: http://www2.census.gov/census_2000/datasets/Summary_File_1/Massachusetts/mageo_uf1.zip
+    md: http://www2.census.gov/census_2000/datasets/Summary_File_1/Maryland/mdgeo_uf1.zip
+    me: http://www2.census.gov/census_2000/datasets/Summary_File_1/Maine/megeo_uf1.zip
+    mi: http://www2.census.gov/census_2000/datasets/Summary_File_1/Michigan/migeo_uf1.zip
+    mn: http://www2.census.gov/census_2000/datasets/Summary_File_1/Minnesota/mngeo_uf1.zip
+    mo: http://www2.census.gov/census_2000/datasets/Summary_File_1/Missouri/mogeo_uf1.zip
+    ms: http://www2.census.gov/census_2000/datasets/Summary_File_1/Mississippi/msgeo_uf1.zip
+    mt: http://www2.census.gov/census_2000/datasets/Summary_File_1/Montana/mtgeo_uf1.zip
+    nc: http://www2.census.gov/census_2000/datasets/Summary_File_1/North_Carolina/ncgeo_uf1.zip
+    nd: http://www2.census.gov/census_2000/datasets/Summary_File_1/North_Dakota/ndgeo_uf1.zip
+    ne: http://www2.census.gov/census_2000/datasets/Summary_File_1/Nebraska/negeo_uf1.zip
+    nh: http://www2.census.gov/census_2000/datasets/Summary_File_1/New_Hampshire/nhgeo_uf1.zip
+    nj: http://www2.census.gov/census_2000/datasets/Summary_File_1/New_Jersey/njgeo_uf1.zip
+    nm: http://www2.census.gov/census_2000/datasets/Summary_File_1/New_Mexico/nmgeo_uf1.zip
+    nv: http://www2.census.gov/census_2000/datasets/Summary_File_1/Nevada/nvgeo_uf1.zip
+    ny: http://www2.census.gov/census_2000/datasets/Summary_File_1/New_York/nygeo_uf1.zip
+    oh: http://www2.census.gov/census_2000/datasets/Summary_File_1/Ohio/ohgeo_uf1.zip
+    ok: http://www2.census.gov/census_2000/datasets/Summary_File_1/Oklahoma/okgeo_uf1.zip
+    or: http://www2.census.gov/census_2000/datasets/Summary_File_1/Oregon/orgeo_uf1.zip
+    pa: http://www2.census.gov/census_2000/datasets/Summary_File_1/Pennsylvania/pageo_uf1.zip
+    pr: http://www2.census.gov/census_2000/datasets/Summary_File_1/Puerto_Rico/prgeo_uf1.zip
+    ri: http://www2.census.gov/census_2000/datasets/Summary_File_1/Rhode_Island/rigeo_uf1.zip
+    sc: http://www2.census.gov/census_2000/datasets/Summary_File_1/South_Carolina/scgeo_uf1.zip
+    sd: http://www2.census.gov/census_2000/datasets/Summary_File_1/South_Dakota/sdgeo_uf1.zip
+    tn: http://www2.census.gov/census_2000/datasets/Summary_File_1/Tennessee/tngeo_uf1.zip
+    tx: http://www2.census.gov/census_2000/datasets/Summary_File_1/Texas/txgeo_uf1.zip
+    ut: http://www2.census.gov/census_2000/datasets/Summary_File_1/Utah/utgeo_uf1.zip
+    va: http://www2.census.gov/census_2000/datasets/Summary_File_1/Virginia/vageo_uf1.zip
+    vt: http://www2.census.gov/census_2000/datasets/Summary_File_1/Vermont/vtgeo_uf1.zip
+    wa: http://www2.census.gov/census_2000/datasets/Summary_File_1/Washington/wageo_uf1.zip
+    wi: http://www2.census.gov/census_2000/datasets/Summary_File_1/Wisconsin/wigeo_uf1.zip
+    wv: http://www2.census.gov/census_2000/datasets/Summary_File_1/West_Virginia/wvgeo_uf1.zip
+    wy: http://www2.census.gov/census_2000/datasets/Summary_File_1/Wyoming/wygeo_uf1.zip
 tables:
     ak:
         1: http://www2.census.gov/census_2000/datasets/Summary_File_1/Alaska/ak00001_uf1.zip
