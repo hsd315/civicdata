@@ -422,7 +422,12 @@ class Bundle(BuildBundle):
         db = partition.database
         cur = db.dbapi_cursor
       
-        cur.execute(ins, values)
+        try:
+            cur.execute(ins, values)
+        except Exception as e:
+            self.log("ERROR: Failed to write to {}".format(db.path))
+            raise e
+        
         #db.dbapi_connection.commit() 
 
     def run_state(self, state):
@@ -488,6 +493,23 @@ class Bundle(BuildBundle):
                 partition.database.dbapi_connection.commit() 
                        
 
+    def combine_state(self, state):
+        
+        urls = yaml.load(file(self.urls_file, 'r'))  
+        row_i = 0
+        for state, logrecno, geo, segments in self.generate_rows(state, urls ):  
+            if row_i == 0:
+               t_start = time.time()
+            
+            if row_i % 1000 == 0:
+               # Prints a number representing the processing rate, 
+               # in 1,000 records per sec.
+               
+               self.log(state+" "+str(int( row_i/(time.time()-t_start)))+" "+str(row_i)+" "+str(int((time.time()-t_start)/60)))
+               
+            row_i += 1
+            
+               
     def build(self):
         '''Create data  partitions. 
         First, creates all of the state segments, one partition per segment per 
@@ -507,9 +529,6 @@ class Bundle(BuildBundle):
         else:
             for state in urls['geos'].keys():
                 self.run_state(state)
-                
-                self.log("ONE STATE ONLY")
-                break
 
         return True
 
