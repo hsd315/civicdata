@@ -426,7 +426,6 @@ class Bundle(BuildBundle):
             cur.executemany(ins, values)
         except Exception as e:
             self.log("ERROR: Failed to write to {}".format(db.path))
-            
             raise e
 
     def run_state(self, state):
