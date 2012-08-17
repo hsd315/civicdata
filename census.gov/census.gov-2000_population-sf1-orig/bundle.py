@@ -410,26 +410,25 @@ class Bundle(BuildBundle):
             print values
             return -1
     
-    def write_fact_row(self, partition, table, values):
+    def write_fact_rows(self, partition,  values):
         from databundles.database import  insert_or_ignore
         
-        ins = self._table_iori_cache.get(table.name, False)
-        if not ins:
-            ins = insert_or_ignore(table.name, table.columns)
-            self._table_iori_cache[table.name] = ins
-            
-          
+        table = partition.table
+        
         db = partition.database
         cur = db.dbapi_cursor
       
+        ins = insert_or_ignore(table.name, table.columns)
         try:
-            cur.execute(ins, values)
+            cur.executemany(ins, values)
         except Exception as e:
+            import pprint
+            pprint.pprint(values)
             self.log("ERROR: Failed to write to {}".format(db.path))
+            
             raise e
-        
-        #db.dbapi_connection.commit() 
 
+        
     def run_state(self, state):
         
         import time
@@ -448,6 +447,8 @@ class Bundle(BuildBundle):
         geo_partitions = self.geo_partition_map()
         fact_partitions = self.fact_partition_map()
         
+        row_cache = {table.id_:[] for table in self.schema.tables}
+        
         for state, logrecno, geo, segments in self.generate_rows(state, urls ):
              
                if row_i == 0:
@@ -460,8 +461,7 @@ class Bundle(BuildBundle):
                    self.log(state+" "+str(int( row_i/(time.time()-t_start)))+" "+str(row_i)+" "+str(int((time.time()-t_start)/60)))
                    
                row_i += 1
-               
-               geo_ids = {}
+         
                geo_keys = []
                
                for table_id, cp in geo_processors.items():
@@ -473,27 +473,35 @@ class Bundle(BuildBundle):
                    partition = geo_partitions[table_id]
                    r = self.write_geo_row(partition, table, columns, values)
 
-                   geo_ids[table.name+'_id']  = r     
                    geo_keys.append(r)           
    
                for seg_number, segment in segments.items():
                    for table_id, range in range_map[seg_number].iteritems():
-                       seg = segment[range['start']:range['source_col']]
-                       
-                       if len(seg) > 0:    
-                           # The values can be null for the PCT tables, which don't 
-                           # exist for some summary levels.       
-                           values =  geo_keys + seg          
-                           partition = fact_partitions[table_id]
-                           self.write_fact_row(partition, self.get_table_by_table_id(table_id), values)
+                        seg = segment[range['start']:range['source_col']]
+                        table = self.get_table_by_table_id(table_id)
+                        if len(seg) > 0:    
+                            # The values can be null for the PCT tables, which don't 
+                            # exist for some summary levels.       
+                            values =  geo_keys + seg                                      
+                            row_cache[table.id_].append(values)
+                           
+                        if row_i % 1000 == 0:
+                            partition = fact_partitions[table_id]
+                            self.write_fact_rows(partition, row_cache[table.id_])
+                            row_cache[table.id_] = []
 
+        #Write the remainder of rows and commit. 
         for seg_number, segment in segments.items():
             for table_id, range in range_map[seg_number].iteritems():
                 partition = fact_partitions[table_id]
+                
+                self.write_fact_rows(partition, row_cache[table.id_])
+                
                 partition.database.dbapi_connection.commit() 
                        
 
     def combine_state(self, state):
+        import time
         
         urls = yaml.load(file(self.urls_file, 'r'))  
         row_i = 0
