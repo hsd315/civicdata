@@ -449,16 +449,24 @@ class Bundle(BuildBundle):
         
         row_cache = {table.id_:[] for table in self.schema.tables}
         
+        self.log("\n")
+        self.ptick(state+' ')
+        
         for state, logrecno, geo, segments in self.generate_rows(state, urls ):
              
                if row_i == 0:
                    t_start = time.time()
              
                if row_i % 1000 == 0:
+                   self.ptick('.')
+                   
+               if row_i % 5000 == 0:
                    # Prints a number representing the processing rate, 
                    # in 1,000 records per sec.
+                   self.ptick(str(int( row_i/(time.time()-t_start)))+'/s ')                
                    
-                   self.log(state+" "+str(int( row_i/(time.time()-t_start)))+" "+str(row_i)+" "+str(int((time.time()-t_start)/60)))
+               if row_i % 25000 == 0:
+                   self.ptick(str(row_i/1000)+"K ")
                    
                row_i += 1
          
@@ -485,7 +493,8 @@ class Bundle(BuildBundle):
                             values =  geo_keys + seg                                      
                             row_cache[table.id_].append(values)
                            
-                        if row_i % 1000 == 0:
+                        if row_i % 2000 == 0:
+                            # Chunk the commits to the database to spped things up. 
                             partition = fact_partitions[table_id]
                             self.write_fact_rows(partition, row_cache[table.id_])
                             row_cache[table.id_] = []
