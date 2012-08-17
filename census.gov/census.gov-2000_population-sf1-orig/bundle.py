@@ -85,7 +85,18 @@ class Bundle(BuildBundle):
         from databundles.partition import PartitionIdentity
         #
         # Geo split files
-        for table in self.get_geo_tables():
+        for table in self.geo_tables():
+            pid = PartitionIdentity(self.identity, table=table.name)
+            partition = self.partitions.find(pid) # Find puts id_ into partition.identity
+            
+            if not partition:
+                self.log("Create partition for "+table.name)
+                partition = self.partitions.new_partition(pid)
+            else:
+                self.log("Already created partition, skipping "+table.name)
+
+        # The Fact partitions
+        for table in self.fact_tables():
             pid = PartitionIdentity(self.identity, table=table.name)
             partition = self.partitions.find(pid) # Find puts id_ into partition.identity
             
@@ -206,27 +217,31 @@ class Bundle(BuildBundle):
                                 raise Exception("Should not have extra items left")
                         except StopIteration:
                             pass
-
         return
         
-    def get_geo_tables(self):
+    def geo_tables(self):
         
-        for table in self.schema.tables:
+        m = { t.name:t for t in self.schema.tables }
+        
+        for table_name in sourcesupport.uscensus.geo_tables():
+            table = m[table_name]
             
             if table.data.get('split_table', '') == 'A':
                 yield table
      
-    def get_fact_tables(self):
+    def fact_tables(self):
         for table in self.schema.tables:
             if table.data.get('fact',False):
                 yield table
-  
-    def get_split_geo_processors(self):
+
+    def geo_processors(self):
         '''Generate a complete set of geo processors for all of the split tables'''
         from databundles.transform import PassthroughTransform, CensusTransform
+        from collections import  OrderedDict
         
-        processor_set = {}
-        for table in self.get_geo_tables():
+        processor_set = OrderedDict()
+        
+        for table in self.geo_tables():
           
             source_cols = ([c.name for c in table.columns 
                                 if not ( c.name.endswith('_id') and not c.is_primary_key)
@@ -246,31 +261,37 @@ class Bundle(BuildBundle):
             
         return processor_set
     
-    def get_fact_table_processors(self):
-        '''Generate a complete set of processors for all of the fact tables'''
+    def fact_processors(self):
+        '''Generate a complete set of processors for all of the fact tables.
+        These processors only deal with the forieng keys to the geo split tables. '''
         from databundles.transform import PassthroughTransform, CensusTransform
         
         processor_set = {}
-        for table in self.get_geo_tables():
+        for table in self.fact_tables():
           
-            source_cols = ([c.name for c in table.columns 
-                                if not ( c.name.endswith('_id') and not c.is_primary_key)
-                                and c.name != 'hash'
-                               ])
+            source_cols = [c.name for c in table.columns if c.is_foreign_key ]
             
             columns = [c for c in table.columns if c.name in source_cols  ]  
-            processors = [CensusTransform(c) for c in columns]
-            processors[0] = lambda row : None # Primary key column
-            
-            if table.name != 'record_code':
-                columns += [ table.column('hash')]
-                processors += [lambda row : None]
+            processors = [PassthroughTransform(c) for c in columns]
      
-            processor_set[table.id_] = (table, columns, processors )         
-             
-            
+            processor_set[table.id_] = (table, columns, processors )  
+       
         return processor_set
     
+    def geo_key_columns(self):
+        ''' '''
+        
+        from databundles.transform import PassthroughTransform, CensusTransform
+        
+        column_sets = {}
+        for table in self.fact_tables():
+          
+            source_cols = [c.name for c in table.columns if c.is_foreign_key ]
+         
+            column_sets[table.id_] = (table, source_cols)  
+       
+        return column_sets
+        
     def row_hash(self, values):
         '''Calculate a hash from a database row, for geo split tables '''  
         import hashlib
@@ -282,7 +303,7 @@ class Bundle(BuildBundle):
      
         return hash
           
-    def get_geo_partition(self, table):
+    def geo_partition(self, table):
         '''Called in geo_partition_map to fetch, and create, the partition for a
         table ''' 
         from databundles.partition import PartitionIdentity
@@ -313,12 +334,12 @@ class Bundle(BuildBundle):
     def geo_partition_map(self):
         '''Create a map from table id to partition for the geo split table'''
         partitions = {}
-        for table in self.get_geo_tables():
-            partitions[table.id_] = self.get_geo_partition(table)
+        for table in self.geo_tables():
+            partitions[table.id_] = self.geo_partition(table)
             
         return partitions
      
-    def get_fact_partition(self, table):
+    def fact_partition(self, table):
         '''Called in geo_partition_map to fetch, and create, the partition for a
         table ''' 
         from databundles.partition import PartitionIdentity
@@ -335,11 +356,11 @@ class Bundle(BuildBundle):
             
         return partition
     
-    def face_partition_map(self):
+    def fact_partition_map(self):
         '''Create a map from table id to partition for the geo split table'''
         partitions = {}
-        for table in self.get_fact_tables():
-            partitions[table.id_] = self.get_fact_partition(table)
+        for table in self.fact_tables():
+            partitions[table.id_] = self.fact_partition(table)
             
         return partitions 
 
@@ -350,10 +371,6 @@ class Bundle(BuildBundle):
         for table in self.schema.tables:
             pass
 
-    def get_geo_record_id(self, table_id, hash):
-        '''Return the primary key Id for a table, givn the hash of the values'''
-        pass
-    
 
     def get_table_by_table_id(self,table_id):  
         '''Get the table definition from the schema'''
@@ -364,7 +381,7 @@ class Bundle(BuildBundle):
             self._table_id_cache[table_id] = t
 
         return t
-        
+
     def write_geo_row(self, partition, table, columns,values):
         from databundles.database import  insert_or_ignore
         
@@ -384,9 +401,16 @@ class Bundle(BuildBundle):
         cur.execute("SELECT {} FROM {} WHERE hash = ?".format(table.name+"_id", table.name), 
                     (values[-1],) )
     
-        return  cur.fetchone()
+        row = cur.fetchone()
+        
+        if row:
+            return row[0]
+        else:
+            print "FAILED IN {} FOR HASH {}".format(table.name, str(values[-1]))
+            print values
+            return -1
     
-    def write_fact_row(self, table, geo, geo_ids, values):
+    def write_fact_row(self, partition, table, values):
         from databundles.database import  insert_or_ignore
         
         ins = self._table_iori_cache.get(table.name, False)
@@ -394,8 +418,12 @@ class Bundle(BuildBundle):
             ins = insert_or_ignore(table.name, table.columns)
             self._table_iori_cache[table.name] = ins
             
-        #print ins
-            
+          
+        db = partition.database
+        cur = db.dbapi_cursor
+      
+        cur.execute(ins, values)
+        #db.dbapi_connection.commit() 
 
     def run_state(self, state):
         
@@ -409,9 +437,11 @@ class Bundle(BuildBundle):
    
         range_map = yaml.load(file(self.rangemap_file, 'r')) 
         urls = yaml.load(file(self.urls_file, 'r')) 
-        table_processors = self.get_split_geo_processors()
+        geo_processors = self.geo_processors()
+        fact_processors = self.fact_processors()
 
         geo_partitions = self.geo_partition_map()
+        fact_partitions = self.fact_partition_map()
         
         for state, logrecno, geo, segments in self.generate_rows(state, urls ):
              
@@ -427,22 +457,36 @@ class Bundle(BuildBundle):
                row_i += 1
                
                geo_ids = {}
-
-               for table_id, cp in table_processors.items():
+               geo_keys = []
+               
+               for table_id, cp in geo_processors.items():
                    table, columns, processors = cp
         
                    values=[ f(geo) for f in processors ]
                    values[-1] = self.row_hash(values)
                    
                    partition = geo_partitions[table_id]
-                   geo_ids[table.name] = self.write_geo_row(partition, table, columns, values)
+                   r = self.write_geo_row(partition, table, columns, values)
+
+                   geo_ids[table.name+'_id']  = r     
+                   geo_keys.append(r)           
    
                for seg_number, segment in segments.items():
                    for table_id, range in range_map[seg_number].iteritems():
-                       values = ([geo['stusab'], geo['sumlev'], geo['geocomp'], geo['chariter'], geo['cifsn'], geo['logrecno'] ] +
-                                      segment[range['start']:range['source_col']] )
+                       seg = segment[range['start']:range['source_col']]
                        
-                       self.write_fact_row(self.get_table_by_table_id(table_id), geo, geo_ids, values)
+                       if len(seg) > 0:    
+                           # The values can be null for the PCT tables, which don't 
+                           # exist for some summary levels.       
+                           values =  geo_keys + seg          
+                           partition = fact_partitions[table_id]
+                           self.write_fact_row(partition, self.get_table_by_table_id(table_id), values)
+
+        for seg_number, segment in segments.items():
+            for table_id, range in range_map[seg_number].iteritems():
+                partition = fact_partitions[table_id]
+                partition.database.dbapi_connection.commit() 
+                       
 
     def build(self):
         '''Create data  partitions. 
@@ -463,6 +507,9 @@ class Bundle(BuildBundle):
         else:
             for state in urls['geos'].keys():
                 self.run_state(state)
+                
+                self.log("ONE STATE ONLY")
+                break
 
         return True
 
