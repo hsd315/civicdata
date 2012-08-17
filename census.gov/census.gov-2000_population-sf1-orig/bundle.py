@@ -449,56 +449,63 @@ class Bundle(BuildBundle):
         
         row_cache = {table.id_:[] for table in self.schema.tables}
         
+        write_frequency = 2000
+        
         self.log("\n")
         self.ptick(state+' ')
         
         for state, logrecno, geo, segments in self.generate_rows(state, urls ):
-             
-               if row_i == 0:
-                   t_start = time.time()
-             
-               if row_i % 1000 == 0:
-                   self.ptick('.')
-                   
-               if row_i % 5000 == 0:
-                   # Prints a number representing the processing rate, 
-                   # in 1,000 records per sec.
-                   self.ptick(str(int( row_i/(time.time()-t_start)))+'/s ')                
-                   
-               if row_i % 25000 == 0:
-                   self.ptick(str(row_i/1000)+"K ")
-                   
-               row_i += 1
-         
-               geo_keys = []
-               
-               for table_id, cp in geo_processors.items():
-                   table, columns, processors = cp
-        
-                   values=[ f(geo) for f in processors ]
-                   values[-1] = self.row_hash(values)
-                   
-                   partition = geo_partitions[table_id]
-                   r = self.write_geo_row(partition, table, columns, values)
-
-                   geo_keys.append(r)           
-   
-               for seg_number, segment in segments.items():
-                   for table_id, range in range_map[seg_number].iteritems():
-                        seg = segment[range['start']:range['source_col']]
-                        table = self.get_table_by_table_id(table_id)
-                        if len(seg) > 0:    
-                            # The values can be null for the PCT tables, which don't 
-                            # exist for some summary levels.       
-                            values =  geo_keys + seg                                      
-                            row_cache[table.id_].append(values)
-                           
-                        if row_i % 2000 == 0:
-                            # Chunk the commits to the database to spped things up. 
-                            partition = fact_partitions[table_id]
-                            self.write_fact_rows(partition, row_cache[table.id_])
-                            row_cache[table.id_] = []
-
+            
+            if row_i == 0:
+                t_start = time.time()
+            
+            if row_i % 1000 == 0:
+                self.ptick('.')
+                
+            if row_i % 5000 == 0:
+                # Prints a number representing the processing rate, 
+                # in 1,000 records per sec.
+                self.ptick(str(int( row_i/(time.time()-t_start)))+'/s ')                
+                
+            if row_i % 25000 == 0:
+                self.ptick(str(row_i/1000)+"K ")
+                
+            row_i += 1
+            
+            geo_keys = []
+            
+            for table_id, cp in geo_processors.items():
+                table, columns, processors = cp
+            
+                values=[ f(geo) for f in processors ]
+                values[-1] = self.row_hash(values)
+                
+                partition = geo_partitions[table_id]
+                r = self.write_geo_row(partition, table, columns, values)
+            
+                geo_keys.append(r)           
+            
+            for seg_number, segment in segments.items():
+                for table_id, range in range_map[seg_number].iteritems():
+                     seg = segment[range['start']:range['source_col']]
+                     table = self.get_table_by_table_id(table_id)
+                     if len(seg) > 0:    
+                         # The values can be null for the PCT tables, which don't 
+                         # exist for some summary levels.       
+                         values =  geo_keys + seg                                      
+                         row_cache[table.id_].append(values)
+                        
+                     if row_i % write_frequency == 0:
+                         # Chunk the commits to the database to spped things up. 
+                         partition = fact_partitions[table_id]
+                         self.write_fact_rows(partition, row_cache[table.id_])
+                        
+            
+            if row_i % write_frequency == 0:
+                # looks like re-building the entire list is a 
+                # better way to clear out memory. 
+                row_cache = {table.id_:[] for table in self.schema.tables}
+                    
         #Write the remainder of rows and commit. 
         for seg_number, segment in segments.items():
             for table_id, range in range_map[seg_number].iteritems():
