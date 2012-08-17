@@ -425,8 +425,6 @@ class Bundle(BuildBundle):
         try:
             cur.executemany(ins, values)
         except Exception as e:
-            import pprint
-            pprint.pprint(values)
             self.log("ERROR: Failed to write to {}".format(db.path))
             
             raise e
