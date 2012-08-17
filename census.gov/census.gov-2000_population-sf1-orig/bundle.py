@@ -449,7 +449,7 @@ class Bundle(BuildBundle):
         
         row_cache = {table.id_:[] for table in self.schema.tables}
         
-        write_frequency = 2000
+        write_frequency = 1000
         
         self.log("\n")
         self.ptick(state+' ')
@@ -511,28 +511,11 @@ class Bundle(BuildBundle):
             for table_id, range in range_map[seg_number].iteritems():
                 partition = fact_partitions[table_id]
                 
-                self.write_fact_rows(partition, row_cache[table.id_])
+                self.write_fact_rows(partition, row_cache[table_id])
                 
                 partition.database.dbapi_connection.commit() 
                        
 
-    def combine_state(self, state):
-        import time
-        
-        urls = yaml.load(file(self.urls_file, 'r'))  
-        row_i = 0
-        for state, logrecno, geo, segments in self.generate_rows(state, urls ):  
-            if row_i == 0:
-               t_start = time.time()
-            
-            if row_i % 1000 == 0:
-               # Prints a number representing the processing rate, 
-               # in 1,000 records per sec.
-               
-               self.log(state+" "+str(int( row_i/(time.time()-t_start)))+" "+str(row_i)+" "+str(int((time.time()-t_start)/60)))
-               
-            row_i += 1
-            
                
     def build(self):
         '''Create data  partitions. 
