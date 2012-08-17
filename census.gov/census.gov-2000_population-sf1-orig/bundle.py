@@ -192,6 +192,7 @@ class Bundle(BuildBundle):
                         segments = {}
                         geo = m.groups()
                         lrn = geo[6]
+                        sumlev = geo[2]
                         for g in gens:
                             try:
                                 seg_number,  row = g.send(None if first else lrn)
@@ -207,9 +208,10 @@ class Bundle(BuildBundle):
                                 # ending all higher level generators. thanks for nuthin. 
                                 break
 
-                        yield state, segments[1][4], dict(zip(header,geo)), segments
                         first = False
-                        
+
+                        yield state, segments[1][4], dict(zip(header,geo)), segments
+
                     # Check that there are no extra lines. 
                     for g in gens:
                         try:
@@ -397,10 +399,11 @@ class Bundle(BuildBundle):
         cur.execute(ins, values)
         lastrowid =  cur.lastrowid
         db.dbapi_connection.commit()
-        
+       
         cur.execute("SELECT {} FROM {} WHERE hash = ?".format(table.name+"_id", table.name), 
                     (values[-1],) )
     
+        
         row = cur.fetchone()
         
         if row:
@@ -428,7 +431,6 @@ class Bundle(BuildBundle):
             
             raise e
 
-        
     def run_state(self, state):
         
         import time
@@ -496,11 +498,10 @@ class Bundle(BuildBundle):
                          row_cache[table.id_].append(values)
                         
                      if row_i % write_frequency == 0:
-                         # Chunk the commits to the database to spped things up. 
+                         # Chunk the commits to the database to speed things up. 
                          partition = fact_partitions[table_id]
                          self.write_fact_rows(partition, row_cache[table.id_])
                         
-            
             if row_i % write_frequency == 0:
                 # looks like re-building the entire list is a 
                 # better way to clear out memory. 
