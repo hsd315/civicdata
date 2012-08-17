@@ -515,7 +515,7 @@ class Bundle(BuildBundle):
                 partition.database.dbapi_connection.commit() 
                        
 
-               
+             
     def build(self):
         '''Create data  partitions. 
         First, creates all of the state segments, one partition per segment per 
@@ -526,15 +526,9 @@ class Bundle(BuildBundle):
         self.multi = True
 
         urls = yaml.load(file(self.urls_file, 'r')) 
-        
-        if self.run_args.multi:
-            p = Pool(int(self.run_args.multi))
-            
-            p.map(run_state, urls['geos'].keys())
-            
-        else:
-            for state in urls['geos'].keys():
-                self.run_state(state)
+    
+        for state in urls['geos'].keys():
+            self.run_state(state)
 
         return True
 
