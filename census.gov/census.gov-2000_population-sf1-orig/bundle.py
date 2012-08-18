@@ -436,6 +436,9 @@ class Bundle(BuildBundle):
         
         row_i = 0
         
+        self.log("\n")
+        self.log("Initializing state: "+state+' ')
+        
         header, regex, regex_str = self.schema.table('sf1geo').get_fixed_regex()
    
         range_map = yaml.load(file(self.rangemap_file, 'r')) 
@@ -448,10 +451,9 @@ class Bundle(BuildBundle):
         
         row_cache = {table.id_:[] for table in self.schema.tables}
         
-        write_frequency = 1000
-        
-        self.log("\n")
-        self.ptick(state+' ')
+        write_frequency = 2000
+
+        self.log("Starting loop for state: "+state+' ')
         
         for state, logrecno, geo, segments in self.generate_rows(state, urls ):
             
