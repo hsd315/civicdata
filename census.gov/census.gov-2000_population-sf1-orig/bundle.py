@@ -531,12 +531,13 @@ class Bundle(BuildBundle):
             if row_i == 0:
                 t_start = time.time()
       
+            row_i += 1
+            
             if row_i % 5000 == 0:
                 # Prints a number representing the processing rate, 
                 # in 1,000 records per sec.
                 self.log(state+" "+str(int( row_i/(time.time()-t_start)))+'/s '+str(row_i/1000)+"K ")
-                
-            row_i += 1
+         
             
             for seg_number, segment in segments.items():
                 for table_id, range in range_map[seg_number].iteritems():
@@ -583,6 +584,7 @@ class Bundle(BuildBundle):
         
         n = len(urls['geos'].keys())
         i = 1
+        
         for state in urls['geos'].keys():
             self.log("Building Geo state for {}, {} of {}".format(state, i, n))
             #self.run_state_geo(state)
@@ -590,12 +592,13 @@ class Bundle(BuildBundle):
          
         #self.store_geo_splits()
             
-        pool = Pool(processes=4)
-        pool.map(run_state_tables, urls['geos'].keys())
-        
-        #for state in urls['geos'].keys():
-        #    self.log("Building fact tables for {}".format(state))
-        #    self.run_state_tables(state)
+        if self.run_args.multi:
+            pool = Pool(processes=int(self.run_args.multi))
+            pool.map(run_state_tables, urls['geos'].keys())
+        else:
+            for state in urls['geos'].keys():
+                self.log("Building fact tables for {}".format(state))
+                self.run_state_tables(state)
           
         return True
 
