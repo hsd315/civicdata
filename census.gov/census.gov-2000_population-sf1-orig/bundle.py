@@ -488,20 +488,14 @@ class Bundle(BuildBundle):
             
             if row_i == 0:
                 t_start = time.time()
-           
-            if row_i % 1000 == 0:
-                self.ptick('.')
-                
-            if row_i % 5000 == 0:
-                # Prints a number representing the processing rate, 
-                # in 1,000 records per sec.
-                self.ptick(str(int( row_i/(time.time()-t_start)))+'/s ')                
-                
-            if row_i % 25000 == 0:
-                self.ptick(str(row_i/1000)+"K ")
-                
+      
             row_i += 1
             
+            if row_i % 10000 == 0:
+                # Prints a number representing the processing rate, 
+                # in 1,000 records per sec.
+                self.log(state+" "+str(int( row_i/(time.time()-t_start)))+'/s '+str(row_i/1000)+"K ")
+             
             geo_keys = []
             
             for table_id, cp in geo_processors.items():
@@ -558,7 +552,7 @@ class Bundle(BuildBundle):
            
     def store_geo_splits(self):
         '''Copy all of the geo split CSV files -- the tempfiles -- into
-        database partitiosn and store them in the library '''
+        database partition and store them in the library '''
         
         for table in self.geo_tables():
             partition = self.geo_partition(table, init=True)
@@ -568,7 +562,6 @@ class Bundle(BuildBundle):
             else:
                 self.log("Loading geo split: "+table.name)
                 continue
-            
             
             db.load_tempfile(table)
             
@@ -593,7 +586,7 @@ class Bundle(BuildBundle):
         i = 1
         
         for state in urls['geos'].keys():
-            self.log("Building Geo state for {}, {} of {}".format(state, i, n))
+            self.log("\nBuilding Geo state for {}, {} of {}".format(state, i, n))
             self.run_state_geo(state)
             i = i + 1
          
