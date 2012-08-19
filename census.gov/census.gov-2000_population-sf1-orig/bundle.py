@@ -606,7 +606,7 @@ import sys
 
 def run_state_tables(state):
     b = Bundle()
-    b.log("\nBuilding (MP) fact tables for {}".format(state))
+    b.log("Building (MP) fact tables for {}".format(state))
     b.run_state_tables(state)
     
 
