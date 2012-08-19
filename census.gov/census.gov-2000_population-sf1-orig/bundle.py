@@ -587,14 +587,15 @@ class Bundle(BuildBundle):
         
         for state in urls['geos'].keys():
             self.log("Building Geo state for {}, {} of {}".format(state, i, n))
-            #self.run_state_geo(state)
+            self.run_state_geo(state)
             i = i + 1
          
-        #self.store_geo_splits()
+        self.store_geo_splits()
             
         if self.run_args.multi:
             pool = Pool(processes=int(self.run_args.multi))
-            pool.map(run_state_tables, urls['geos'].keys())
+            result = pool.map_async(run_state_tables, urls['geos'].keys())
+            print result.get()
         else:
             for state in urls['geos'].keys():
                 self.log("Building fact tables for {}".format(state))
