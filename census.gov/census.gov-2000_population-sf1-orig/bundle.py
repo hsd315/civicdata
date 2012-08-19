@@ -173,7 +173,8 @@ class Bundle(BuildBundle):
         segment tables'''
         import csv
     
-        with open(self.filesystem.build_path('geodim',state), 'r') as f:
+        f = self.geo_dim_file(state)
+        with open(f, 'r') as f:
             r = csv.reader(f)
             r.next() # Skip the header row
             for row in r:
@@ -424,10 +425,12 @@ class Bundle(BuildBundle):
             tf.writerow(values)
         
         return r
+    def geo_dim_file(self,state):
+         return self.filesystem.build_path('geodim',state)
       
     def geo_key_writer(self, state):
         import csv
-        f = self.filesystem.build_path('geodim',state)
+        f = self.geo_dim_file(state)
         
         file = open(f, 'wb')
         writer = csv.writer(file)
@@ -455,8 +458,11 @@ class Bundle(BuildBundle):
         import random
         
         row_i = 0
+      
+        if os.path.exists(self.geo_dim_file(state)):
+            self.log("Geo dim exists for {}, skipping".format(state))
+            return
         
-        self.log("\n")
         self.log("Initializing state: "+state+' ')
         
         header, regex, regex_str = self.schema.table('sf1geo').get_fixed_regex()
@@ -466,9 +472,9 @@ class Bundle(BuildBundle):
         geo_processors = self.geo_processors()
       
         geo_partitions = self.geo_partition_map()
-        
 
         gd_file, geo_dim_writer = self.geo_key_writer(state)
+        
         
         hash = {}
         counts = {}
@@ -558,9 +564,10 @@ class Bundle(BuildBundle):
             partition = self.geo_partition(table, init=True)
             db = partition.database
             if not db.tempfile(table).exists:
-                self.log("Loading geo split: "+table.name)
+                self.log("Geosplit tempfile doe not exist "+table.name)
             else:
                 self.log("Loading geo split: "+table.name)
+                continue
             
             
             db.load_tempfile(table)
