@@ -32,7 +32,7 @@ class Bundle(BuildBundle):
         
         self._table_id_cache = {}
         self._table_iori_cache = {}
-        
+    
     def scrape_urls(self):
 
         import sourcesupport.uscensus #@UnusedImport
@@ -106,6 +106,8 @@ class Bundle(BuildBundle):
             else:
                 self.log("Already created partition, skipping "+table.name)
 
+        
+
     def prepare(self):
         '''Create the prototype database'''
         from  databundles.database import Database
@@ -165,8 +167,21 @@ class Bundle(BuildBundle):
                     next_logrecno = (yield seg_number,  row)
                  
         return
+    
+    def generate_geodim_rows(self, state):
+        '''Generate the rows that were created to link the geo split files with the
+        segment tables'''
+        import csv
+    
+        with open(self.filesystem.build_path('geodim',state), 'r') as f:
+            r = csv.reader(f)
+            r.next() # Skip the header row
+            for row in r:
+                yield row
+        
+        return
                      
-    def generate_rows(self, state, urls):
+    def generate_rows(self, state, urls, geodim=False):
         '''A Generator that yelds a tuple that has the logrecno row
         for all of the segment files and the geo file. '''
         import csv
@@ -178,6 +193,8 @@ class Bundle(BuildBundle):
       
         gens = [self.generate_seg_rows(n,source) for n,source in urls['tables'][state].items() ]
 
+        geodim_gen = self.generate_geodim_rows(state) if geodim else None
+     
         with self.filesystem.download(geo_source) as geo_zip_file:
             with self.filesystem.unzip(geo_zip_file) as grf:
                 with open(grf, 'rbU') as geofile:
@@ -207,10 +224,16 @@ class Bundle(BuildBundle):
                                 # a generator function, gets propagated all the way up, 
                                 # ending all higher level generators. thanks for nuthin. 
                                 break
+                    
+                        geodim = geodim_gen.next() if geodim_gen is not None else None
+
+                        if geodim and geodim[0] != lrn:
+                            raise Exception("Logrecno mismatch for geodim : {} != {}"
+                                                    .format(geodim[0],lrn))
 
                         first = False
 
-                        yield state, segments[1][4], dict(zip(header,geo)), segments
+                        yield state, segments[1][4], dict(zip(header,geo)), segments, geodim
 
                     # Check that there are no extra lines. 
                     for g in gens:
@@ -221,6 +244,7 @@ class Bundle(BuildBundle):
                             pass
         return
         
+  
     def geo_tables(self):
         
         m = { t.name:t for t in self.schema.tables }
@@ -305,7 +329,7 @@ class Bundle(BuildBundle):
      
         return hash
           
-    def geo_partition(self, table):
+    def geo_partition(self, table, init=False):
         '''Called in geo_partition_map to fetch, and create, the partition for a
         table ''' 
         from databundles.partition import PartitionIdentity
@@ -317,7 +341,7 @@ class Bundle(BuildBundle):
         if not partition:
             raise Exception("Failed to get partition: "+str(pid.name))
         
-        if not partition.database.exists():
+        if init and not partition.database.exists():
             partition.create_with_tables(table.name)
             
             # Ensure that the first record is the one with all of the null values
@@ -341,7 +365,7 @@ class Bundle(BuildBundle):
             
         return partitions
      
-    def fact_partition(self, table):
+    def fact_partition(self, table, init=False):
         '''Called in geo_partition_map to fetch, and create, the partition for a
         table ''' 
         from databundles.partition import PartitionIdentity
@@ -353,7 +377,7 @@ class Bundle(BuildBundle):
         if not partition:
             raise Exception("Failed to get partition: "+str(pid.name))
         
-        if not partition.database.exists():
+        if init and not partition.database.exists():
             partition.create_with_tables(table.name)
             
         return partition
@@ -363,7 +387,8 @@ class Bundle(BuildBundle):
         partitions = {}
         for table in self.fact_tables():
             partitions[table.id_] = self.fact_partition(table)
-            
+ 
+ 
         return partitions 
 
     
@@ -384,51 +409,46 @@ class Bundle(BuildBundle):
 
         return t
 
-    def write_geo_row(self, partition, table, columns,values):
+    def write_geo_row(self, hash, partition, table, columns,values):
         from databundles.database import  insert_or_ignore
         
-        ins = self._table_iori_cache.get(table.name, False)
-        if not ins:
-            ins = insert_or_ignore(table.name, columns)
-            self._table_iori_cache[table.name] = ins
-            
+        th = hash[table.id_]
+                
+        if values[-1] in th:
+            return th[values[-1]]
+        else:                   
+            r = len(th)+1
+            th[values[-1]] = r
+            values[0] = r
+            tf = partition.database.tempfile(table).writer
+            tf.writerow(values)
+        
+        return r
       
-        #self.log('Write {} to {}: '.format(table.name, db.path))
-        db = partition.database
-        cur = db.dbapi_cursor
-        cur.execute(ins, values)
-        lastrowid =  cur.lastrowid
-        db.dbapi_connection.commit()
-       
-        cur.execute("SELECT {} FROM {} WHERE hash = ?".format(table.name+"_id", table.name), 
-                    (values[-1],) )
-    
+    def geo_key_writer(self, state):
+        import csv
+        f = self.filesystem.build_path('geodim',state)
         
-        row = cur.fetchone()
+        file = open(f, 'wb')
+        writer = csv.writer(file)
         
-        if row:
-            return row[0]
-        else:
-            print "FAILED IN {} FOR HASH {}".format(table.name, str(values[-1]))
-            print values
-            return -1
+        # Write the header row
+        writer.writerow(['logrecno'] + sourcesupport.uscensus.geo_keys())
+        
+        return file, writer
     
-    def write_fact_rows(self, partition,  values):
+    
+    def write_fact_table(self, state, partition, table,  values):
         from databundles.database import  insert_or_ignore
-        
-        table = partition.table
-        
-        db = partition.database
-        cur = db.dbapi_cursor
-      
-        ins = insert_or_ignore(table.name, table.columns)
-        try:
-            cur.executemany(ins, values)
-        except Exception as e:
-            self.log("ERROR: Failed to write to {}".format(db.path))
-            raise e
 
-    def run_state(self, state):
+        tf = partition.database.tempfile(table, suffix=state)
+        tf = tf.writer.writerow(values)
+
+    def run_state_geo(self, state):
+        '''Break up the geo files into seperate files, combine them 
+        nationally, and store them in temporary CSV files. Creates a set of 
+        files for each state, the geodim files, that link the state and logrecnos
+        to the primary keys for the geodim records. '''
         
         import time
         from databundles.transform import PassthroughTransform, CensusTransform
@@ -444,22 +464,25 @@ class Bundle(BuildBundle):
         range_map = yaml.load(file(self.rangemap_file, 'r')) 
         urls = yaml.load(file(self.urls_file, 'r')) 
         geo_processors = self.geo_processors()
-        fact_processors = self.fact_processors()
-
+      
         geo_partitions = self.geo_partition_map()
-        fact_partitions = self.fact_partition_map()
         
-        row_cache = {table.id_:[] for table in self.schema.tables}
-        
-        write_frequency = 2000
 
+        gd_file, geo_dim_writer = self.geo_key_writer(state)
+        
+        hash = {}
+        counts = {}
+        for table_id, cp in geo_processors.items():
+            hash[table_id] = {}
+            counts[table_id] = 1
+        
         self.log("Starting loop for state: "+state+' ')
         
-        for state, logrecno, geo, segments in self.generate_rows(state, urls ):
+        for state, logrecno, geo, segments, geodim in self.generate_rows(state, urls ):
             
             if row_i == 0:
                 t_start = time.time()
-            
+           
             if row_i % 1000 == 0:
                 self.ptick('.')
                 
@@ -480,11 +503,40 @@ class Bundle(BuildBundle):
             
                 values=[ f(geo) for f in processors ]
                 values[-1] = self.row_hash(values)
-                
+                      
                 partition = geo_partitions[table_id]
-                r = self.write_geo_row(partition, table, columns, values)
-            
-                geo_keys.append(r)           
+                r = self.write_geo_row(hash, partition, table, columns, values)
+ 
+                geo_keys.append(r)    
+                
+            geo_dim_writer.writerow([logrecno] + geo_keys)
+            gd_file.flush()     
+        
+
+        gd_file.close()
+   
+    def run_state_tables(self, state):
+        '''Split up the segment files into seperate tables, and link in the
+        geo splits table for foreign keys to the geo splits. '''
+        import time
+        
+        fact_partitions = self.fact_partition_map()
+        urls = yaml.load(file(self.urls_file, 'r')) 
+        range_map = yaml.load(file(self.rangemap_file, 'r')) 
+        
+        row_i = 0
+        
+        for state, logrecno, geo, segments, geo_keys in self.generate_rows(state, urls,geodim=True ):
+ 
+            if row_i == 0:
+                t_start = time.time()
+      
+            if row_i % 5000 == 0:
+                # Prints a number representing the processing rate, 
+                # in 1,000 records per sec.
+                self.log(state+" "+str(int( row_i/(time.time()-t_start)))+'/s '+str(row_i/1000)+"K ")
+                
+            row_i += 1
             
             for seg_number, segment in segments.items():
                 for table_id, range in range_map[seg_number].iteritems():
@@ -494,29 +546,31 @@ class Bundle(BuildBundle):
                          # The values can be null for the PCT tables, which don't 
                          # exist for some summary levels.       
                          values =  geo_keys + seg                                      
-                         row_cache[table.id_].append(values)
-                        
-                     if row_i % write_frequency == 0:
-                         # Chunk the commits to the database to speed things up. 
                          partition = fact_partitions[table_id]
-                         self.write_fact_rows(partition, row_cache[table.id_])
-                        
-            if row_i % write_frequency == 0:
-                # looks like re-building the entire list is a 
-                # better way to clear out memory. 
-                row_cache = {table.id_:[] for table in self.schema.tables}
-                    
-        #Write the remainder of rows and commit. 
-        for seg_number, segment in segments.items():
-            for table_id, range in range_map[seg_number].iteritems():
-                partition = fact_partitions[table_id]
-                
-                self.write_fact_rows(partition, row_cache[table_id])
-                
-                partition.database.dbapi_connection.commit() 
-                       
-
-             
+                         self.write_fact_table(state, partition, table, values)
+           
+    def store_geo_splits(self):
+        '''Copy all of the geo split CSV files -- the tempfiles -- into
+        database partitiosn and store them in the library '''
+        
+        for table in self.geo_tables():
+            partition = self.geo_partition(table, init=True)
+            db = partition.database
+            if not db.tempfile(table).exists:
+                self.log("Loading geo split: "+table.name)
+            else:
+                self.log("Loading geo split: "+table.name)
+            
+            
+            db.load_tempfile(table)
+            
+            dest = self.library.put(partition)
+            self.log("Install in library: "+dest)
+            
+            db.tempfile(table).delete()
+            
+            partition.database.delete()
+   
     def build(self):
         '''Create data  partitions. 
         First, creates all of the state segments, one partition per segment per 
@@ -524,25 +578,42 @@ class Bundle(BuildBundle):
        
         from multiprocessing import Pool
 
-        self.multi = True
 
         urls = yaml.load(file(self.urls_file, 'r')) 
-    
+        
+        n = len(urls['geos'].keys())
+        i = 1
         for state in urls['geos'].keys():
-            self.run_state(state)
-
+            self.log("Building Geo state for {}, {} of {}".format(state, i, n))
+            #self.run_state_geo(state)
+            i = i + 1
+         
+        #self.store_geo_splits()
+            
+        pool = Pool(processes=4)
+        pool.map(run_state_tables, urls['geos'].keys())
+        
+        #for state in urls['geos'].keys():
+        #    self.log("Building fact tables for {}".format(state))
+        #    self.run_state_tables(state)
+          
         return True
 
 import sys
 
-def run_state(state):
+def run_state_tables(state):
     b = Bundle()
-    b.log("Starting process for {}".format(state))
-    b.run_state(state)
+    b.log("\nBuilding (MP) fact tables for {}".format(state))
+    b.run_state_tables(state)
+    
+
 
 if __name__ == '__main__':
     import databundles.run
-      
+    #import cProfile 
+
+
+    #cProfile.run('databundles.run.run(sys.argv[1:], Bundle)')
     databundles.run.run(sys.argv[1:], Bundle)
     
     
