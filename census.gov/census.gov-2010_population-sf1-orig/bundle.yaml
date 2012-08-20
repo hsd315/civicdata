@@ -1,6 +1,6 @@
 build:
-    headersFile: meta/2000-sf1-columns.csv
-    rootUrl: http://www2.census.gov/census_2000/datasets/Summary_File_1/
+    headersFile: meta/2010-sf1-columns.csv
+    rootUrl: http://www2.census.gov/census_2010/04-Summary_File_1/
     statesFile: meta/States
     geoheaderFile: meta/geoheaders.csv
     geoschemaFile: meta/geoschema.csv
@@ -10,7 +10,7 @@ build:
     partitionsFile: meta/partitions.sql
 identity:
     creator: clarinova.com
-    dataset: 2000 Population
+    dataset: 2010 Population
     id: a11q8t
     revision: 1
     source: census.gov
