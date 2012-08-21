@@ -24,14 +24,8 @@ class Bundle(Us2010CensusBundle):
     def prepare(self):
         '''Create the prototype database'''
 
-        if not self.database.exists():
-            self.database.create()
-
-        self.scrape_urls()
-        
-        self.create_table_schema()
-     
-        self.make_range_map()
+        if not super(Bundle, self).prepare():
+            return False
 
         if not self.schema.table('sf1geo'): # Do this only once for the database
             from databundles.orm import Column
@@ -44,9 +38,7 @@ class Bundle(Us2010CensusBundle):
             
                 table.add_column('hash',  datatype=Column.DATATYPE_INTEGER,
                                   uindexes = 'uihash')
-        
-        self.generate_partitions()
-  
+        return True
         
 import sys
 

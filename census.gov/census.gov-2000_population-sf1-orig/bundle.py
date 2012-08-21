@@ -20,6 +20,25 @@ class Bundle(Us2000CensusBundle):
     def build(self, multi_func=None):
         super(Bundle, self).build(multi_func=run_state_tables)
         
+    def prepare(self):
+        '''Create the prototype database'''
+
+        if not super(Bundle, self).prepare():
+            return False
+
+        if not self.schema.table('sf1geo'): # Do this only once for the database
+            from databundles.orm import Column
+            self.schema.schema_from_file(open(self.geoschema_file, 'rbU'))
+    
+            # Add extra fields to all of the split_tables
+            for table in self.schema.tables:
+                if not table.data.get('split_table', False):
+                    continue;
+            
+                table.add_column('hash',  datatype=Column.DATATYPE_INTEGER,
+                                  uindexes = 'uihash')
+        return True
+        
 import sys
 
 def run_state_tables(state):
