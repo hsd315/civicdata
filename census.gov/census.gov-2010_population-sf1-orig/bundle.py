@@ -17,9 +17,38 @@ class Bundle(Us2010CensusBundle):
         self.super_.__init__(directory)
     
         
+    #def build(self, multi_func=None):   
+    #    super(Bundle, self).build(multi_func=run_state_tables)
+     
     def build(self, multi_func=None):
-        return False
-        super(Bundle, self).build(multi_func=run_state_tables)
+        '''Create data  partitions. 
+        First, creates all of the state segments, one partition per segment per 
+        state. Then creates a partition for each of the geo files. '''
+        import yaml
+        from multiprocessing import Pool
+
+        urls = yaml.load(file(self.urls_file, 'r')) 
+        
+        n = len(urls.keys())
+        i = 1
+        
+        for state in urls.keys():
+            self.log("Building Geo state for {}, {} of {}".format(state, i, n))
+            self.run_state_geo(state)
+            i = i + 1
+         
+        self.store_geo_splits()
+            
+        if self.run_args.multi:
+            pool = Pool(processes=int(self.run_args.multi))
+            result = pool.map_async(multi_func, urls['geos'].keys())
+            print result.get()
+        else:
+            for state in urls['geos'].keys():
+                self.log("Building fact tables for {}".format(state))
+                self.run_state_tables(state)
+          
+        return True
         
     def prepare(self):
         '''Create the prototype database'''
@@ -27,19 +56,8 @@ class Bundle(Us2010CensusBundle):
         if not super(Bundle, self).prepare():
             return False
 
-        if not self.schema.table('sf1geo'): # Do this only once for the database
-            from databundles.orm import Column
-            self.schema.schema_from_file(open(self.geoschema_file, 'rbU'))
-    
-            # Add extra fields to all of the split_tables
-            for table in self.schema.tables:
-                if not table.data.get('split_table', False):
-                    continue;
-            
-                table.add_column('hash',  datatype=Column.DATATYPE_INTEGER,
-                                  uindexes = 'uihash')
         return True
-        
+
 import sys
 
 def run_state_tables(state):

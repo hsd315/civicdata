@@ -2,8 +2,7 @@ build:
     headersFile: meta/2010-sf1-columns.csv
     rootUrl: http://www2.census.gov/census_2010/04-Summary_File_1/
     statesFile: meta/States
-    geoheaderFile: meta/geoheaders.csv
-    geoschemaFile: meta/geoschema.csv
+    geoschemaFile: meta/2010-sf1-geoschema.csv
     urlsFile: meta/urls.yaml
     segMapFile: meta/seg_map.yaml
     rangeMapFile: meta/range_map.yaml

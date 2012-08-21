@@ -1,12 +1,7 @@
 *.pyc
 *.zip
 *.uf1
-.*/build/.*
-
-
-census.gov/2000/build
-census.gov/census.gov-2000_population-sf1-orig/build
-bea.gov/bea.gov-metro_gdp-orig/downloads
-bea.gov/bea.gov-metro_gdp-orig/build
+**/build/*
 range_map.yaml
-partitions.sql
+
+
