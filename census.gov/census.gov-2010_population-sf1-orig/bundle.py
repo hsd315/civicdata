@@ -6,6 +6,18 @@ Created on Jun 10, 2012
 @author: eric
 '''
 from  sourcesupport.us2010census import Us2010CensusBundle
+   
+def mp_run_state_tables(arg):
+    n, state = arg
+    b = Bundle()
+    b.log("Building (MP) fact tables for {} {}/52".format(state, n))
+    b.run_state_tables(state)
+  
+def mp_run_fact_db(arg):
+    n, state = arg
+    b = Bundle()
+    b.log("Building (MP) fact tables for {} {}/52".format(state, n))
+    b.run_fact_db(state)
     
 class Bundle(Us2010CensusBundle):
     '''
@@ -16,54 +28,16 @@ class Bundle(Us2010CensusBundle):
         self.super_ = super(Bundle, self)
         self.super_.__init__(directory)
     
-        
-    #def build(self, multi_func=None):   
-    #    super(Bundle, self).build(multi_func=run_state_tables)
-     
-    def build(self, multi_func=None):
-        '''Create data  partitions. 
-        First, creates all of the state segments, one partition per segment per 
-        state. Then creates a partition for each of the geo files. '''
-        import yaml
-        from multiprocessing import Pool
-
-        urls = yaml.load(file(self.urls_file, 'r')) 
-        
-        n = len(urls.keys())
-        i = 1
-        
-        for state in urls.keys():
-            self.log("Building Geo state for {}, {} of {}".format(state, i, n))
-            self.run_state_geo(state)
-            i = i + 1
-         
-        self.store_geo_splits()
-            
-        if self.run_args.multi:
-            pool = Pool(processes=int(self.run_args.multi))
-            result = pool.map_async(multi_func, urls['geos'].keys())
-            print result.get()
-        else:
-            for state in urls['geos'].keys():
-                self.log("Building fact tables for {}".format(state))
-                self.run_state_tables(state)
-          
-        return True
+    def build(self):
+        return super(Bundle, self).build(mp_run_state_tables,mp_run_fact_db)
         
     def prepare(self):
         '''Create the prototype database'''
-
-        if not super(Bundle, self).prepare():
-            return False
-
-        return True
+        return super(Bundle, self).prepare()
 
 import sys
 
-def run_state_tables(state):
-    b = Bundle()
-    b.log("Building (MP) fact tables for {}".format(state))
-    b.run_state_tables(state)
+
 
 if __name__ == '__main__':
     import databundles.run

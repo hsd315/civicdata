@@ -6,6 +6,20 @@ Created on Jun 10, 2012
 @author: eric
 '''
 from  sourcesupport.us2000census import Us2000CensusBundle
+  
+def mp_run_state_tables(arg):
+    n, state = arg
+    b = Bundle()
+    b.log("Building (MP) fact tables for {} {}/52".format(state, n))
+    b.run_state_tables(state)
+    return state
+  
+def mp_run_fact_db(arg):
+    n, table_id = arg
+    b = Bundle()
+    b.log("Building (MP) fact database for {} {}/52".format(table_id, n))
+    b.run_fact_db(table_id)
+    return table_id
     
 class Bundle(Us2000CensusBundle):
     '''
@@ -17,41 +31,19 @@ class Bundle(Us2000CensusBundle):
         self.super_.__init__(directory)
     
         
-    def build(self, multi_func=None):
-        super(Bundle, self).build(multi_func=run_state_tables)
+    def build(self):
+        return super(Bundle, self).build(mp_run_state_tables,mp_run_fact_db)
         
     def prepare(self):
         '''Create the prototype database'''
-
-        if not super(Bundle, self).prepare():
-            return False
-
-        if not self.schema.table('sf1geo'): # Do this only once for the database
-            from databundles.orm import Column
-            self.schema.schema_from_file(open(self.geoschema_file, 'rbU'))
-    
-            # Add extra fields to all of the split_tables
-            for table in self.schema.tables:
-                if not table.data.get('split_table', False):
-                    continue;
-            
-                table.add_column('hash',  datatype=Column.DATATYPE_INTEGER,
-                                  uindexes = 'uihash')
-        return True
+        return super(Bundle, self).prepare()
         
 import sys
-
-def run_state_tables(state):
-    b = Bundle()
-    b.log("Building (MP) fact tables for {}".format(state))
-    b.run_state_tables(state)
 
 if __name__ == '__main__':
     import databundles.run
     #import cProfile 
 
-
     #cProfile.run('databundles.run.run(sys.argv[1:], Bundle)')
     databundles.run.run(sys.argv[1:], Bundle)
-    
     
