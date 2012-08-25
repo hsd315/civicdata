@@ -10,6 +10,8 @@ from  sourcesupport.us2000census import Us2000CensusBundle
 def mp_run_state_tables(arg):
     n, state = arg
     b = Bundle()
+    b.parse_args(sys.argv[1:])
+    
     b.log("Building (MP) fact tables for {} {}/52".format(state, n))
     b.run_state_tables(state)
     return state
@@ -17,6 +19,8 @@ def mp_run_state_tables(arg):
 def mp_run_fact_db(arg):
     n, table_id = arg
     b = Bundle()
+    b.parse_args(sys.argv[1:])
+   
     b.log("Building (MP) fact database for {} {}/52".format(table_id, n))
     b.run_fact_db(table_id)
     return table_id
@@ -36,6 +40,7 @@ class Bundle(Us2000CensusBundle):
         
     def prepare(self):
         '''Create the prototype database'''
+        
         return super(Bundle, self).prepare()
         
 import sys
