@@ -1,0 +1,37 @@
+build:
+    geoheaderFile: meta/geoheaders.csv
+    geoschemaFile: meta/geoschema.csv
+    headersFile: meta/2000-sf4-columns.csv
+    partitionsFile: meta/partitions.sql
+    rangeMapFile: meta/range_map.yaml
+    rootUrl: http://www2.census.gov/census_2000/datasets/Summary_File_4/
+    segMapFile: meta/seg_map.yaml
+    statesFile: meta/States
+    urlsFile: meta/urls.yaml
+identity:
+    creator: clarinova.com
+    dataset: 2000 Population
+    id: a1oDFK
+    revision: 1
+    source: census.gov
+    subset: SF4
+    variation: orig
+library:
+    database:
+        dbname: databundles-dev
+        driver: postgresql+psycopg2
+        password: databundles
+        server: lorne
+        username: databundles
+    downloads: /net/nas2/c/proj/data-library-downloads/
+    extracts: /Volumes/DataLibrary/extracts
+    root: /Volumes/DataLibrary/data
+loaded:
+- /etc/databundles.yaml
+repository:
+    main:
+        access: none
+        bucket: ma-bucket
+        secret: none
+        type: S3
+    submit: main

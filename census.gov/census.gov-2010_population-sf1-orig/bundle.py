@@ -10,12 +10,14 @@ from  sourcesupport.us2010census import Us2010CensusBundle
 def mp_run_state_tables(arg):
     n, state = arg
     b = Bundle()
+    b.parse_args(sys.argv[1:])
     b.log("Building (MP) fact tables for {} {}/52".format(state, n))
     b.run_state_tables(state)
   
 def mp_run_fact_db(arg):
     n, state = arg
     b = Bundle()
+    b.parse_args(sys.argv[1:])
     b.log("Building (MP) fact tables for {} {}/52".format(state, n))
     b.run_fact_db(state)
     
