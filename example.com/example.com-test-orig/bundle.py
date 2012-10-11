@@ -3,15 +3,16 @@
 
 from  databundles.bundle import BuildBundle
 from  databundles.orm import Table, Column
-from databundles.exceptions import ConfigurationError
+from databundles.dbexceptions import ConfigurationError
+import os.path
 class Bundle(BuildBundle):
     ''' '''
  
     def __init__(self, directory=None):
         self.super_ = super(Bundle, self)
+     
         self.super_.__init__(directory)
 
-  
   
     def prepare(self):
         
@@ -59,15 +60,24 @@ class Bundle(BuildBundle):
 
         # make a few partitions
         
-        for space in ['space1', 'space2']:
-            for time in ['time1','time2']:
+        for space in ['space1', 'space2', 'space3', 'space4' ]:
+            for time in ['time1','time2', 'time3','time4']:
                 pid = PartitionIdentity(self.identity, time=time, space=space)
                 partition = self.partitions.new_partition(pid)
-                self.database.session.commit()
-                print partition.identity.name
+                partition.database.session.commit()
+                self.log('Creating: '+partition.identity.name)
                 partition.init()
 
-        
+                with partition.database.inserter('example') as ins:
+                    for i in range(1,10):
+                        ins.insert([
+                               random.randint(1,10000),
+                               random.random()*1000,
+                               str(uuid.uuid4()),
+                               random.choice(tags),
+                               random.choice(flags)+random.choice(flags)
+                               ])
+                
 
         return True
        
@@ -76,8 +86,14 @@ class Bundle(BuildBundle):
     def install(self):
         
         try:
-            self.log("Installing to library" + self.library.root)
+            self.log("Installing base to library")
             self.library.put(self)
+            
+            for partition in self.partitions.all:
+                self.log("Installing partition to library: "+str(partition.identity.name))
+                self.library.put(partition)
+            
+            
         except ConfigurationError:
             self.log("ERROR: Missing configuration for library root in bundle.yaml")
             return False

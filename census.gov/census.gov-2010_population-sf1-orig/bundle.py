@@ -40,11 +40,9 @@ class Bundle(Us2010CensusBundle):
 import sys
 
 
-
 if __name__ == '__main__':
     import databundles.run
     #import cProfile 
-
 
     #cProfile.run('databundles.run.run(sys.argv[1:], Bundle)')
     databundles.run.run(sys.argv[1:], Bundle)

@@ -5,8 +5,8 @@ Created on Jun 10, 2012
 
 @author: eric
 '''
-from  sourcesupport.us2000census import Us2000CensusBundle
-  
+from  databundles.sourcesupport.us2000census import Us2000CensusBundle
+ 
 def mp_run_state_tables(arg):
     n, state = arg
     b = Bundle()
