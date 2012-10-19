@@ -34,7 +34,6 @@ class Bundle(Us2000CensusBundle):
         self.super_ = super(Bundle, self)
         self.super_.__init__(directory)
     
-        
     def build(self):
         return super(Bundle, self).build(mp_run_state_tables,mp_run_fact_db)
         

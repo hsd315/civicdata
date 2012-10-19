@@ -22,5 +22,12 @@ meta/sf1geo.sql is extracted from the meta/tables.sql file.
 
 meta/geoheaders comes from the IRE Census project, 
 https://raw.github.com/ireapps/census/master/dataprocessing/census2000_geo_schema.csv
+
+DATA CHANGES
+------------
+
+The geo file for Puerto Rico has a lot of b-bit names. Census files are encoded 
+as IBM850, and these encoding are converted to unicode. In general, this conversion 
+happened whenever sqlite throws an error when an 8-bit string is inserted. 
     
     

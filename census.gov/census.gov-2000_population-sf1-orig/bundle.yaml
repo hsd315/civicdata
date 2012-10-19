@@ -1,13 +1,11 @@
 build:
-    headersFile: meta/2000-sf1-columns.csv
     rootUrl: http://www2.census.gov/census_2000/datasets/Summary_File_1/
+    headersFile: meta/2000-sf1-columns.csv
     statesFile: meta/States
-    geoheaderFile: meta/geoheaders.csv
     geoschemaFile: meta/geoschema.csv
-    urlsFile: meta/urls.yaml
-    segMapFile: meta/seg_map.yaml
-    rangeMapFile: meta/range_map.yaml
-    partitionsFile: meta/partitions.sql
+    urlsFile: build/urls.yaml
+    segMapFile: build/seg_map.yaml
+    rangeMapFile: build/range_map.yaml
 identity:
     creator: clarinova.com
     dataset: 2000 Population

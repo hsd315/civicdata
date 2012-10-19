@@ -5,7 +5,7 @@ Created on Jun 10, 2012
 
 @author: eric
 '''
-from  sourcesupport.us2010census import Us2010CensusBundle
+from  databundles.sourcesupport.us2010census import Us2010CensusBundle
    
 def mp_run_state_tables(arg):
     n, state = arg
