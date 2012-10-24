@@ -6,6 +6,8 @@ build:
     urlsFile: build/urls.yaml
     segMapFile: build/seg_map.yaml
     rangeMapFile: build/range_map.yaml
+    fileid: 1
+    release_id: 10 
 identity:
     creator: clarinova.com
     dataset: 2000 Population

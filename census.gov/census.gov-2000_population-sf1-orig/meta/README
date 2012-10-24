@@ -5,3 +5,20 @@ at:  http://www.census.gov/support/2000/SF1/Access97.zip
 mdb-export SF1.MDB TABLES > columns.csv
 
 mdb-schema SF1.MDB   > tables.sql
+
+Notes
+
+Got rid of the Consolodated city geo table, since there only a few valid values,
+from the SF! documentation, 7-9:
+
+03436 Athens-Clarke County, Georgia
+04200 Augusta-Richmond County, Georgia
+11397 Butte-Silver Bow, Montana
+19000 Columbus, Georgia
+36003 Indianapolis, Indiana
+47515 Milford, Connecticut
+52006 Nashville-Davidson, Tennessee
+
+These regions should be distinguishable, and avoidable, by their sumlev
+
+Metropo
