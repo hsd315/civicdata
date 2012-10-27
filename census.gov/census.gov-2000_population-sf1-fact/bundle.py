@@ -5,7 +5,7 @@ Created on Jun 10, 2012
 
 @author: eric
 '''
-from  databundles.sourcesupport.us2000census import Us2000CensusBundle
+from  databundles.sourcesupport.us2000census import Us2000FactCensusBundle
   
 def mp_run_state_tables(arg):
     n, state = arg
@@ -24,17 +24,8 @@ def mp_run_fact_db(arg):
     b.log("Building (MP) fact database for {} {}/52".format(table_id, n))
     b.run_fact_db(table_id)
     return table_id
-    
-def mp_run_geo_dim(arg):
-    n, table_id = arg
-    b = Bundle()
-    b.parse_args(sys.argv[1:])
    
-    b.log("Creating (MP) geo dim tables for {} {}/52".format(table_id, n))
-    b.run_geo_dim(table_id)
-    return table_id
-    
-class Bundle(Us2000CensusBundle):
+class Bundle(Us2000FactCensusBundle):
     '''
     Bundle code for US 2000 Census, Summary File 1
     '''
@@ -44,7 +35,8 @@ class Bundle(Us2000CensusBundle):
         self.super_.__init__(directory)
     
     def build(self):
-        return super(Bundle, self).build(mp_run_geo_dim, mp_run_state_tables,mp_run_fact_db)
+        return super(Bundle, self).build(mp_run_state_tables,
+                                         mp_run_fact_db)
         
     def prepare(self):
         '''Create the prototype database'''
