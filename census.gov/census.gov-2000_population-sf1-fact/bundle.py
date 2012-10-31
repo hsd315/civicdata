@@ -5,7 +5,7 @@ Created on Jun 10, 2012
 
 @author: eric
 '''
-from  databundles.sourcesupport.us2000census import Us2000FactCensusBundle
+from  databundles.sourcesupport.us2000census import Us2000CensusFactBundle
   
 def mp_run_state_tables(arg):
     n, state = arg
@@ -25,7 +25,7 @@ def mp_run_fact_db(arg):
     b.run_fact_db(table_id)
     return table_id
    
-class Bundle(Us2000FactCensusBundle):
+class Bundle(Us2000CensusFactBundle):
     '''
     Bundle code for US 2000 Census, Summary File 1
     '''

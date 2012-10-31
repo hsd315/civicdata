@@ -3,6 +3,8 @@ build:
     headersFile: meta/2000-sf1-columns.csv
     statesFile: meta/States
     geoschemaFile: meta/geoschema.csv
+    postCreateSql: meta/post_create.sql
+    sf1IndexSql: meta/sf1_geo_indexes.sql
     geoMap: build/geo_map.pickle
     urlsFile: build/urls.yaml
     segMapFile: build/seg_map.yaml
