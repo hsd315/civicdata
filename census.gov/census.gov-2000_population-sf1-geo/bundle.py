@@ -32,9 +32,9 @@ def mp_run_join_geo_dim(partition_id):
     partition = b.partitions.get(partition_id)
     
     try:
-        b.join_geo_dim(partition)
-    except:
-        b.error("Failed to join {} ".format(partition.identity.name))
+        b.load_geo_dim(partition)
+    except Exception as e:
+        b.error("Failed to join {}: {} ".format(partition.identity.name, e))
         
     return partition.identity.name  
     
@@ -48,8 +48,7 @@ class Bundle(Us2000CensusDimBundle):
         self.super_.__init__(directory)
     
     def build(self):
-        return super(Bundle, self).build(mp_run_join_geo_dim, 
-                                         mp_run_geo_dim)
+        return super(Bundle, self).build(mp_run_join_geo_dim, mp_run_geo_dim)
         
     def prepare(self):
         '''Create the prototype database'''

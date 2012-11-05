@@ -5,12 +5,8 @@ build:
     geoschemaFile: meta/geoschema.csv
     postCreateSql: meta/post_create.sql
     sf1IndexSql: meta/sf1_geo_indexes.sql
-    geoMap: build/geo_map.pickle
-    urlsFile: build/urls.yaml
-    segMapFile: build/seg_map.yaml
-    rangeMapFile: build/range_map.yaml
-    fileid: 1
-    release_id: 2800
+    urlsFile: meta/urls.yaml
+    release_id: 2801
     
 identity:
     creator: clarinova.com

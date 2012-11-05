@@ -1,5 +1,5 @@
-"table","column","is_pk","is_fk","i1","i2","i3","ui1","type","width","default","description","Notes","d_split_table","d_orig_type"
-"record_code","record_code_id",1,,,,,,"INTEGER",,-1,,,"A",
+"table","column","is_pk","is_fk","i1","i2","i3","ui1","type","width","default","description","Notes","d_split_table","d_mandatory"
+"record_code","record_code_id",1,,,,,,"INTEGER",,-1,,,,
 "record_code","logrecno",,,1,,,,"INTEGER",7,-1,,,,
 "record_code","geoid",,,1,,,,"INTEGER64",,-1,,,,
 ,,,,,,,,,,,,,,
@@ -9,7 +9,7 @@
 "grain","sumlev",,,,,,,"INTEGER",3,-1,,,,
 "grain","geocomp",,,,,,,"INTEGER",2,-1,,,,
 "grain","chariter",,,,,,,"INTEGER",3,-1,,,,
-"grain","cifsn",,,,,,,"INTEGER",2,-1,,,,"TEXT"
+"grain","cifsn",,,,,,,"INTEGER",2,-1,,,,
 ,,,,,,,,,,,,,,
 "name","name_id",1,,,,,,"INTEGER",,-1,,,"A",
 "name","name",,,,,,,"TEXT",,"NONE",,,,
@@ -52,25 +52,25 @@
 "block","county",,,,,,,"INTEGER",,-1,"County",,,
 "block","tract",,,,,,,"INTEGER",,-1,"Census Tract",,,
 "block","blkgrp",,,,,,,"INTEGER",,-1,"Block Group",,,
-"block","block",,,,,,,"INTEGER",4,-1,"Block",,,
+"block","block",,,,,,,"INTEGER",4,-1,"Block",,,1
 ,,,,,,,,,,,,,,
 "blockgroup","blockgroup_id",1,,,,,,"INTEGER",,,,,"A",
 "blockgroup","state",,,,,,,"INTEGER",,-1,"State ( Census)",,,
 "blockgroup","county",,,,,,,"INTEGER",,-1,"County",,,
 "blockgroup","tract",,,,,,,"INTEGER",,-1,"Census Tract",,,
-"blockgroup","blkgrp",,,,,,,"INTEGER",,-1,"Block Group",,,
+"blockgroup","blkgrp",,,,,,,"INTEGER",,-1,"Block Group",,,1
 ,,,,,,,,,,,,,,
 "tract","tract_id",1,,,,,,"INTEGER",,,,,"A",
 "tract","state",,,,,,,"INTEGER",,-1,"State ( Census)",,,
 "tract","county",,,,,,,"INTEGER",,-1,"County",,,
-"tract","tract",,,,,,,"INTEGER",,-1,"Census Tract",,,
+"tract","tract",,,,,,,"INTEGER",,-1,"Census Tract",,,1
 ,,,,,,,,,,,,,,
-"taz","taz_id",,,,,,,"INTEGER",-1,,,,"A",
+"taz","taz_id",1,,,,,,"INTEGER",-1,,,,"A",
 "taz","state",,,,,,,"INTEGER",,-1,"State ( Census)",,,
 "taz","county",,,,,,,"INTEGER",,-1,"County",,,
-"taz","taz",,,,,,,"TEXT",6,"NONE","Traffic Analysis Zone",,,
+"taz","taz",,,,,,,"TEXT",6,"NONE","Traffic Analysis Zone",,,1
 ,,,,,,,,,,,,,,
-"puma","puma_id",,,,,,,"INTEGER",,-1,,,"A",
+"puma","puma_id",1,,,,,,"INTEGER",,-1,,,"A",
 "puma","puma5",,,,,,,"INTEGER",,-1,"Public Use Microdata Area 5% File",,,
 "puma","puma1",,,,,,,"INTEGER",,-1,"Public Use Microdata Area 1% File",,,
 ,,,,,,,,,,,,,,
@@ -78,19 +78,19 @@
 "county","region",,,,,,,"INTEGER",,-1,"Region",,,
 "county","division",,,,,,,"INTEGER",,-1,"Division",,,
 "county","state",,,,,,,"INTEGER",,-1,"State ( Census)",,,
-"county","county",,,,,,,"INTEGER",,-1,"County",,,"TEXT"
-"county","countysc",,,,,,,"INTEGER",,-1,"County Size Code",,,"TEXT"
+"county","county",,,,,,,"INTEGER",,-1,"County",,,
+"county","countysc",,,,,,,"INTEGER",,-1,"County Size Code",,,
 "county","cousub",,,,,,,"INTEGER",5,-1,"County Subdivision (FIPS)",,,
 "county","cousubcc",,,,,,,"TEXT",,"NONE","FIPS County Subdivision Class Code",,,
-"county","cousubsc",,,,,,,"INTEGER",,-1,"County Subdivision Size Code",,,"TEXT"
+"county","cousubsc",,,,,,,"INTEGER",,-1,"County Subdivision Size Code",,,
 ,,,,,,,,,,,,,,
 "leg_district","leg_district_id",1,,,,,,"INTEGER",,-1,,,"A",
 "leg_district","state",,,,,,,"INTEGER",,-1,"State",,,
 "leg_district","county",,,,,,,"INTEGER",,-1,"County",,,
-"leg_district","cd106",,,,,,,"INTEGER",,-1,"Congressional District (106th)",,,"TEXT"
-"leg_district","cd108",,,,,,,"INTEGER",,-1,"Congressional District (108th)",,,"TEXT"
-"leg_district","cd109",,,,,,,"INTEGER",,-1,"Congressional District (109th)",,,"TEXT"
-"leg_district","cd110",,,,,,,"INTEGER",,-1,"Congressional District (110th)",,,"TEXT"
+"leg_district","cd106",,,,,,,"INTEGER",,-1,"Congressional District (106th)",,,
+"leg_district","cd108",,,,,,,"INTEGER",,-1,"Congressional District (108th)",,,
+"leg_district","cd109",,,,,,,"INTEGER",,-1,"Congressional District (109th)",,,
+"leg_district","cd110",,,,,,,"INTEGER",,-1,"Congressional District (110th)",,,
 "leg_district","vtdi",,,,,,,"TEXT",,"NONE","Voting District Indicator",,,
 "leg_district","vtd",,,,,,,"TEXT",,"NONE","Voting District",,,
 "leg_district","sldu",,,,,,,"TEXT",,"NONE","State Legislative District (Upper Chamber)",,,
@@ -100,18 +100,18 @@
 "metro_type","state",,,,,,,"INTEGER",,-1,,,,
 "metro_type","county",,,,,,,"INTEGER",,-1,,,,
 "metro_type","place",,,,,,,"INTEGER",5,-1,,,,
-"metro_type","msacmsa",,,,,,,"INTEGER",4,-1,"Metropolitan Statistical Area/Consolidated Metropolitan Statistical Area",,,"TEXT"
-"metro_type","masc",,,,,,,"INTEGER",,-1,"MSA/CMSA Size Code",,,"TEXT"
-"metro_type","cmsa",,,,,,,"INTEGER",2,-1,"Consolidated Metropolitan Statistical Area",,,"TEXT"
+"metro_type","msacmsa",,,,,,,"INTEGER",4,-1,"Metropolitan Statistical Area/Consolidated Metropolitan Statistical Area",,,
+"metro_type","masc",,,,,,,"INTEGER",,-1,"MSA/CMSA Size Code",,,
+"metro_type","cmsa",,,,,,,"INTEGER",2,-1,"Consolidated Metropolitan Statistical Area",,,
 "metro_type","macci",,,,,,,"TEXT",1,"NONE","Metropolitan Area Central City Indicator",,,
-"metro_type","pmsa",,,,,,,"INTEGER",4,-1,"Primary Metropolitan Statistical Area",,,"TEXT"
+"metro_type","pmsa",,,,,,,"INTEGER",4,-1,"Primary Metropolitan Statistical Area",,,
 ,,,,,,,,,,,,,,
 "place","place_id",1,,,,,,"INTEGER",,,,,"A",
 "place","state",,,,,,,"INTEGER",,-1,"State",,,
-"place","place",,,,,,,"INTEGER",5,-1,"Place (FIPS)",,,"TEXT"
+"place","place",,,,,,,"INTEGER",5,-1,"Place (FIPS)",,,
 "place","placecc",,,,,,,"TEXT",2,"NONE","FIPS Place Class Code",,,
 "place","placedc",,,,,,,"TEXT",,"NONE","Place Description Code",,,
-"place","placesc",,,,,,,"INTEGER",,-1,"Place Size Code",,,"TEXT"
+"place","placesc",,,,,,,"INTEGER",,-1,"Place Size Code",,,
 "place","exi",,,,,,,"TEXT",1,"NONE","Extended Place Indicator",,,
 ,,,,,,,,,,,,,,
 "schools","schools_id",1,,,,,,"INTEGER",,-1,,,"A",
@@ -127,21 +127,21 @@
 "spec_area","necmasc",,,,,,,"INTEGER",,-1,"New England County Metropolitan Area Size Code",,,
 "spec_area","submcd",,,,,,,"INTEGER",5,-1,"Subbarrio (FIPS)",,,
 "spec_area","submcdcc",,,,,,,"TEXT",2,"NONE","FIPS Subbarrio Class Code",,,
-"spec_area","anrc",,,,,,,"INTEGER",5,-1,"Alaska Native Regional Corporation (FIPS)",,,"TEXT"
+"spec_area","anrc",,,,,,,"INTEGER",5,-1,"Alaska Native Regional Corporation (FIPS)",,,
 "spec_area","anrccc",,,,,,,"TEXT",2,"NONE","FIPS Alaska Native Regional Corporation Class Code",,,
-"spec_area","aianhh",,,,,,,"INTEGER",4,-1,"American Indian Area/Alaska Native Area/Hawaiian Home Land (Census)",,,"TEXT"
-"spec_area","aianhhfp",,,,,,,"INTEGER",5,-1,"American Indian Area/Alaska Native Area/Hawaiian Home Land (FIPS).",,,"TEXT"
+"spec_area","aianhh",,,,,,,"INTEGER",4,-1,"American Indian Area/Alaska Native Area/Hawaiian Home Land (Census)",,,
+"spec_area","aianhhfp",,,,,,,"INTEGER",5,-1,"American Indian Area/Alaska Native Area/Hawaiian Home Land (FIPS).",,,
 "spec_area","aianhhcc",,,,,,,"TEXT",2,"NONE","FIPS American Indian Area/Alaska Native Area/Hawaiian Home Land Class Code",,,
 "spec_area","aihhtli",,,,,,,"TEXT",1,"NONE","American Indian Trust Land/Hawaiian Home Land Indicator",,,
-"spec_area","aitsce",,,,,,,"INTEGER",3,-1,"American Indian Tribal Subdivision (Census)",,,"TEXT"
-"spec_area","aits",,,,,,,"INTEGER",5,-1,"American Indian Tribal Subdivision (FIPS)",,,"TEXT"
+"spec_area","aitsce",,,,,,,"INTEGER",3,-1,"American Indian Tribal Subdivision (Census)",,,
+"spec_area","aits",,,,,,,"INTEGER",5,-1,"American Indian Tribal Subdivision (FIPS)",,,
 "spec_area","aitscc",,,,,,,"TEXT",2,"NONE","FIPS American Indian Tribal Subdivision Class Code",,,
 "spec_area","uga",,,,,,,"INTEGER",5,-1,"Oregon Urban Growth Area",,,
 ,,,,,,,,,,,,,,
 "urban_type","urban_type_id",1,,,,,,"INTEGER",,-1,"Code used in SF3, Not 1 or 2",,"A",
 "urban_type","ua",,,,,,,"INTEGER",,-1,"Urban Area",,,
 "urban_type","uasc",,,,,,,"INTEGER",,-1,"Urban Area Size Code",,,
-"urban_type","uatype",,,,,,,"TEXT",1,-1,"Urban Area Type",,,"TEXT"
+"urban_type","uatype",,,,,,,"TEXT",1,-1,"Urban Area Type",,,
 "urban_type","ur",,,,,,,"TEXT",1,-1,"Urban/Rural",,,
 ,,,,,,,,,,,,,,
 "sf1geo","fileid",,,,,,,"TEXT",6,"NONE",,,,
@@ -149,61 +149,61 @@
 "sf1geo","sumlev",,,,,,,"INTEGER",3,-1,,,,
 "sf1geo","geocomp",,,,,,,"INTEGER",2,-1,,,,
 "sf1geo","chariter",,,,,,,"INTEGER",3,-1,,,,
-"sf1geo","cifsn",,,,,,,"INTEGER",2,-1,,,,"TEXT"
+"sf1geo","cifsn",,,,,,,"INTEGER",2,-1,,,,
 "sf1geo","logrecno",,,,,,,"INTEGER",7,-1,,,,
 "sf1geo","region",,,,,,,"INTEGER",1,-1,,,,
 "sf1geo","division",,,,,,,"INTEGER",1,-1,,,,
 "sf1geo","statece",,,,,,,"INTEGER",2,-1,,,,
 "sf1geo","state",,,,,,,"INTEGER",2,-1,,,,
-"sf1geo","county",,,,,,,"INTEGER",3,-1,,,,"TEXT"
-"sf1geo","countysc",,,,,,,"INTEGER",2,-1,,,,"TEXT"
-"sf1geo","cousub",,,,,,,"INTEGER",5,-1,,,,"TEXT"
+"sf1geo","county",,,,,,,"INTEGER",3,-1,,,,
+"sf1geo","countysc",,,,,,,"INTEGER",2,-1,,,,
+"sf1geo","cousub",,,,,,,"INTEGER",5,-1,,,,
 "sf1geo","cousubcc",,,,,,,"TEXT",2,"NONE",,,,
-"sf1geo","cousubsc",,,,,,,"INTEGER",2,-1,,,,"TEXT"
-"sf1geo","place",,,,,,,"INTEGER",5,-1,,,,"TEXT"
+"sf1geo","cousubsc",,,,,,,"INTEGER",2,-1,,,,
+"sf1geo","place",,,,,,,"INTEGER",5,-1,,,,
 "sf1geo","placecc",,,,,,,"TEXT",2,"NONE",,,,
 "sf1geo","placedc",,,,,,,"TEXT",1,"NONE",,,,
-"sf1geo","placesc",,,,,,,"INTEGER",2,-1,,,,"TEXT"
-"sf1geo","tract",,,,,,,"INTEGER",6,-1,,,,"TEXT"
-"sf1geo","blkgrp",,,,,,,"INTEGER",1,-1,,,,"TEXT"
-"sf1geo","block",,,,,,,"INTEGER",4,-1,,,,"TEXT"
-"sf1geo","iuc",,,,,,,"INTEGER",2,-1,,,,"TEXT"
-"sf1geo","concit",,,,,,,"INTEGER",5,-1,,,,"TEXT"
+"sf1geo","placesc",,,,,,,"INTEGER",2,-1,,,,
+"sf1geo","tract",,,,,,,"INTEGER",6,-1,,,,
+"sf1geo","blkgrp",,,,,,,"INTEGER",1,-1,,,,
+"sf1geo","block",,,,,,,"INTEGER",4,-1,,,,
+"sf1geo","iuc",,,,,,,"INTEGER",2,-1,,,,
+"sf1geo","concit",,,,,,,"INTEGER",5,-1,,,,
 "sf1geo","concitcc",,,,,,,"TEXT",2,"NONE",,,,
-"sf1geo","concitsc",,,,,,,"INTEGER",2,-1,,,,"TEXT"
-"sf1geo","aianhh",,,,,,,"INTEGER",4,-1,,,,"TEXT"
-"sf1geo","aianhhfp",,,,,,,"INTEGER",5,-1,,,,"TEXT"
+"sf1geo","concitsc",,,,,,,"INTEGER",2,-1,,,,
+"sf1geo","aianhh",,,,,,,"INTEGER",4,-1,,,,
+"sf1geo","aianhhfp",,,,,,,"INTEGER",5,-1,,,,
 "sf1geo","aianhhcc",,,,,,,"TEXT",2,"NONE",,,,
 "sf1geo","aihhtli",,,,,,,"TEXT",1,"NONE",,,,
-"sf1geo","aitsce",,,,,,,"INTEGER",3,-1,,,,"TEXT"
-"sf1geo","aits",,,,,,,"INTEGER",5,-1,,,,"TEXT"
+"sf1geo","aitsce",,,,,,,"INTEGER",3,-1,,,,
+"sf1geo","aits",,,,,,,"INTEGER",5,-1,,,,
 "sf1geo","aitscc",,,,,,,"TEXT",2,"NONE",,,,
-"sf1geo","anrc",,,,,,,"INTEGER",5,-1,,,,"TEXT"
+"sf1geo","anrc",,,,,,,"INTEGER",5,-1,,,,
 "sf1geo","anrccc",,,,,,,"TEXT",2,"NONE",,,,
-"sf1geo","msacmsa",,,,,,,"INTEGER",4,-1,,,,"TEXT"
-"sf1geo","masc",,,,,,,"INTEGER",2,-1,,,,"TEXT"
-"sf1geo","cmsa",,,,,,,"INTEGER",2,-1,,,,"TEXT"
+"sf1geo","msacmsa",,,,,,,"INTEGER",4,-1,,,,
+"sf1geo","masc",,,,,,,"INTEGER",2,-1,,,,
+"sf1geo","cmsa",,,,,,,"INTEGER",2,-1,,,,
 "sf1geo","macci",,,,,,,"TEXT",1,"NONE",,,,
-"sf1geo","pmsa",,,,,,,"INTEGER",4,-1,,,,"TEXT"
-"sf1geo","necma",,,,,,,"INTEGER",4,-1,,,,"TEXT"
+"sf1geo","pmsa",,,,,,,"INTEGER",4,-1,,,,
+"sf1geo","necma",,,,,,,"INTEGER",4,-1,,,,
 "sf1geo","necmacci",,,,,,,"TEXT",1,"NONE",,,,
-"sf1geo","necmasc",,,,,,,"INTEGER",2,-1,,,,"TEXT"
+"sf1geo","necmasc",,,,,,,"INTEGER",2,-1,,,,
 "sf1geo","exi",,,,,,,"TEXT",1,"NONE",,,,
-"sf1geo","ua",,,,,,,"INTEGER",5,-1,,,,"TEXT"
-"sf1geo","uasc",,,,,,,"INTEGER",2,-1,,,,"TEXT"
-"sf1geo","uatype",,,,,,,"TEXT",1,-1,,,,"TEXT"
-"sf1geo","ur",,,,,,,"TEXT",1,-1,,,,"TEXT"
-"sf1geo","cd106",,,,,,,"INTEGER",2,-1,,,,"TEXT"
-"sf1geo","cd108",,,,,,,"INTEGER",2,-1,,,,"TEXT"
-"sf1geo","cd109",,,,,,,"INTEGER",2,-1,,,,"TEXT"
-"sf1geo","cd110",,,,,,,"INTEGER",2,-1,,,,"TEXT"
+"sf1geo","ua",,,,,,,"INTEGER",5,-1,,,,
+"sf1geo","uasc",,,,,,,"INTEGER",2,-1,,,,
+"sf1geo","uatype",,,,,,,"TEXT",1,-1,,,,
+"sf1geo","ur",,,,,,,"TEXT",1,-1,,,,
+"sf1geo","cd106",,,,,,,"INTEGER",2,-1,,,,
+"sf1geo","cd108",,,,,,,"INTEGER",2,-1,,,,
+"sf1geo","cd109",,,,,,,"INTEGER",2,-1,,,,
+"sf1geo","cd110",,,,,,,"INTEGER",2,-1,,,,
 "sf1geo","sldu",,,,,,,"TEXT",3,"NONE",,,,
 "sf1geo","sldl",,,,,,,"TEXT",3,"NONE",,,,
 "sf1geo","vtd",,,,,,,"TEXT",6,"NONE",,,,
 "sf1geo","vtdi",,,,,,,"TEXT",1,"NONE",,,,
-"sf1geo","zcta3",,,,,,,"INTEGER",3,-1,,,,"TEXT"
+"sf1geo","zcta3",,,,,,,"INTEGER",3,-1,,,,
 "sf1geo","zcta5",,,,,,,"TEXT",5,"NONE",,,,
-"sf1geo","submcd",,,,,,,"INTEGER",5,-1,,,,"TEXT"
+"sf1geo","submcd",,,,,,,"INTEGER",5,-1,,,,
 "sf1geo","submcdcc",,,,,,,"TEXT",2,"NONE",,,,
 "sf1geo","arealand",,,,,,,"INTEGER",14,-1,,,,
 "sf1geo","areawatr",,,,,,,"INTEGER",14,-1,,,,
@@ -216,11 +216,11 @@
 "sf1geo","intptlon",,,,,,,"INTEGER",10,-1,,,,
 "sf1geo","lsadc",,,,,,,"TEXT",2,-1,,,,
 "sf1geo","partflag",,,,,,,"TEXT",1,"NONE",,,,
-"sf1geo","sdelm",,,,,,,"INTEGER",5,-1,,,,"TEXT"
-"sf1geo","sdsec",,,,,,,"INTEGER",5,-1,,,,"TEXT"
-"sf1geo","sduni",,,,,,,"INTEGER",5,-1,,,,"TEXT"
+"sf1geo","sdelm",,,,,,,"INTEGER",5,-1,,,,
+"sf1geo","sdsec",,,,,,,"INTEGER",5,-1,,,,
+"sf1geo","sduni",,,,,,,"INTEGER",5,-1,,,,
 "sf1geo","taz",,,,,,,"TEXT",6,"NONE",,,,
-"sf1geo","uga",,,,,,,"INTEGER",5,-1,,,,"TEXT"
-"sf1geo","puma5",,,,,,,"INTEGER",5,-1,,,,"TEXT"
-"sf1geo","puma1",,,,,,,"INTEGER",5,-1,,,,"TEXT"
-"sf1geo","reserved",,,,,,,"INTEGER",32,-1,,,,"TEXT"
+"sf1geo","uga",,,,,,,"INTEGER",5,-1,,,,
+"sf1geo","puma5",,,,,,,"INTEGER",5,-1,,,,
+"sf1geo","puma1",,,,,,,"INTEGER",5,-1,,,,
+"sf1geo","reserved",,,,,,,"INTEGER",32,-1,,,,
