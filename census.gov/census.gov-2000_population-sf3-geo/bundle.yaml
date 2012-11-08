@@ -1,0 +1,16 @@
+build:
+    geoschemaFile: ../census.gov-2000_population-sf1-geo/meta/geoschema.csv
+    rangeMapFile: build/range_map.yaml
+    release_id: 2803
+    rootUrl: http://www2.census.gov/census_2000/datasets/Summary_File_3/
+    segMapFile: build/seg_map.yaml
+    statesFile: ../census.gov-2000_population-sf1-geo/meta/States
+    urlsFile: meta/urls.yaml
+identity:
+    creator: clarinova.com
+    dataset: 2000 Population
+    id: a1O5Tm
+    revision: 1
+    source: census.gov
+    subset: SF3
+    variation: geo
