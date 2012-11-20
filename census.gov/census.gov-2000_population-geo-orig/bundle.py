@@ -2,11 +2,11 @@
 
 @author: eric
 '''
-from  databundles.sourcesupport.us2000census import Us2000CensusDimBundle
+from  databundles.bundle import BuildBundle
 import os.path
 import yaml
  
-class Bundle(Us2000CensusDimBundle):
+class Bundle(BuildBundle):
     '''
     Bundle code for US 2000 Census, Summary File 2
     '''
@@ -15,12 +15,24 @@ class Bundle(Us2000CensusDimBundle):
         self.super_ = super(Bundle, self)
         self.super_.__init__(directory)
 
-        self._states  = ['ak', 'al', 'ar', 'az', 'ca', 'co', 'ct', 'dc', 'de', 
+        self._states = None
+        
+        bg = self.config.build
+        self.geoschema_file = self.filesystem.path(bg.geoschemaFile)
+        self.states_file =  self.filesystem.path(bg.statesFile)
+        self.urls_file =  self.filesystem.path(bg.urlsFile)
+        
+    @property
+    def states(self):
+        if self._states  is None:
+            self._states  = ['ak', 'al', 'ar', 'az', 'ca', 'co', 'ct', 'dc', 'de', 
                          'fl', 'ga', 'hi', 'ia', 'id', 'il', 'in', 'ks', 'ky', 
                          'la', 'ma', 'md', 'me', 'mi', 'mn', 'mo', 'ms', 'mt',
                          'nc', 'nd', 'ne', 'nh', 'nj', 'nm', 'nv', 'ny', 'oh',
                          'ok', 'or', 'pa', 'pr', 'ri', 'sc', 'sd', 'tn', 'tx', 
                          'ut', 'va', 'vt', 'wa', 'wi', 'wv', 'wy']
+                 
+        return self._states
         
     def prepare(self):
         '''Scrape the URLS into the urls.yaml file and load all of the geo data
@@ -141,7 +153,7 @@ class Bundle(Us2000CensusDimBundle):
             
             for state, url in urls.items():
                 
-                if state not in self._states:
+                if state not in self.states:
                     continue
                 
                 with partition.database.inserter(partition.table) as ins:
@@ -203,6 +215,18 @@ class Bundle(Us2000CensusDimBundle):
 
         geofile.close()
 
+    def install(self):  
+     
+        self.log("Install bundle")  
+        dest = self.library.put(self)
+        self.log("Installed to {} ".format(dest[2]))
+        
+        for partition in self.partitions:
+            self.log("Install partition {}".format(partition.name))  
+            dest = self.library.put(partition)
+            self.log("Installed to {} ".format(dest[2]))
+
+        return True
         
 import sys
 
