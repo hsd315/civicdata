@@ -5,14 +5,14 @@ Created on Jun 9, 2012
 '''
 
 
-from  databundles.bundle import Bundle as Base
+from  databundles.bundle import BuildBundle
 from  databundles.orm import Table, Column
 import os.path  
 import zipfile
 import csv
 from contextlib import contextmanager
 
-class Bundle(Base):
+class Bundle(BuildBundle):
     ''' '''
  
     def __init__(self,directory=None):
@@ -22,56 +22,65 @@ class Bundle(Base):
 
     @contextmanager
     def downloader(self):
+        '''This context manager downloads the sourceUrl and extracts
+        a single file. The downloaded file is cached, so it isn't
+        expensive to call multiple times. The file that gets unpacked, 
+        allgmp.ccsv, is the concatenation of the other files in the archive. '''
+        
         url = self.config.group('files').get('sourceUrl')
-        with self.filesystem.download(url, cache=True) as f:
-            extractDir = os.path.dirname(f)
-            with zipfile.ZipFile(f) as zf:
-                for name in  zf.namelist():
+        f = self.filesystem.download(url)
+
+        extractDir = os.path.dirname(f)
+        with zipfile.ZipFile(f) as zf:
+            for name in  zf.namelist():
+                
+                if 'allgmp.csv' in name:  
+                    extractFilename = os.path.join(extractDir,name)
                     
-                    if 'allgmp.csv' in name:  
-                        extractFilename = os.path.join(extractDir,name)
+
+                    if os.path.exists(extractFilename):
+                        os.remove(extractFilename)
                         
-                        if os.path.exists(extractFilename):
-                            os.remove(extractFilename)
-                            
-                        self.log('Extracting'+extractFilename+' from '+f)
-                        name = name.replace('/','').replace('..','')
-                        zf.extract(name,extractDir )
-                        yield extractFilename
-                        os.unlink(extractFilename)
-                        return
-    
-    def schemaGenerator(self):
-        '''Get the first line of the file and make a schema from it. ''' 
-        
-        tname = self.identity.dataset
-        
-        
-        yield Table(name=tname)
-        
-        with self.downloader() as f:
-            reader = csv.reader(open(f, 'rb'))
-            
-            # The header map and uniques dicts keep track of the non-fact values
-            # so we can make dimension tables. 
-            header = reader.next()    
-            first = reader.next()
-           
-           
-        for index,name in enumerate(header):
-            
-            try:
-                int(first[index])
-                dt = Column.DATATYPE_INTEGER
-            except:
-                dt = Column.DATATYPE_TEXT
-            
-            yield Column(name=name,table_name=tname,datatype=dt)
-        
-        
+                    self.log('Extracting'+extractFilename+' from '+f)
+                    name = name.replace('/','').replace('..','')
+                    zf.extract(name,extractDir )
+                    yield extractFilename
+                    os.unlink(extractFilename)
+                    return
+
+
     def prepare(self):
-        self.schema.generate()
+        '''Create a table for the file by taking names from the header
+        of the file, and data types by examining the first line. '''
         
+        if not self.database.exists():
+            self.database.create()
+        
+        if len(self.schema.tables) == 0:
+            table = self.schema.add_table(self.identity.dataset )
+            
+            with self.downloader() as f:
+                reader = csv.reader(open(f, 'rb'))
+                
+                # The header map and uniques dicts keep track of the non-fact values
+                # so we can make dimension tables. 
+                header = reader.next()    
+                first = reader.next()
+    
+            for index,name in enumerate(header):
+        
+                # If the cell can be converted to an int, use the int type. Otherwise, 
+                # make it a TEXT.
+                # WARNING! This won't work if some of the integer fields have a letter
+                # to indicate a footnote.       
+                try:
+                    int(first[index])
+                    dt = Column.DATATYPE_INTEGER
+                except:
+                    dt = Column.DATATYPE_TEXT
+    
+                self.schema.add_column(table, name,datatype=dt)
+                          
         return True
     
     ### Build the final package
@@ -81,6 +90,7 @@ class Bundle(Base):
         
   
     def build(self):
+        
         with self.downloader() as f:
             
             file_ = open(f, 'rb')

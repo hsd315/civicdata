@@ -2,10 +2,14 @@ identity:
     creator: clarinova.com
     dataset: Metro GDP
     id: a13jOR
-    revision: '1'
+    revision: 1
     source: bea.gov
     subset: null
     variation: orig
 files:
     sourceUrl: http://bea.gov/regional/zip/GDPMetro.zip
-  
+documentation:
+    econ-areas-1: http://www.bea.gov/regional/docs/econlist.cfm
+    econ-areas-2: http://www.bea.gov/SCB/PDF/2004/11November/1104Econ-Areas.pdf
+    
+    
