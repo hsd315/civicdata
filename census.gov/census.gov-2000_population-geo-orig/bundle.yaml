@@ -1,10 +1,13 @@
 build:
     urlsFile: meta/urls.yaml
-    statesFile: ../census.gov-2000_population-sf1-geo/meta/States
-    rootUrl: http://www2.census.gov/census_2000/datasets/Summary_File
-    urlTemplate: http://www2.census.gov/census_2000/datasets/Summary_File_{index}/{state}/{stateabr}geo_uf{index}.zip
+    statesFile: meta/states.yaml
     geoschemaFile: meta/geoschema.csv
-    
+    urlTemplate: http://www2.census.gov/census_2000/datasets/Summary_File_{index}/{state}/{stateabr}geo_uf{index}.zip
+    nationalFiles:
+      1: http://www2.census.gov/census_2000/datasets/Summary_File_1/0Final_National/usgeo_uf1.zip
+      2: http://www2.census.gov/census_2000/datasets/Summary_File_2/0Final_National/usgeo_uf2.zip
+      3: http://www2.census.gov/census_2000/datasets/Summary_File_3/0_National/usgeo_uf3.zip
+      4: http://www2.census.gov/census_2000/datasets/Summary_File_4/0_National/usgeo_uf4.zip
 identity:
     creator: clarinova.com
     dataset: 2000 Population

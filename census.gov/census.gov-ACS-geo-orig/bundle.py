@@ -8,7 +8,7 @@ import yaml
  
 class Bundle(BuildBundle):
     '''
-    Bundle code for US 2000 Census, Summary File 2
+    Bundle code for US 2010 Census geo files. 
     '''
 
     def __init__(self,directory=None):
@@ -20,7 +20,6 @@ class Bundle(BuildBundle):
         bg = self.config.build
         self.geoschema_file = self.filesystem.path(bg.geoschemaFile)
         self.states_file =  self.filesystem.path(bg.statesFile)
-        self.urls_file =  self.filesystem.path(bg.urlsFile)
         
         
     def prepare(self):
@@ -52,41 +51,56 @@ class Bundle(BuildBundle):
         
         return True
  
-    def generate_urls(self):
-        '''  '''
-        from databundles.partition import PartitionIdentity
+    def generate_geofiles(self):
+        '''Generate a series of local geofiles, for each of the summary state and national
+        files on the census.gov servers. '''
+        import re, yaml
         
-        
+        self.stateTemplates = self.config.build.stateFileTemplates
+
         with open(self.states_file, 'r') as f:
             states =  yaml.load(f) 
- 
+            
+        def test_zip_file(f):
+            import zipfile
+            try:
+                with zipfile.ZipFile(f) as zf:
+                    return zf.testzip() is None
+            except zipfile.BadZipfile:
+                return False
 
-        template = self.config.build.urlTemplate
- 
-        for index in [1,2,3,4]:
+        for index,url in self.config.build.nationalFiles.items():
+            zip_file = self.filesystem.download(url, test_zip_file)
+            
+            grf = self.filesystem.unzip(zip_file, re.compile('\w\wgeo2010.sf*'))
+            
+            yield 'us', 'sf'+str(index)+'us', grf    
+
+        for index in [1,2]:
             for stateabr, state in states.items():
+                template = self.stateTemplates[index]
                 url = template.format(index=index, state=state, stateabr=stateabr)
-                yield stateabr, url
-
-        nationals = self.config.build.nationalFiles
-
-        for index, url in nationals.items():
-            grain = 'sf'+str(index)+'us'
-            pid = PartitionIdentity(self.identity, table='geofile', grain=grain)
-            yield 'us',  url
-
+                
+                zip_file = self.filesystem.download(url, test_zip_file)
+                
+                grf = self.filesystem.unzip(zip_file, re.compile('\w\wgeo2010.sf*'))
+                
+                yield stateabr, 'sf'+str(index), grf
+                        
+                
         return 
  
 
     def build(self):
         from databundles.partition import PartitionIdentity
         import time
+        import re
+
 
         #self.load()
         
-        #self.split()
-
-                       
+        self.split()
+         
         return True
            
     def load(self):
@@ -94,7 +108,6 @@ class Bundle(BuildBundle):
         import time
         
         row_i = 0
-        t_start = time.time()      
         
         #
         # Load all of the records into
@@ -102,23 +115,25 @@ class Bundle(BuildBundle):
         if not partition.database.exists():
             partition.create_with_tables()          
     
-
         with partition.database.inserter(partition.table) as ins:        
-            for  state, url in  self.generate_urls():
-                for row in self.generate_rows(state, url):
+            for state, file, row in self.generate_rows():
+                
+                if row_i == 0:
+                    t_start = time.time()      
+                
+                row_i += 1
+            
+                if row_i % 50000 == 0:
+                    # Prints the processing rate in 1,000 records per sec.
+                    self.log(state+" "+str(int( row_i/(time.time()-t_start)))+'/s '+str(row_i/1000)+"K ")       
+
+                row['name'] = row['name'].decode('latin1') # The Puerto Rico files has 8-bit names
                     
-                    row_i += 1
+                row = { k:v.strip() for k,v in row.items()}
+   
+                ins.insert(row)  
                 
-                    if row_i % 50000 == 0:
-                        # Prints the processing rate in 1,000 records per sec.
-                        self.log(state+" "+str(int( row_i/(time.time()-t_start)))+'/s '+str(row_i/1000)+"K ") 
-               
-                    if state == 'pr' or state == 'us':
-                        row['name'] = row['name'].decode('latin1') # The Puerto Rico files has 8-bit names
-                        
-                    row = { k:v.strip() for k,v in row.items()}
-                    ins.insert(row)  
-                
+     
     def split(self):
         '''Split the SF1 file into blocks and non-blocks components. This will reduce the
         size below the 5gb limit for storing files on Amazon. '''
@@ -130,26 +145,20 @@ class Bundle(BuildBundle):
         self.log("Compile unique summary levels")
         all = self.partitions.find(PartitionIdentity(self.identity, table='geofile', grain='all'))
         n1 = self.database.attach(all);
-        #self.database.connection.execute('DROP TABLE IF EXISTS sumlev');
+        self.database.connection.execute('DROP TABLE IF EXISTS sumlev');
         q='CREATE TABLE sumlev AS  SELECT DISTINCT trim(sumlev) as sumlev, trim(fileid) as fileid FROM {}.geofile;'.format(n1)
-        #self.database.connection.execute(q);
+        self.database.connection.execute(q);
   
         self.log("Build summary levels file table")
         self.database.connection.execute('DROP TABLE IF EXISTS slfiles');
         q="""
 CREATE TABLE slfiles AS
 SELECT DISTINCT  s0.sumlev, 
-s1.fileid as sf1_file, s2.fileid as sf2_file, s3.fileid as sf3_file, s4.fileid as sf4_file,
-s1us.fileid as sf1us_file, s2us.fileid as sf2us_file, s3us.fileid as sf3us_file, s4us.fileid as sf4us_file
+s1.fileid as sf1_file, s2.fileid as sf2_file, s1us.fileid as sf1us_file
 FROM sumlev as s0
-LEFT JOIN sumlev s1 ON s1.sumlev = s0.sumlev AND s1.fileid = 'uSF1'
-LEFT JOIN sumlev s2 ON s2.sumlev = s0.sumlev AND s2.fileid = 'uSF2'
-LEFT JOIN sumlev s3 ON s3.sumlev = s0.sumlev AND s3.fileid = 'uSF3'
-LEFT JOIN sumlev s4 ON s4.sumlev = s0.sumlev AND s4.fileid = 'uSF4'
-LEFT JOIN sumlev s1us ON s1.sumlev = s0.sumlev AND s1us.fileid = 'uSF1F'
-LEFT JOIN sumlev s2us ON s2.sumlev = s0.sumlev AND s2us.fileid = 'uSF2F'
-LEFT JOIN sumlev s3us ON s3.sumlev = s0.sumlev AND s3us.fileid = 'uSF3F'
-LEFT JOIN sumlev s4us ON s4.sumlev = s0.sumlev AND s4us.fileid = 'uSF4F'
+LEFT JOIN sumlev s1us ON s1.sumlev = s0.sumlev AND s1us.fileid = 'SF1US'
+LEFT JOIN sumlev s1 ON s1.sumlev = s0.sumlev AND s1.fileid = 'SF1ST'
+LEFT JOIN sumlev s2 ON s2.sumlev = s0.sumlev AND s2.fileid = 'SF2ST'
 ;
         """
         self.database.connection.execute(q);
@@ -173,7 +182,7 @@ LEFT JOIN sumlev s4us ON s4.sumlev = s0.sumlev AND s4us.fileid = 'uSF4F'
             
             db.detach(name)
   
-    def generate_rows(self, state, geo_source):
+    def generate_rows(self):
         '''A generator that yields rows from the state geo files. It will 
         unpack the fixed width file and return a dict'''
         import struct
@@ -184,38 +193,30 @@ LEFT JOIN sumlev s4us ON s4.sumlev = s0.sumlev AND s4us.fileid = 'uSF4F'
 
         rows = 0;
 
-        def test_zip_file(f):
-            try:
-                with zipfile.ZipFile(f) as zf:
-                    return zf.testzip() is None
-            except zipfile.BadZipfile:
-                return False
-
-        geo_zip_file = self.filesystem.download(geo_source, test_zip_file)
-
-        grf = self.filesystem.unzip(geo_zip_file)
-
-        geofile = open(grf, 'rbU', buffering=1*1024*1024)
-
-        for line in geofile.readlines():
+        for state, fileid, file in self.generate_geofiles():
             
-            rows  += 1
-            
-            if rows > 20000 and self.run_args.test:
-                break
-
-            try:
-                geo = struct.unpack(unpack_str, line[:-1])
-            except struct.error as e:
-                self.error("Struct error for state={}, file={}, line_len={}, row={}, \nline={}"
-                           .format(state,grf,len(line),rows, line))
-             
-            if not geo:
-                raise ValueError("Failed to match regex on line: "+line) 
-
-            yield dict(zip(header,geo))
-
-        geofile.close()
+            geofile = open(file, 'rbU', buffering=1*1024*1024)
+    
+            for line in geofile.readlines():
+                
+                rows  += 1
+                
+                if rows > 20000 and self.run_args.test:
+                    break
+    
+                try:
+                    geo = struct.unpack(unpack_str, line[:-1])
+                except struct.error as e:
+                    self.error("Struct error for state={}, file={}, line_len={}, row={}, \nline={}"
+                               .format(state,file,len(line),rows, line))
+                    raise e
+                 
+                if not geo:
+                    raise ValueError("Failed to match regex on line: "+line) 
+    
+                yield state, fileid, dict(zip(header,geo))
+    
+            geofile.close()
 
     def install(self):  
      

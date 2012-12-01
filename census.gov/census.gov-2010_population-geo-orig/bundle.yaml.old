@@ -1,0 +1,12 @@
+build:
+    urlsFile: meta/urls.yaml
+    statesFile: meta/states.yaml
+    geoschemaFile: meta/geoschema.csv
+identity:
+    creator: clarinova.com
+    dataset: 2010 Population
+    id: 
+    revision: 1
+    source: census.gov
+    subset: geo
+    variation: orig
