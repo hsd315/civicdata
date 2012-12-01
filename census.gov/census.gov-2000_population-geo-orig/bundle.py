@@ -22,7 +22,6 @@ class Bundle(BuildBundle):
         self.states_file =  self.filesystem.path(bg.statesFile)
         self.urls_file =  self.filesystem.path(bg.urlsFile)
         
-        
     def prepare(self):
         '''Scrape the URLS into the urls.yaml file and load all of the geo data
         into partitions, without transformation'''
@@ -82,11 +81,10 @@ class Bundle(BuildBundle):
         from databundles.partition import PartitionIdentity
         import time
 
-        #self.load()
+        self.load()
         
-        #self.split()
-
-                       
+        self.split()
+              
         return True
            
     def load(self):
