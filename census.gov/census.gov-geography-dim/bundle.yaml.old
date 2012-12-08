@@ -1,0 +1,8 @@
+build:
+    x: x
+identity:
+    creator: clarinova.com
+    dataset: geography
+    revision: 1
+    source: census.gov
+    subset: dim

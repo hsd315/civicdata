@@ -1,0 +1,10 @@
+build:
+    geoschemaFile: meta/geoschema.csv
+    statesFile: meta/states.yaml
+identity:
+    creator: clarinova.com
+    dataset: geography
+    id: a1YRk4
+    revision: 1
+    source: census.gov
+    subset: dim

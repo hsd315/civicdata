@@ -1,0 +1,14 @@
+identity:
+    creator: eric@clarniova.com
+    dataset: cbsa_crosswalk
+    id: a2021B
+    revision: 1
+    source: cms.org
+    subset: null
+    variation: orig
+build:
+    urls:
+      FY_05: http://data.nber.org/cbsa-msa-fips-ssa-county-crosswalk/2005/fr05_cbsa_msa_xwalk_pub.zip
+      FY_13: http://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/Downloads/FY_13_NPRM_County_to_CBSA_Xwalk.zip
+      FY_12: http://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/Downloads/FY_2012_NPRM_County_to_CBSA_Xwalk.zip
+      FY_11: http://www.cms.gov/Medicare/Medicare-Fee-for-Service-Payment/AcuteInpatientPPS/Downloads/FY_11_NPRM_County_to_CBSA_Xwalk.zip
