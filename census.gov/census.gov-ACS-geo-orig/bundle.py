@@ -19,8 +19,6 @@ class Bundle(BuildBundle):
         self.geoschema_file = self.filesystem.path(bg.geoschemaFile)
         self.states_file =  self.filesystem.path(bg.statesFile)
 
-  
-        
     def prepare(self):
         '''Scrape the URLS into the urls.yaml file and load all of the geo data
         into partitions, without transformation'''
@@ -140,53 +138,8 @@ class Bundle(BuildBundle):
                         row['name'] = row['name'].decode('latin1') # The Puerto Rico files has 8-bit names
 
                         ins.insert(row)   
-         
         return True
-  
-    def load_individual_files(self):
-        from databundles.partition import PartitionIdentity
-        import time
-        import re
-        import pprint
-        import csv
-
-        table = self.schema.table('geofile')
-
-        header = [ c.name for c in table.columns]
-
-        row_i = 0
-
-        for stateabr, time_id, file_name in self.generate_geofiles():
-
-            partition = self.partitions.find(PartitionIdentity(
-                            self.identity, table='geofile', time=str(time_id) )) 
-
-            with open(file_name, 'rbU', buffering=1*1024*1024) as gf:
-                with partition.database.inserter(partition.table) as ins: 
-
-                    for row in csv.reader(gf):
-         
-                        if row_i == 0:
-                            t_start = time.time()      
-                
-                        row_i += 1
-            
-                        if row_i % 150000 == 0:
-                            # Prints the processing rate in 1,000 records per sec.
-                            self.log(stateabr+" "+" "+str(time_id)+" "+
-                                     str(int( row_i/(time.time()-t_start)))+'/s '+str(row_i/1000)+"K ") 
-
-                        row = [ v.strip() for v in row]
-
-                        row = dict(zip(header,row))
-
-                        if 'name' not in row:
-                            self.error("Bad file: "+file_name)
-                            pprint.pprint(row)
-                            
-                        row['name'] = row['name'].decode('latin1') # The Puerto Rico files has 8-bit names
-
-                        ins.insert(row)   
+ 
     def install(self):  
      
         return False
