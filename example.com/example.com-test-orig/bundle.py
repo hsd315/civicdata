@@ -5,17 +5,18 @@ from  databundles.bundle import BuildBundle
 from  databundles.orm import Table, Column
 from databundles.dbexceptions import ConfigurationError
 import os.path
+import logging
 class Bundle(BuildBundle):
     ''' '''
  
     def __init__(self, directory=None):
         self.super_ = super(Bundle, self)
-     
         self.super_.__init__(directory)
-
+        self.logger.setLevel(logging.DEBUG) 
   
     def prepare(self):
-  
+        from databundles.partition import PartitionIdentity
+        
         self.database.delete()
         self.database.create()
         
@@ -36,6 +37,22 @@ class Bundle(BuildBundle):
         
         self.database.session.commit()
         
+        spaces = ['space1', 'space2', 'space3', 'space4' ]
+        times = ['time1','time2', 'time3','time4']
+        
+        spaces = ['space1','space2' ]
+        times = ['time1','time2']
+        
+        table = self.schema.table('example')
+        
+        for space in spaces:
+            for time in times:
+                pid = PartitionIdentity(self.identity, time=time, space=space, table=table.name)
+                partition = self.partitions.new_partition(pid)
+                partition.database.session.commit()
+                self.log('Creating: '+partition.identity.name)
+                partition.create_with_tables()
+                        
         return True
 
     ### Build the final package
@@ -67,67 +84,52 @@ class Bundle(BuildBundle):
                        ])
 
         # make a few partitions
-        
-        spaces = ['space1', 'space2', 'space3', 'space4' ]
-        times = ['time1','time2', 'time3','time4']
-        
-        spaces = ['space1','space2' ]
-        times = ['time1']
-        
-        for pragma in ['journal_mode','synchronous','temp_store', 'foreign_keys']:
-            for row in self.database.connection.execute('pragma '+pragma):
-                print pragma,row
-        
-        
-        for space in spaces:
-            for time in times:
-                pid = PartitionIdentity(self.identity, time=time, space=space)
-                partition = self.partitions.new_partition(pid)
-                partition.database.session.commit()
-                self.log('Creating: '+partition.identity.name)
-                partition.init()
 
-                import time
-                t_start = time.time()
-                with partition.database.inserter('example') as ins:
-                    for i in range(1,5000):
-                        ins.insert([
-                               random.randint(1,10000),
-                               random.random()*1000,
-                               random.randint(1,10000),
-                               random.random()*1000,
-                               random.randint(1,10000),
-                               random.random()*1000,
-                               str(uuid.uuid4()),
-                               random.choice(tags),
-                               random.choice(flags)+random.choice(flags)
-                               ])
+        
+        for partition in self.partitions:
 
-                        if i % 1000 == 0:
-                            # Prints the processing rate in 1,000 records per sec.
-                            self.log(str(int( i/(time.time()-t_start)))+'/s '+str(i/1000)+"K ")
-                partition.database.close()
+            import time
+            t_start = time.time()
+            with partition.database.inserter('example') as ins:
+                self.log('Building partition: {}'.format(partition.identity.name))
+                for i in range(1,5000):
+                    ins.insert([
+                           random.randint(1,10000),
+                           random.random()*1000,
+                           random.randint(1,10000),
+                           random.random()*1000,
+                           random.randint(1,10000),
+                           random.random()*1000,
+                           str(uuid.uuid4()),
+                           random.choice(tags),
+                           random.choice(flags)+random.choice(flags)
+                           ])
+
+                    if i % 1000 == 0:
+                        # Prints the processing rate in 1,000 records per sec.
+                        self.log(str(int( i/(time.time()-t_start)))+'/s '+str(i/1000)+"K ")
+            partition.database.close()
 
         return True
        
     ### Submit the package to the repository
  
-    def install(self):
+    def install(self):  
+     
+        import databundles.library
+     
+        library = databundles.library.get_library(name='test-library')
+     
+        self.log("Install bundle")  
+        dest = library.put(self)
+        self.log("Installed to {} ".format(dest[2]))
         
-        try:
-            self.log("Installing base to library")
-            self.library.remove(self)
-            self.library.put(self)
-            
-            for partition in self.partitions.all:
-                self.log("Installing partition to library: "+str(partition.identity.name))
-                self.library.put(partition)
-            
-            
-        except ConfigurationError:
-            self.log("ERROR: Missing configuration for library root in bundle.yaml")
-            return False
-            
+        for partition in self.partitions:
+        
+            self.log("Install partition {}".format(partition.name))  
+            dest = library.put(partition)
+            self.log("Installed to {} ".format(dest[2]))
+
         return True
     
 import sys

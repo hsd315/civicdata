@@ -18,6 +18,9 @@ class Bundle(BuildBundle):
         bg = self.config.build
         self.geoschema_file = self.filesystem.path(bg.geoschemaFile)
         self.states_file =  self.filesystem.path(bg.statesFile)
+        
+        import logging
+        self.logger.setLevel(logging.DEBUG) 
 
     def prepare(self):
         '''Scrape the URLS into the urls.yaml file and load all of the geo data
@@ -142,16 +145,18 @@ class Bundle(BuildBundle):
  
     def install(self):  
      
-        return False
+        import databundles.library
+     
+        library = databundles.library.get_library(cache_name='test-library')
      
         self.log("Install bundle")  
-        dest = self.library.put(self)
+        dest = library.put(self)
         self.log("Installed to {} ".format(dest[2]))
         
         for partition in self.partitions:
         
             self.log("Install partition {}".format(partition.name))  
-            dest = self.library.put(partition)
+            dest = library.put(partition)
             self.log("Installed to {} ".format(dest[2]))
 
         return True
