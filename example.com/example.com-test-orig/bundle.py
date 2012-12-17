@@ -112,26 +112,7 @@ class Bundle(BuildBundle):
 
         return True
        
-    ### Submit the package to the repository
- 
-    def install(self):  
-     
-        import databundles.library
-     
-        library = databundles.library.get_library(name='test-library')
-     
-        self.log("Install bundle")  
-        dest = library.put(self)
-        self.log("Installed to {} ".format(dest[2]))
-        
-        for partition in self.partitions:
-        
-            self.log("Install partition {}".format(partition.name))  
-            dest = library.put(partition)
-            self.log("Installed to {} ".format(dest[2]))
 
-        return True
-    
 import sys
 
 if __name__ == '__main__':
