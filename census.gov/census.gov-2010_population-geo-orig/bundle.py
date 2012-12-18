@@ -96,8 +96,7 @@ class Bundle(BuildBundle):
         import time
         import re
 
-
-        #self.load()
+        self.load()
         
         self.split()
          
@@ -218,19 +217,6 @@ LEFT JOIN sumlev s2 ON s2.sumlev = s0.sumlev AND s2.fileid = 'SF2ST'
     
             geofile.close()
 
-    def install(self):  
-     
-        self.log("Install bundle")  
-        dest = self.library.put(self)
-        self.log("Installed to {} ".format(dest[2]))
-        
-        for partition in self.partitions:
-        
-            self.log("Install partition {}".format(partition.name))  
-            dest = self.library.put(partition)
-            self.log("Installed to {} ".format(dest[2]))
-
-        return True
         
 import sys
 

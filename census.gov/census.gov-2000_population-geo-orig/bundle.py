@@ -128,9 +128,9 @@ class Bundle(BuildBundle):
         self.log("Compile unique summary levels")
         all = self.partitions.find(PartitionIdentity(self.identity, table='geofile', grain='all'))
         n1 = self.database.attach(all);
-        #self.database.connection.execute('DROP TABLE IF EXISTS sumlev');
+        self.database.connection.execute('DROP TABLE IF EXISTS sumlev');
         q='CREATE TABLE sumlev AS  SELECT DISTINCT trim(sumlev) as sumlev, trim(fileid) as fileid FROM {}.geofile;'.format(n1)
-        #self.database.connection.execute(q);
+        self.database.connection.execute(q);
   
         self.log("Build summary levels file table")
         self.database.connection.execute('DROP TABLE IF EXISTS slfiles');
@@ -182,14 +182,8 @@ LEFT JOIN sumlev s4us ON s4.sumlev = s0.sumlev AND s4us.fileid = 'uSF4F'
 
         rows = 0;
 
-        def test_zip_file(f):
-            try:
-                with zipfile.ZipFile(f) as zf:
-                    return zf.testzip() is None
-            except zipfile.BadZipfile:
-                return False
 
-        geo_zip_file = self.filesystem.download(geo_source, test_zip_file)
+        geo_zip_file = self.filesystem.download(geo_source, 'zip')
 
         grf = self.filesystem.unzip(geo_zip_file)
 
@@ -215,19 +209,7 @@ LEFT JOIN sumlev s4us ON s4.sumlev = s0.sumlev AND s4us.fileid = 'uSF4F'
 
         geofile.close()
 
-    def install(self):  
-     
-        self.log("Install bundle")  
-        dest = self.library.put(self)
-        self.log("Installed to {} ".format(dest[2]))
-        
-        for partition in self.partitions:
-        
-            self.log("Install partition {}".format(partition.name))  
-            dest = self.library.put(partition)
-            self.log("Installed to {} ".format(dest[2]))
 
-        return True
         
 import sys
 
