@@ -1,0 +1,77 @@
+1: 01-Beer Manufacturer
+2: 02-Winegrower
+3: 03-Brandy Manufacturer
+4: 04-Distilled Spirits Manufacturer
+5: 05-Distilled Spirits Manufacturer Agent
+6: 06-Still
+7: 07-Rectifier
+8: 08-Wine Rectifier
+9: 09-Beer And Wine Importer
+10: 10-Beer And Wine Importer's General
+11: 11-Brandy Importer
+12: 12-Distilled Spirits Importer
+13: 13-Distilled Spirits Importer's General
+14: 14-Public Warehouse
+15: 15-Customs Broker
+16: 16-Wine Broker
+17: 17-Beer And Wine Wholesaler
+18: 18-Distilled Spirits Wholesaler
+19: 19-Industrial Alcohol Dealer
+20: 20-Off-Sale Beer And Wine
+21: 21-Off-Sale General
+22: 22-Wineblender
+23: 23-Small Beer Manufacturer
+24: 24-Distilled Spirits Rectifier's General
+25: 25-California Brandy Wholesaler
+26: 26-Out-Of-State Beer Manufacturer Certificate
+27: 27-California Winegrower Agent
+28: 28-Out-Of-State Distilled Spirit Shipper
+29: 29-Winegrape Grower Storage
+30: 30-Temporary Retail Permit
+31: 31-Special Daily License
+32: 32-One Day Beer
+33: 33-One Day Wine
+34: 34-One Day Beer & Wine
+37: 37-Daily On-Sale General
+40: 40-On-Sale Beer
+41: 41-On-Sale Beer And Wine - Eating Place
+42: 42-On-Sale Beer And Wine - Public Premises
+43: 43-On-Sale Beer And Wine - Train
+44: 44-On-Sale Beer Fishing Party Boat
+45: 45-On-Sale Beer And Wine Boat
+46: 46-On-Sale Beer And Wine - Airplane
+47: 47-On-Sale General Eating Place
+48: 48-On-Sale General Public Premises
+49: 49-On-Sale General Seasonal
+50: 50-On-Sale General Club
+51: 51-Club
+52: 52-Veterans Club
+53: 53-On-Sale General Train
+54: 54-On-Sale General Boat
+55: 55-On-Sale General Airplane
+56: 56-On-Sale General Vessel
+57: 57-Special On-Sale General
+58: 58-Caterer Permit
+59: 59-On-Sale Beer And Wine Seasonal
+60: 60-On-Sale Beer Seasonal
+61: 61-On-Sale Beer Public Premises
+62: 62-On-Sale General Dockside
+63: 63-On-Sale Special
+64: 64-Special On-Sale General Theater
+65: 65-Special On-Sale Beer And Wine Symphony
+66: 66-Controlled Access Cabinet Permit
+67: 67-Special On-Sale Wine Bed And Breakfast Inn
+68: 68-Portable Bar
+69: 69-Special On-Sale Beer And Wine Theatre
+70: 70-On-Sale General Restrictive Services
+75: 75-On-Sale General Brew-Pub
+76: 76-On-Sale General Maritime Museum Association
+77: 77-Event Permit
+78: 78-On-Sale General Wine, Food And Art Cultural Museum
+79: 79-Certified Farmers' Market Sales Permit
+80: 80-Special On-Sale General Bed And Breakfast Inn
+81: 81-Wine Sales Event Permit
+82: 82-Direct Shippers Permit
+83: 83-On-Sale General Caterer's License
+85: 85-Limited Off-Sale Wine License
+86: 86-Instructional Tasting License
