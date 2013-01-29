@@ -1,0 +1,23 @@
+identity:
+    creator: eric@clarinova.com
+    dataset: us_crime_incidents
+    id: a2hjX5
+    revision: 1
+    source: clarinova.com
+    subset: 
+    variation: orig
+build:
+    urlTemplate: http://ds.civicknowledge.org/spotcrime.com/free-access-incidents/{year}-{month}.csv.zip
+    statesFile: meta/states.yaml
+about:
+    title: US Crime Incidents, 2007 to 2010
+    description: >
+      San Diego Crime incidents from 2007 to 2010. These files 
+      include the date, category, location and description of crime incidents 
+      that were scraped from public websites by SpotCrime.com, 
+      which makes the data available under this disclaimer. Because these 
+      records were scraped from a website with a
+      program that we don't have access to, the data should be 
+      considered illustrative, not definitive. Don't use this data 
+      for statistical analysis without understanding its limitations. 
+   
