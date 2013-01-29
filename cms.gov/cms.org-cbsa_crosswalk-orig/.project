@@ -3,6 +3,7 @@
 	<name>cms.org-cbsa_crosswalk-orig</name>
 	<comment></comment>
 	<projects>
+		<project>databundles</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

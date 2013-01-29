@@ -108,10 +108,24 @@ class Bundle(BuildBundle):
         
         return True
   
+    def submit(self):
+        
+        import petl.fluent as petlf
+        
+        db_path = self.database.path
+        (petlf
+         .fromsqlite3(db_path, "select * from fy_05 limit 10")
+         .tocsv()
+        )
+     
+        return True
+        
+
 import sys
 
 if __name__ == '__main__':
     import databundles.run
-      
-    databundles.run.run(sys.argv[1:], Bundle)
+    args = sys.argv[1:]
+    #args=['submit']
+    databundles.run.run(args, Bundle)
     
