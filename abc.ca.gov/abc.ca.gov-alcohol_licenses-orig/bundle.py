@@ -91,7 +91,9 @@ class Bundle(BuildBundle):
         ac(t,'licensetype',datatype = Column.DATATYPE_INTEGER)  
         ac(t,'issuedate',datatype = Column.DATATYPE_DATE)        
         ac(t,'exprdate',datatype = Column.DATATYPE_DATE)  
-        ac(t,'ownerpremises',datatype = Column.DATATYPE_TEXT)    
+        ac(t,'owner',datatype = Column.DATATYPE_TEXT) 
+        ac(t,'premisesaddress',datatype = Column.DATATYPE_TEXT) 
+        ac(t,'tract',datatype = Column.DATATYPE_TEXT)           
         ac(t,'business',datatype = Column.DATATYPE_TEXT)
         ac(t,'mailaddress',datatype = Column.DATATYPE_TEXT)
         ac(t,'geocode',datatype = Column.DATATYPE_INTEGER)                 
@@ -185,9 +187,10 @@ class Bundle(BuildBundle):
         for city in target_cities:
             self.log("Downloading: {} ".format(city))
             cache_state, page = self.download_page(city, report_type='p_Retail')
-            print cache_state
             if cache_state == 'new':
                 time.sleep(5)
+            else:
+                self.log("Page was cached")
             
             bf = BeautifulSoup(page)
         
@@ -195,22 +198,28 @@ class Bundle(BuildBundle):
             for html_row in bf.find("table").find_all('tr', {"class":"report_column"}):
                 row = []
                 
-                for cell in html_row.find_all('td'):
-             
-                    v = '|'.join(map(lambda x: x.strip(), cell.strings))
-    
-                    if not v:
-                        continue
+                for i, cell in enumerate(html_row.find_all('td')):
                     
-                    v = v.strip('|').strip(')')
-                    
-                    row.append(v)
-                    
-                    
+                    if i == 6:
+                        strings = [ s.strip() for s in cell.strings]
+                        if len(strings) > 0:
+                            owner = strings.pop(0)
+                            tract = strings.pop().split(' ')[-1]
+                            address = ', '.join(map(lambda x: x.strip(), strings))
+
+                        row.append(owner)
+                        row.append(address)
+                        row.append(tract)
+                    else:
+                        v = ' '.join(cell.strings).strip()
+                        row.append(v)
+  
+                
                 if row:
-                    row[4] = datetime.datetime.strptime(row[4],'%m-%d-%Y').date()
-                    row[5] = datetime.datetime.strptime(row[5],'%m-%d-%Y').date()
                     del row[0] # ordinal number
+                    row[3] = datetime.datetime.strptime(row[3],'%m-%d-%Y').date()
+                    row[4] = datetime.datetime.strptime(row[4],'%m-%d-%Y').date()
+                    
                     ins_row = [None, datetime.date.today()] + row
                     table.append(ins_row)
                     
@@ -220,11 +229,27 @@ class Bundle(BuildBundle):
             
         return True
 
-        
+
     ### Submit the package to the repository
     def submit(self):
+        import os
+        import databundles.client.ckan
+        import time, datetime
+
+        ck = databundles.client.ckan.get_client()
+    
+
+        ckb = ck.update_or_new_bundle_extract(self)
+        
+        # Clear out existing resources. 
+        ckb['resources'] = []      
+        ck.put_package(ckb)
+        
+        for config, partition in self.generate_extracts():
+            self.do_extract(ckb, config, partition)
+        
         return True
-  
+        
     
 import sys
 
