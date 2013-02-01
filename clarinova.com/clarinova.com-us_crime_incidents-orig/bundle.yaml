@@ -30,15 +30,20 @@ extracts:
     query: |
       select  date, time, type, latitude, longitude from incidents
       where latitude > {min_lat} and latitude < {max_lat} and longitude > {min_lon}
-      and longitude < {max_lon} and type = 'Theft' 
-    title: 'SANDAG Cities ABC Licenses, {ident.time}'
+      and longitude < {max_lon} and type = '{type}' 
+    title: 'SANDAG Cities ABC Licenses for {area}, {p_time}'
     description: > 
       Alcohol Beverage Control licenses, for the
-      SANDAG cities, for the year {ident.time}
-    name: 'licenses-{ident.time}.csv'
-    for: "p.identity.table == 'incidents'"
+      SANDAG cities, for the year {p_time}
+    name: '{type}-{area}.csv'
+    for: "True"
     each:
-      - { area: California, min_lat: 32.814978, min_lon: -124.804687, max_lat: 41.983994, max_lon: -114.147949}
-      - { area: San Diego, min_lat: 32.004009, min_lon: -117.601255, max_lat: 33.475510, max_lon: -116.107189 }  
+      - 
+        - { type: Theft}
+        - { type: Shooting}
+        - { type: Vandalism}
+      -
+        - { area: California, min_lat: 32.814978, min_lon: -124.804687, max_lat: 41.983994, max_lon: -114.147949}
+        - { area: San Diego, min_lat: 32.004009, min_lon: -117.601255, max_lat: 33.475510, max_lon: -116.107189 }  
 
 

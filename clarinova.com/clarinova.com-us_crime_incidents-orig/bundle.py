@@ -54,7 +54,6 @@ class Bundle(BuildBundle):
         self.database.session.commit()
         self.schema.create_tables()
      
-    
         return True
         
     def generate_urls(self):
@@ -108,48 +107,8 @@ class Bundle(BuildBundle):
     
         return True
   
-    def x_submit(self):
-        
-        import petl.fluent as petlf
-        import tempfile
-            
-        bb = self.sd_bb
-        
-        q = (()
-            .format(bb[0][0],bb[1][0],bb[0][1],bb[1][1])
-            )
-   
-        print q
-        t = (petlf
-            .fromsqlite3(self.database.path, q)
-            .tocsv('/tmp/sd-crime.csv')
-            )
-
-        return True
     
-    ### Submit the package to the repository
-    def submit(self):
-        import os
-        import databundles.client.ckan
-        import time, datetime
 
-        for config in self.generate_extracts():
-            print config
-            
-        return True
-
-        ck = databundles.client.ckan.get_client()
-    
-        ckb = ck.update_or_new_bundle_extract(self)
-        
-        # Clear out existing resources. 
-        ckb['resources'] = []      
-        ck.put_package(ckb)
-        
-        for config, partition in self.generate_extracts():
-            self.do_extract(ckb, config, partition)
-        
-        return True
     
 import sys
 

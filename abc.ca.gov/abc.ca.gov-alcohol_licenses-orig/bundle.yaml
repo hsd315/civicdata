@@ -6,12 +6,6 @@ identity:
   source: abc.ca.gov
   subset: null
   variation: orig
-build:
-  api_url: 'http://www.abc.ca.gov/datport/AHCityRep.asp'
-  # Payloads for report that do specify a license type
-  lt_payload_template: 'q_CityLOV={city}&q_LTLOV={license_type}&RPTYPE=p_Lictype&SUBMIT1=Continue'
-  # Payload for reports that don't specify a particular liscentype. Must speify the report type
-  report_payload_template: 'q_CityLOV={city}&q_LTLOV=01&RPTYPE={report_type}&SUBMIT1=Continue'
 about:
   title: 'SANDAG City Alcohol Permits'
   description: > 
@@ -27,6 +21,12 @@ about:
   url: http://www.abc.ca.gov/datport/AHCity.asp
   license: other-open
   tags: [government,gov-licenses,business, bus-economy]
+build:
+  api_url: 'http://www.abc.ca.gov/datport/AHCityRep.asp'
+  # Payloads for report that do specify a license type
+  lt_payload_template: 'q_CityLOV={city}&q_LTLOV={license_type}&RPTYPE=p_Lictype&SUBMIT1=Continue'
+  # Payload for reports that don't specify a particular liscentype. Must speify the report type
+  report_payload_template: 'q_CityLOV={city}&q_LTLOV=01&RPTYPE={report_type}&SUBMIT1=Continue'
 meta:
   meta_url: http://www.abc.ca.gov/datport/AHCity.asp
   license_categories:

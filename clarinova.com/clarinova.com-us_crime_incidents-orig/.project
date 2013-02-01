@@ -3,6 +3,7 @@
 	<name>clarinova.com-us_crime_incidents-orig</name>
 	<comment></comment>
 	<projects>
+		<project>databundles</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

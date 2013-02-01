@@ -229,15 +229,8 @@ class Bundle(BuildBundle):
             
         return True
 
-    ### Submit the package to the repository
-    def submit(self):
-        import os
-        import databundles.client.ckan
-        import time, datetime
 
-        self.repository.submit()
         
-    
 import sys
 
 if __name__ == '__main__':
