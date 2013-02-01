@@ -229,26 +229,13 @@ class Bundle(BuildBundle):
             
         return True
 
-
     ### Submit the package to the repository
     def submit(self):
         import os
         import databundles.client.ckan
         import time, datetime
 
-        ck = databundles.client.ckan.get_client()
-    
-
-        ckb = ck.update_or_new_bundle_extract(self)
-        
-        # Clear out existing resources. 
-        ckb['resources'] = []      
-        ck.put_package(ckb)
-        
-        for config, partition in self.generate_extracts():
-            self.do_extract(ckb, config, partition)
-        
-        return True
+        self.repository.submit()
         
     
 import sys

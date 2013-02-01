@@ -12,14 +12,21 @@ build:
   lt_payload_template: 'q_CityLOV={city}&q_LTLOV={license_type}&RPTYPE=p_Lictype&SUBMIT1=Continue'
   # Payload for reports that don't specify a particular liscentype. Must speify the report type
   report_payload_template: 'q_CityLOV={city}&q_LTLOV=01&RPTYPE={report_type}&SUBMIT1=Continue'
-properties:
+about:
   title: 'SANDAG City Alcohol Permits'
+  description: > 
+    Records extracted from the California Alcohol Beverage Control website for
+    the 18 SANDAG cities:
+      
+    Carlsbad, Chula Vista, Coronado, Del Mar, El Cajon, Encinitas, Escondido, 
+    Imperial Beach, La Mesa, Lemon Grove, National City, Oceanside, 
+    Poway, San Diego, San Marcos, Santee, Solana Beach, Vista
   maintainer: Eric Busboom
   author: Eric Busboom
   homepage: http://www.abc.ca.gov/datport/AHCity.asp
   url: http://www.abc.ca.gov/datport/AHCity.asp
   license: other-open
-  tags: [one,two,three]
+  tags: [government,gov-licenses,business, bus-economy]
 meta:
   meta_url: http://www.abc.ca.gov/datport/AHCity.asp
   license_categories:
@@ -49,11 +56,11 @@ meta:
 extracts:
   - partition: any
     query: 'select * from licenses'
-    title: 'SANDAG Cities ABC Licenses, {ident.time}'
+    title: 'SANDAG Cities ABC Licenses, {p_time}'
     description: > 
       Alcohol Beverage Control licenses, for the
-      SANDAG cities, for the year {ident.time}
-    name: 'licenses-{ident.time}.csv'
-    for: "p.identity.table == 'licenses'"
+      SANDAG cities, for the year {p_time}
+    name: 'licenses-{p_time}.csv'
+    for: "partition.identity.table == 'licenses'"
 
   

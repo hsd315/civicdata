@@ -20,4 +20,25 @@ about:
       program that we don't have access to, the data should be 
       considered illustrative, not definitive. Don't use this data 
       for statistical analysis without understanding its limitations. 
-   
+    maintainer: Eric Busboom
+    author: Eric Busboom
+    homepage: http://spotcrime.com/#San%20Diego%20
+    license: other-open
+    tags: [government,gov-crime]   
+extracts:
+  - partition: any
+    query: |
+      select  date, time, type, latitude, longitude from incidents
+      where latitude > {min_lat} and latitude < {max_lat} and longitude > {min_lon}
+      and longitude < {max_lon} and type = 'Theft' 
+    title: 'SANDAG Cities ABC Licenses, {ident.time}'
+    description: > 
+      Alcohol Beverage Control licenses, for the
+      SANDAG cities, for the year {ident.time}
+    name: 'licenses-{ident.time}.csv'
+    for: "p.identity.table == 'incidents'"
+    each:
+      - { area: California, min_lat: 32.814978, min_lon: -124.804687, max_lat: 41.983994, max_lon: -114.147949}
+      - { area: San Diego, min_lat: 32.004009, min_lon: -117.601255, max_lat: 33.475510, max_lon: -116.107189 }  
+
+

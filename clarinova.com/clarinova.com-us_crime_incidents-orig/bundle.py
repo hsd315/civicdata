@@ -12,12 +12,7 @@ class Bundle(BuildBundle):
  
     header = ['Date', 'Type', 'Address', 'Latitude', 'Longitude', 'Link', 'Description', 'time','state']
     types  = [str,      str,    str,     float,      float,        str,    str,           str, str]
- 
-    # lat/lon bounding box for california
-    ca_bb = ( (32.814978,-124.804687), (41.983994,-114.147949) )
 
-    sd_bb = ( (32.004009,-117.601255), (33.475510,-116.107189) )
- 
     def __init__(self,directory=None):
         import yaml
         
@@ -113,16 +108,14 @@ class Bundle(BuildBundle):
     
         return True
   
-    def submit(self):
+    def x_submit(self):
         
         import petl.fluent as petlf
         import tempfile
             
         bb = self.sd_bb
         
-        q = (("select  date, time, type, latitude, longitude from incidents "+
-            "where latitude > {} and latitude < {} and longitude > {} and longitude < {} "+
-            "and type = 'Theft' ")
+        q = (()
             .format(bb[0][0],bb[1][0],bb[0][1],bb[1][1])
             )
    
@@ -132,6 +125,30 @@ class Bundle(BuildBundle):
             .tocsv('/tmp/sd-crime.csv')
             )
 
+        return True
+    
+    ### Submit the package to the repository
+    def submit(self):
+        import os
+        import databundles.client.ckan
+        import time, datetime
+
+        for config in self.generate_extracts():
+            print config
+            
+        return True
+
+        ck = databundles.client.ckan.get_client()
+    
+        ckb = ck.update_or_new_bundle_extract(self)
+        
+        # Clear out existing resources. 
+        ckb['resources'] = []      
+        ck.put_package(ckb)
+        
+        for config, partition in self.generate_extracts():
+            self.do_extract(ckb, config, partition)
+        
         return True
     
 import sys
