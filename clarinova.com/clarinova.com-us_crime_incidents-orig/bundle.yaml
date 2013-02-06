@@ -31,7 +31,7 @@ extracts:
       select  date, time, type, latitude, longitude from incidents
       where latitude > {min_lat} and latitude < {max_lat} and longitude > {min_lon}
       and longitude < {max_lon} and type = '{type}' 
-    title: 'SANDAG Cities ABC Licenses for {area}, {p_time}'
+    title: 'Crime Incidents {area}, {p_time}'
     description: > 
       Alcohol Beverage Control licenses, for the
       SANDAG cities, for the year {p_time}

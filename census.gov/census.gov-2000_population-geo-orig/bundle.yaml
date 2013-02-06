@@ -16,3 +16,5 @@ identity:
     source: census.gov
     subset: geo
     variation: orig
+meta:
+    documentation: http://www.census.gov/prod/cen2000/doc/sf1.pdf
