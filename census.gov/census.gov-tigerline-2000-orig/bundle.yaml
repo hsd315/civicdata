@@ -1,0 +1,16 @@
+identity:
+    creator: eric@clarinova.com
+    dataset: tigerline
+    id: a2lseu
+    revision: '1'
+    source: census.gov
+    subset: '2000'
+    variation: orig
+build:
+  url_template: http://www2.census.gov/geo/tiger/TIGER2010/{type}/{year4}/tl_2010_{state}_{typelc}{year2}.zip
+  types:
+    - TABBLOCK
+    - TRACT
+    - COUNTY
+about:
+  homepage: http://www.census.gov/cgi-bin/geo/shapefiles2010/layers.cgi
