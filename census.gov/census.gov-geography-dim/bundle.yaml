@@ -1,7 +1,6 @@
 build:
     geoschemaFile: meta/geoschema.csv
     statesFile: meta/states.yaml
-    gengeoFile: meta/generated-geo.csv
 identity:
     creator: clarinova.com
     dataset: geography
@@ -14,10 +13,11 @@ documentation:
       url: http://www.census.gov/rdo/pdf/0GEOID_Construction_for_Matching.pdf
       title: GEOID specification
       description: |
-      A Guide for creating GEOIDs. While the document is for the  redistricting 
-      files, and the summary levels are different, it is illustrative. 
-meta:
-    query2000: 
+        A Guide for creating GEOIDs. While the document is for the  redistricting 
+        files, and the summary levels are different, it is illustrative. 
+queries:
+    q2000: 
+      source: census.gov-2000_population-geo-orig-a7d9-r1
       template: |
         SELECT DISTINCT {2}, 
         arealand, areawatr, pop100, hu100, intptlat, intptlon, gcuni,lsadc, trim(replace(name,'{3}','')) as name
@@ -29,7 +29,26 @@ meta:
         - [50,counties,'region, division, state, statece, county, countysc', County]
         - [60,cosubs,'region, division, state, statece, county, countysc, cousub, cousubcc, cousubsc',District]
         - [140,tracts,'region, division, state, statece, county, countysc, tract','Census Tract']
-        - [150,blockgroups,'region, division, state, statece, county, countysc, tract, blkgrp','Block Group']
-        - [160,places,'region, division, state, statece, place, placecc, placedc, placesc, msacmsa,masc,cmsa,macci,pmsa','']
-        - [380,metros,'msacmsa,masc,cmsa','']
-        - [101,blocks,'region, division, state, statece, county, countysc, tract, blkgrp, block',Block]
+        #- [150,blockgroups,'region, division, state, statece, county, countysc, tract, blkgrp','Block Group']
+        - [160,places,'region, division, state, statece, place, placecc, placedc, placesc','']
+        #- [380,metros,',msacmsa,masc,cmsa,macci,pmsa','']
+        #- [101,blocks,'region, division, state, statece, county, countysc, tract, blkgrp, block',Block]
+    q2010: 
+      source: census.gov-2010_population-geo-orig-a7d9-r1
+      template: |
+        SELECT DISTINCT {2}, 
+        arealand, areawatr, pop100, hu100, intptlat, intptlon, gcuni,lsadc, trim(replace(name,'{3}','')) as name
+        FROM geofile WHERE sumlev =  {0} and chariter = 0 and geocomp = '00' ;
+      data:
+        - [20,region,'region',Region]
+        - [30,divisions,'region, division', Division]
+        - [40,states,'region, division, state, statens','']
+        - [50,counties,'region, division, state, statens, county, countyns, countycc, countysc', County]
+        - [60,cosubs,'region, division, state, statens, county, countyns, countycc, countysc, cousub, cousubcc, cousubsc',District]
+        - [140,tracts,'region, division, state, statens, county, countyns, tract','Census Tract']
+        #- [150,blockgroups,'region, division, state, statens, county, countyns, tract, blkgrp','Block Group']
+        - [160,places,'region, division, state, statens, place, placens, placecc, placesc','']
+        #- [101,blocks,'region, division, state, statens, county, countyns, tract, blkgrp, block',Block] 
+        #-[ xxx,metro, 'cbsa,cbsasc,cbsapci,csa,metdiv,memi']
+       
+        

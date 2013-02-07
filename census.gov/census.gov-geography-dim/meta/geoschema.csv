@@ -1,122 +1,174 @@
-"table","column","is_pk","is_fk","i1","i2","i3","ui1","type","width","default","description"
-"region","region_id",1,,,,,,"INTEGER",,,
-"region","geoid",,,,,,,"TEXT",,,
-"region","name",,,,,,,"TEXT",,,
-"region","region",,,,,,,"INTEGER",,-1,"Region"
-"region","division",,,,,,,"INTEGER",,-1,"Division"
-,,,,,,,,,,,
-"state","state_id",1,,,,,,"INTEGER",,,
-"state ","geoid",,,,,,,"TEXT",,,
-"state","abbrev",,,,,,,"TEXT",,"NONE","Abbreviation, added in code"
-"state","name",,,,,,,"TEXT",,"NONE",
-"state","region",,,,,,,"INTEGER",,-1,"Region"
-"state","division",,,,,,,"INTEGER",,-1,"Division"
-"state","state",,,,,,,"INTEGER",,-1,"State ( Census)"
-"state","statece",,,,,,,"INTEGER",,-1,"State (FIPS)"
-"state","statens",,,,,,,"INTEGER",,-1,"State (ANSI)"
-,,,,,,,,,,,
-"county","county_id",1,,,,,,"INTEGER",,,
-"county","geoid",,,,,,,"TEXT",,,
-"county","name",,,,,,,"TEXT",,"NONE",
-"county","region",,,,,,,"INTEGER",,-1,"Region"
-"county","division",,,,,,,"INTEGER",,-1,"Division"
-"county","state",,,,,,,"INTEGER",,-1,"State (Fips)"
-"county","statece",,,,,,,"INTEGER",,-1,"State (Census)"
-"county","statens",,,,,,,"INTEGER",,-1,"State (ANSI)"
-"county","county",,,,,,,"INTEGER",,-1,"County (Census)"
-"county","countns",,,,,,,"INTEGER",,-1,"County (ANSI)"
-"county","countysc",,,,,,,"INTEGER",,-1,"County Size Code"
-"county","countycc",,,,,,,"INTEGER",,-1,"County Class Code"
-,,,,,,,,,,,
-"cousub","cosub_id",1,,,,,,"INTEGER",,,
-"cousub","geoid",,,,,,,"TEXT",,,
-"cousub","name",,,,,,,"TEXT",,"NONE",
-"cousub","state",,,,,,,"INTEGER",,-1,"State ( Census)"
-"cousub","statece",,,,,,,"INTEGER",,-1,"State (FIPS)"
-"cousub","statens",,,,,,,"INTEGER",,-1,"State (ANSI)"
-"cousub","county",,,,,,,"INTEGER",,-1,"County (Census)"
-"cousub","countns",,,,,,,"INTEGER",,-1,"County (ANSI)"
-"cousub","cousub",,,,,,,"INTEGER",5,-1,"County Subdivision (FIPS)"
-"cousub","cousubns",,,,,,,"INTEGER",5,-1,"County Subdivision (ANSI)"
-"cousub","cousubcc",,,,,,,"TEXT",,"NONE","FIPS County Subdivision Class Code"
-"cousub","cousubsc",,,,,,,"INTEGER",,-1,"County Subdivision Size Code"
-,,,,,,,,,,,
-,,,,,,,,,,,
-"submcd","cosub_id",1,,,,,,"INTEGER",,,
-"submcd","geoid",,,,,,,"TEXT",,,
-"submcd","name",,,,,,,"TEXT",,"NONE",
-"submcd","state",,,,,,,"INTEGER",,-1,"State (FIPS)"
-"submcd","statece",,,,,,,"INTEGER",,-1,"State (Census)"
-"submcd","statens",,,,,,,"INTEGER",,-1,"State (ANSI)"
-"submcd","county",,,,,,,"INTEGER",,-1,"County (Census)"
-"submcd","countns",,,,,,,"INTEGER",,-1,"County (ANSI)"
-"submcd","cousub",,,,,,,"INTEGER",5,-1,"County Subdivision (FIPS)"
-"submcd","cousubns",,,,,,,"INTEGER",5,-1,"County Subdivision (ANSI)"
-"submcd","cousubcc",,,,,,,"TEXT",,"NONE","FIPS County Subdivision Class Code"
-"submcd","cousubsc",,,,,,,"INTEGER",,-1,"County Subdivision Size Code"
-"submcd","submcd",,,,,,,"INTEGER",,,
-"submcd","submcdns",,,,,,,"INTEGER",,,
-"submcd","submcdcc",,,,,,,"INTEGER",,,
-,,,,,,,,,,,
-"place","place_id",1,,,,,,"INTEGER",,,
-"place","geoid",,,,,,,"TEXT",,,
-"place","name",,,,,,,"TEXT",,"NONE",
-"place","state",,,,,,,"INTEGER",,-1,"State"
-"place","statens",,,,,,,"INTEGER",,-1,"State (ANSI)"
-"place","place",,,,,,,"INTEGER",5,-1,"Place (FIPS)"
-"place","placens",,,,,,,"INTEGER",5,-1,"Place (ANSI)"
-"place","placecc",,,,,,,"TEXT",2,"NONE","FIPS Place Class Code"
-"place","placedc",,,,,,,"TEXT",,"NONE","Place Description Code"
-"place","placesc",,,,,,,"INTEGER",,-1,"Place Size Code"
-"place","exi",,,,,,,"TEXT",1,"NONE","Extended Place Indicator"
-"place","partflag",,,,,,,"TEXT",,"NONE","Part Flag"
-,,,,,,,,,,,
-"tract","tract_id",1,,,,,,"INTEGER",,,
-"tract","geoid",,,,,,,"TEXT",,,
-"tract","name ",,,,,,,"TEXT",,"NONE",
-"tract","state",,,,,,,"INTEGER",,-1,"State (FIPS)"
-"tract","statece",,,,,,,"INTEGER",,-1,"State (Census)"
-"tract","statens",,,,,,,"INTEGER",,-1,"State (ANSI)"
-"tract","county",,,,,,,"INTEGER",,-1,"County (Census)"
-"tract","countns",,,,,,,"INTEGER",,-1,"County (ANSI)"
-"tract","place",1,,,,,,"INTEGER",,,"Place"
-"tract","msa",,,,,,,"INTEGER",,,"Metro Area"
-"tract","tract",,,,,,,"INTEGER",,-1,"Census Tract"
-,,,,,,,,,,,
-"blockgroup","blockgroup_id",1,,,,,,"INTEGER",,,
-"blockgroup","geoid",,,,,,,"TEXT",,,
-"blockgroup","name",,,,,,,"TEXT",,-1,
-"blockgroup","state",,,,,,,"INTEGER",,-1,"State (FIPS)"
-"blockgroup","statece",,,,,,,"INTEGER",,-1,"State (Census)"
-"blockgroup","statens",,,,,,,"INTEGER",,-1,"State (ANSI)"
-"blockgroup","county",,,,,,,"INTEGER",,-1,"County (Census)"
-"blockgroup","countns",,,,,,,"INTEGER",,-1,"County (ANSI)"
-"blockgroup","place",1,,,,,,"INTEGER",,,"Place"
-"blockgroup","msa",,,,,,,"INTEGER",,,"Metro Area"
-"blockgroup","tract",,,,,,,"INTEGER",,-1,"Census Tract"
-"blockgroup","blkgrp",,,,,,,"INTEGER",,-1,"Block Group"
-,,,,,,,,,,,
-"block","block_id",1,,,,,,"INTEGER",,,
-"block","geoid",,,,,,,"TEXT",,,
-"block","name",,,,,,,"TEXT",,"NONE",
-"block","state",,,,,,,"INTEGER",,-1,"State (FIPS)"
-"block","statece",,,,,,,"INTEGER",,-1,"State (Census)"
-"block","statens",,,,,,,"INTEGER",,-1,"State (ANSI)"
-"block","county",,,,,,,"INTEGER",,-1,"County (Census)"
-"block","countns",,,,,,,"INTEGER",,-1,"County (ANSI)"
-"block","place",1,,,,,,"INTEGER",,,"Place"
-"block","msa",,,,,,,"INTEGER",,,"Metro Area"
-"block","tract",,,,,,,"INTEGER",,-1,"Census Tract"
-"block","blkgrp",,,,,,,"INTEGER",,-1,"Block Group"
-"block","block",,,,,,,"INTEGER",4,-1,"Block"
-,,,,,,,,,,,
-"zacta","zacta_id",1,,,,,,"INTEGER",,-1,
-"zacta","zcta3",,,,,,,"INTEGER",,-1,"ZIP Code Tabulation Area (3 digit)"
-"zacta","zcta5",,,,,,,"TEXT",,"NONE","ZIP Code Tabulation Area (5 digit)"
-,,,,,,,,,,,
-"schools","schools_id",1,,,,,,"INTEGER",,-1,
-"schools","name",,,,,,,"TEXT",,"NONE",
-"schools","state",,,,,,,"INTEGER",,-1,"State"
-"schools","sdelm",,,,,,,"INTEGER",5,-1,"School District (Elementary)"
-"schools","sdsec",,,,,,,"INTEGER",5,-1,"School District (Secondary)"
-"schools","sduni",,,,,,,"INTEGER",5,-1,"School District (Unified)"
+"table"	"column"	"is_pk"	"type"	"description"	"d_in2000"	"d_in2010"
+"region00"	"region_id"	1	"INTEGER"		1	1
+"region00"	"geoid"		"TEXT"		1	1
+"region00"	"region"		"INTEGER"		1	1
+"region00"	"arealand"		"INTEGER"		1	1
+"region00"	"areawatr"		"INTEGER"		1	1
+"region00"	"pop100"		"INTEGER"		1	1
+"region00"	"hu100"		"INTEGER"		1	1
+"region00"	"intptlat"		"INTEGER"		1	1
+"region00"	"intptlon"		"INTEGER"		1	1
+"region00"	"gcuni"		"TEXT"		1	1
+"region00"	"lsadc"		"INTEGER"		1	1
+"region00"	"name"		"INTEGER"		1	1
+						
+"divisions00"	"divisions_id"	1	"INTEGER"		1	1
+"divisions00"	"geoid"		"TEXT"		1	1
+"divisions00"	"region"		"INTEGER"		1	1
+"divisions00"	"division"		"INTEGER"		1	1
+"divisions00"	"arealand"		"INTEGER"		1	1
+"divisions00"	"areawatr"		"INTEGER"		1	1
+"divisions00"	"pop100"		"INTEGER"		1	1
+"divisions00"	"hu100"		"INTEGER"		1	1
+"divisions00"	"intptlat"		"INTEGER"		1	1
+"divisions00"	"intptlon"		"INTEGER"		1	1
+"divisions00"	"gcuni"		"TEXT"		1	1
+"divisions00"	"lsadc"		"INTEGER"		1	1
+"divisions00"	"name"		"INTEGER"		1	1
+					1	1
+"states00"	"states_id"	1	"INTEGER"		1	1
+"states00"	"geoid"		"TEXT"		1	1
+"states00"	"region"		"INTEGER"		1	1
+"states00"	"division"		"INTEGER"		1	1
+"states00"	"state"		"INTEGER"		1	1
+"states00"	"statece"		"INTEGER"		1	
+"states10"	"statens"		"INTEGER"			1
+"states00"	"arealand"		"INTEGER"		1	1
+"states00"	"areawatr"		"INTEGER"		1	1
+"states00"	"pop100"		"INTEGER"		1	1
+"states00"	"hu100"		"INTEGER"		1	1
+"states00"	"intptlat"		"INTEGER"		1	1
+"states00"	"intptlon"		"INTEGER"		1	1
+"states00"	"gcuni"		"TEXT"		1	1
+"states00"	"lsadc"		"INTEGER"		1	1
+"states00"	"name"		"INTEGER"		1	1
+						
+"counties00"	"counties_id"	1	"INTEGER"		1	1
+"counties00"	"geoid"		"TEXT"		1	1
+"counties00"	"region"		"INTEGER"		1	1
+"counties00"	"division"		"INTEGER"		1	1
+"counties00"	"state"		"INTEGER"		1	1
+"counties00"	"statece"		"INTEGER"		1	
+"counties10"	"statens"		"INTEGER"			1
+"counties00"	"county"		"INTEGER"		1	1
+"counties00"	"countysc"		"INTEGER"		1	1
+"counties10"	"countyns"		"INTEGER"			1
+"counties10"	"countycc"		"TEXT"			1
+"counties00"	"arealand"		"INTEGER"		1	1
+"counties00"	"areawatr"		"INTEGER"		1	1
+"counties00"	"pop100"		"INTEGER"		1	1
+"counties00"	"hu100"		"INTEGER"		1	1
+"counties00"	"intptlat"		"INTEGER"		1	1
+"counties00"	"intptlon"		"INTEGER"		1	1
+"counties00"	"gcuni"		"TEXT"		1	1
+"counties00"	"lsadc"		"INTEGER"		1	1
+"counties00"	"name"		"INTEGER"		1	1
+						
+"cosubs00"	"cosubs_id"	1	"INTEGER"		1	1
+"cosubs00"	"geoid"		"TEXT"		1	1
+"cosubs00"	"region"		"INTEGER"		1	1
+"cosubs00"	"division"		"INTEGER"		1	1
+"cosubs00"	"state"		"INTEGER"		1	1
+"cosubs00"	"statece"		"INTEGER"		1	
+"cosubs10"	"statens"		"INTEGER"			1
+"cosubs00"	"county"		"INTEGER"		1	1
+"cosubs00"	"countysc"		"INTEGER"		1	1
+"cosubs10"	"countyns"		"INTEGER"			1
+"cosubs10"	"countycc"		"TEXT"			1
+"cosubs00"	"cousub"		"INTEGER"		1	1
+"cosubs00"	"cousubcc"		"TEXT"		1	1
+"cosubs00"	"cousubsc"		"INTEGER"		1	1
+"cosubs00"	"arealand"		"INTEGER"		1	1
+"cosubs00"	"areawatr"		"INTEGER"		1	1
+"cosubs00"	"pop100"		"INTEGER"		1	1
+"cosubs00"	"hu100"		"INTEGER"		1	1
+"cosubs00"	"intptlat"		"INTEGER"		1	1
+"cosubs00"	"intptlon"		"INTEGER"		1	1
+"cosubs00"	"gcuni"		"TEXT"		1	1
+"cosubs00"	"lsadc"		"INTEGER"		1	1
+"cosubs00"	"name"		"INTEGER"		1	1
+						
+"tracts00"	"tracts_id"	1	"INTEGER"		1	1
+"tracts00"	"geoid"		"TEXT"		1	1
+"tracts00"	"region"		"INTEGER"		1	1
+"tracts00"	"division"		"INTEGER"		1	1
+"tracts00"	"state"		"INTEGER"		1	1
+"tracts00"	"statece"		"INTEGER"		1	
+"tracts10"	"statens"		"INTEGER"			1
+"tracts00"	"county"		"INTEGER"		1	1
+"tracts00"	"countysc"		"INTEGER"		1	1
+"tracts00"	"tract"		"INTEGER"		1	1
+"tracts00"	"arealand"		"INTEGER"		1	1
+"tracts00"	"areawatr"		"INTEGER"		1	1
+"tracts00"	"pop100"		"INTEGER"		1	1
+"tracts00"	"hu100"		"INTEGER"		1	1
+"tracts00"	"intptlat"		"INTEGER"		1	1
+"tracts00"	"intptlon"		"INTEGER"		1	1
+"tracts00"	"gcuni"		"TEXT"		1	1
+"tracts00"	"lsadc"		"TEXT"		1	1
+"tracts00"	"name"		"INTEGER"		1	1
+						
+"blockgroups00"	"blockgroups_id"	1	"INTEGER"		1	1
+"blockgroups00"	"geoid"		"TEXT"		1	1
+"blockgroups00"	"region"		"INTEGER"		1	1
+"blockgroups00"	"division"		"INTEGER"		1	1
+"blockgroups00"	"state"		"INTEGER"		1	1
+"blockgroups00"	"statece"		"INTEGER"		1	
+"blockgroups10"	"statens"		"INTEGER"			1
+"blockgroups00"	"county"		"INTEGER"		1	1
+"blockgroups00"	"countysc"		"INTEGER"		1	1
+"blockgroups00"	"tract"		"INTEGER"		1	1
+"blockgroups00"	"blkgrp"		"INTEGER"		1	1
+"blockgroups00"	"arealand"		"INTEGER"		1	1
+"blockgroups00"	"areawatr"		"INTEGER"		1	1
+"blockgroups00"	"pop100"		"INTEGER"		1	1
+"blockgroups00"	"hu100"		"INTEGER"		1	1
+"blockgroups00"	"intptlat"		"INTEGER"		1	1
+"blockgroups00"	"intptlon"		"INTEGER"		1	1
+"blockgroups00"	"gcuni"		"TEXT"		1	1
+"blockgroups00"	"lsadc"		"TEXT"		1	1
+"blockgroups00"	"name"		"INTEGER"		1	1
+						
+"places00"	"places_id"	1	"INTEGER"		1	1
+"places00"	"geoid"		"TEXT"		1	1
+"places00"	"region"		"INTEGER"		1	1
+"places00"	"division"		"INTEGER"		1	1
+"places00"	"state"		"INTEGER"		1	1
+"places00"	"statece"		"INTEGER"		1	1
+"places00"	"place"		"INTEGER"		1	1
+"places01"	"placens"		"INTEGER"			1
+"places00"	"placecc"		"TEXT"		1	1
+"places00"	"placedc"		"INTEGER"		1	1
+"places00"	"placesc"		"INTEGER"		1	1
+"places00"	"arealand"		"INTEGER"		1	1
+"places00"	"areawatr"		"INTEGER"		1	1
+"places00"	"pop100"		"INTEGER"		1	1
+"places00"	"hu100"		"INTEGER"		1	1
+"places00"	"intptlat"		"INTEGER"		1	1
+"places00"	"intptlon"		"INTEGER"		1	1
+"places00"	"gcuni"		"TEXT"		1	1
+"places00"	"lsadc"		"INTEGER"		1	1
+"places00"	"name"		"INTEGER"		1	1
+						
+"blocks00"	"blocks_id"	1	"INTEGER"		1	1
+"blocks00"	"geoid"		"TEXT"		1	1
+"blocks00"	"region"		"INTEGER"		1	1
+"blocks00"	"division"		"INTEGER"		1	1
+"blocks00"	"state"		"INTEGER"		1	1
+"blocks00"	"statece"		"INTEGER"		1	
+"blocks10"	"statens"		"INTEGER"			1
+"blocks00"	"county"		"INTEGER"		1	1
+"blocks10"	"countyns"		"INTEGER"			1
+"blocks00"	"countysc"		"INTEGER"		1	1
+"blocks00"	"tract"		"INTEGER"		1	1
+"blocks00"	"blkgrp"		"INTEGER"		1	1
+"blocks00"	"block"		"INTEGER"		1	1
+"blocks00"	"arealand"		"INTEGER"		1	1
+"blocks00"	"areawatr"		"INTEGER"		1	1
+"blocks00"	"pop100"		"INTEGER"		1	1
+"blocks00"	"hu100"		"INTEGER"		1	1
+"blocks00"	"intptlat"		"INTEGER"		1	1
+"blocks00"	"intptlon"		"INTEGER"		1	1
+"blocks00"	"gcuni"		"TEXT"		1	1
+"blocks00"	"lsadc"		"TEXT"		1	1
+"blocks00"	"name"		"INTEGER"		1	1
