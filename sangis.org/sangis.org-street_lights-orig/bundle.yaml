@@ -1,0 +1,29 @@
+identity:
+    creator: eric@clarinova.com
+    dataset: street_lights
+    id: a2mriW
+    revision: 1
+    source: sangis.org
+    subset: null
+    variation: orig
+build:
+  url: http://rdw.sandag.org/file_store/Miscellaneous/Street_Light.zip
+about:
+    title: San Diego Street Light Locations
+    description: >
+      Street Light Pole locations used for Street Division GIS/SAP Work 
+      Management System. The geographic extent is the City of San Diego. 
+    maintainer: SanGIS
+    author: SanGIS
+    homepage: http://rdw.sandag.org/Default.aspx?dir=Miscellaneous
+    license: other-open
+    tags: [government,gov-infrastructure]   
+extracts:
+  - partition: sangis.org-street_lights-orig-7ba4-street_lights
+    query: select * from street_lights
+    title: 'San Diego Street Light Locations'
+    description: >
+      Extract of the table in the original ESRI shape file, but with the 
+      addition of two columns for the WGS84 lat/lon
+    name: sandiego_street_lights.csv
+ 
