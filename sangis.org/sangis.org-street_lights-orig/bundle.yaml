@@ -10,14 +10,38 @@ build:
   url: http://rdw.sandag.org/file_store/Miscellaneous/Street_Light.zip
 about:
     title: San Diego Street Light Locations
-    description: >
+    description: |
       Street Light Pole locations used for Street Division GIS/SAP Work 
       Management System. The geographic extent is the City of San Diego. 
-    maintainer: SanGIS
-    author: SanGIS
+      
+      Users must understand the original SanGIS Terms and Conditions before 
+      using this derived data. This GIS data was derived and  modified from SanGIS 
+      downloadable data - www.sangis.org Copyright SanGIS 2009
+      
+    maintainer: City of San Diego, General Services Dept., Street Division 
+    author: City of San Diego, General Services Dept., Street Division
     homepage: http://rdw.sandag.org/Default.aspx?dir=Miscellaneous
     license: other-open
-    tags: [government,gov-infrastructure]   
+    tags: [government,gov-infrastructure]  
+    documents:
+      -
+        url: http://rdw.sandag.org/file_store/Miscellaneous/Street_Light.zip 
+        title: Source Shapefile
+        description: >
+          The original SanGIS Shapefile, subject to their [Terms and Conditions]
+          (http://rdw.sandag.org) 
+          
+      -
+        url: http://rdw.sandag.org/file_store/Miscellaneous/Street_Light.pdf
+        title: SanGIS Metadata
+        description: The original metadta, provided by SanGIS
+      - 
+        url: http://www.sangis.org/Legal_Notice.htm
+        title: Terms and Conditions
+        description: >
+          The terms and conditions that apply to the original shapefile.
+          Users must accept these terms before using the file.  
+           
 extracts:
   - partition: sangis.org-street_lights-orig-7ba4-street_lights
     query: select * from street_lights
