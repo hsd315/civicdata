@@ -118,7 +118,7 @@ class Bundle(BuildBundle):
         print 'SHape',a.shape
     
         m =  outer(array([1.,2.,1.]),array([1.,2.,1.]))
-        m /= sum(m)
+        m /= sum(m) # Normalize the sum of all cells in the matrix to 1
 
         # Draw registration marks at the corners. 
         if False:
