@@ -4,7 +4,7 @@
 
 
 from  databundles.bundle import BuildBundle
-from numpy  import *
+
 
 class Bundle(BuildBundle):
     ''' '''
@@ -37,12 +37,11 @@ class Bundle(BuildBundle):
 
         return True
     
-    
-    
     def build_import(self):
         """Perform the initial import, then convert to imported shapefile 
         partition to one that has lat and lon columns. """
         from databundles.identity import PartitionIdentity
+        import re
         
         url = self.config.build.url
 
@@ -51,12 +50,11 @@ class Bundle(BuildBundle):
         pid = PartitionIdentity(self.identity, table='street_lights_g')
         shape_partition = self.partitions.find(pid)
 
-        if not shape_partition:
-        
-            for f in self.filesystem.unzip_dir(zip_file):
-                if not f.endswith('.shp'):
-                    continue
-               
+        if not shape_partition:  
+            # Need to use unzip_dir, and not break when we find the file, for Shapefiles. 
+            # The .shpfile opten cant be loaded without the ocrresponding .shx file in the
+            # same directory. 
+            for f in self.filesystem.unzip_dir(zip_file, regex=re.compile('.*\.shp$')):
                 shape_partition = self.partitions.new_geo_partition( pid, f)
           
         
@@ -74,111 +72,26 @@ class Bundle(BuildBundle):
         
         return partition
 
-
-    def extract_density_tiff(self):
+    def extract(self):
         '''Collect the street_lights into a heat map. '''
         from databundles.identity import PartitionIdentity
-        from osgeo import gdal, gdal_array, osr
-        from osgeo.gdalconst import GDT_Float32, GDT_Byte, GDT_Int16
-
-     
+        from databundles.geo.density import DensityImage, LinearMatrix
+        
         pid = PartitionIdentity(self.identity, table='street_lights')
         partition = self.partitions.find(pid) 
-
-        e=partition.database.connection.execute
         
-        # Find the extents of the data and figure out the offsets for the array. 
-        r = e("""SELECT min(_db_lat) as min_y, min(_db_lon) as min_x, 
-                max(_db_lat) as max_y, max(_db_lon) as max_x from street_lights """).first()
- 
-        bin_scale = 1000.
-        i_bin_scale = 1 / float(bin_scale)
-
-
-        x_offset_c = int(r['min_x']*bin_scale)-2
-        y_offset_c = int(r['min_y']*bin_scale)-2  
-
-        x_max_c = int(r['max_x']*bin_scale)
-        y_max_c = int(r['max_y']*bin_scale)    
-
-        x_offset_d = x_offset_c/bin_scale
-        y_offset_d = y_offset_c/bin_scale
-       
-        # Size of the output array
-        x_size = x_max_c - x_offset_c + 4
-        y_size = y_max_c - y_offset_c + 4
-   
-        print 'OFFSETS', x_offset_d, y_offset_d
-        print "size",  x_size, y_size
-        print 'UL Corner (x,y)',r['min_x'], r['max_y']
-        print 'LR Corner (x,y)',r['max_x'], r['min_y']
-        
-        a =  zeros( (  y_size, x_size),  dtype=float )
-    
-        print 'SHape',a.shape
-    
-        m =  outer(array([1.,2.,1.]),array([1.,2.,1.]))
-        m /= sum(m) # Normalize the sum of all cells in the matrix to 1
-
-        # Draw registration marks at the corners. 
-        if False:
-            for i in range(0,30,2):
-                a[i,0] = 1
-                a[0,i] = 1
-                
-                a[y_size-i-1,x_size-1] = 1
-                a[y_size-1,x_size-i-1] = 1
-                
-                a[y_size-i-1,0] = 1
-                a[0,x_size-i-1] = 1
-                
-                a[i,x_size-1] = 1
-                a[y_size-1,i] = 1
+        m = LinearMatrix()
+        di = DensityImage(partition, 4000, m)
+        di.info()
         
         for i,row in enumerate(partition.database.connection.execute("select * from street_lights")):
+            di.add_matrix(row['_db_lon'], row['_db_lat'])
             
-            x = int(row['_db_lon']*bin_scale) - x_offset_c 
-            y = int(row['_db_lat']*bin_scale) - y_offset_c 
       
-            x -= 1
-      
-            if row['ogc_fid'] in [34307, 8040]:
-                print row['ogc_fid'],  x, y
-             
+        file_ = self.filesystem.path('extracts',partition.table.name+".tiff")
             
-            if False:   
-                # Sum number of lamps
-                a[y,x] += 1
-            else:
-                # Add in smoothing matrix
-                for (x_m,y_m), value in ndenumerate(m):
-                    #print x,x_m,x+x_m,' : ',y,y_m,y+y_m
-                    a[y+y_m-1][x+x_m-1] += value
-        
-     
-        driver = gdal.GetDriverByName('GTiff') 
-        file_ = self.filesystem.path('extracts','street_lamp_density.tiff')
-        out = driver.Create(file_, a.shape[1], a.shape[0], 1, GDT_Float32)  
-        
-        transform = [ x_offset_d ,  # Upper Left X postion
-                     i_bin_scale ,  # Pixel Width 
-                     0 ,     # rotation, 0 if image is "north up" 
-                     y_offset_d ,  # Upper Left Y Position
-                     0 ,     # rotation, 0 if image is "north up"
-                     i_bin_scale # Pixel Height
-                     ]
-
-        out.SetGeoTransform(transform)  
-        
-        srs = osr.SpatialReference()
-        srs.ImportFromEPSG(4326)
-        out.SetProjection( srs.ExportToWkt() )
-     
-        out.GetRasterBand(1).SetNoDataValue(0)
-        out.GetRasterBand(1).WriteArray(a)
-      
-        return file_
-    
+        print di.write(file_)
+  
 import sys
 
 if __name__ == '__main__':
