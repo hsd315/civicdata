@@ -13,19 +13,6 @@ class Bundle(BuildBundle):
         self.super_ = super(Bundle, self)
         self.super_.__init__(directory)
 
-    ### Meta is run before prepare, to load or configure meta information
-
-    def meta(self):
-        return True
- 
-    ### Prepare is run before building, part of the devel process.  
-
-    def prepare(self):
-        
-        if not self.database.exists():
-            self.database.create()
-        
-        return True
         
     ### Build the final package
 
@@ -57,7 +44,6 @@ class Bundle(BuildBundle):
             for f in self.filesystem.unzip_dir(zip_file, regex=re.compile('.*\.shp$')):
                 shape_partition = self.partitions.new_geo_partition( pid, f)
           
-        
         pid = PartitionIdentity(self.identity, table='street_lights')
         partition = self.partitions.find(pid)  
         
@@ -72,26 +58,41 @@ class Bundle(BuildBundle):
         
         return partition
 
-    def extract(self):
+        
+    def extract_density(self, data, file_name=None):
+  
         '''Collect the street_lights into a heat map. '''
         from databundles.identity import PartitionIdentity
-        from databundles.geo.density import DensityImage, LinearMatrix
+        from databundles.geo.density import DensityImage, LinearMatrix,GaussianMatrix
+        from numpy import histogram, ndenumerate, set_printoptions
+
         
         pid = PartitionIdentity(self.identity, table='street_lights')
         partition = self.partitions.find(pid) 
-        
-        m = LinearMatrix()
-        di = DensityImage(partition, 4000, m)
-        di.info()
-        
-        for i,row in enumerate(partition.database.connection.execute("select * from street_lights")):
+
+        bin_scale = 5000 # cells per degree
+        matrix_size = int((bin_scale / 500) / 2) * 2 + 1 # Maxtrix size must be odd
+        matrix_dia = matrix_size / 3 # Controls spread of matrix
+
+        di = DensityImage(partition.extents, bin_scale, GaussianMatrix(matrix_size,matrix_dia))
+   
+        #limit_where = 'where _db_lon < -117 and _db_lat < 32.8 and _db_lat >32.6'
+   
+        for i,row in enumerate(partition.database.connection.execute("select * from street_lights ")):
             di.add_matrix(row['_db_lon'], row['_db_lat'])
-            
-      
-        file_ = self.filesystem.path('extracts',partition.table.name+".tiff")
-            
-        print di.write(file_)
+          
+        if not file_name:  
+            file_name = self.filesystem.path('extracts',partition.table.name+".tiff")
+
+        di.mask()
+        di.std_norm()
+        print di.info()
+                
+        print di.write(file_name)
+        
+        return file_name
   
+
 import sys
 
 if __name__ == '__main__':

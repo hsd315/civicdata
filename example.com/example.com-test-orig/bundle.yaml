@@ -1,8 +1,46 @@
+extracts:
+    A:
+        description: Extract Description 1
+        each:
+        -   -   one: 1
+                three: 3
+                two: 2
+            -   one: 11
+                three: 33
+                two: 22
+        -   -   bee: B
+                cee: C
+                eay: A
+            -   bee: BB
+                cee: CC
+                eay: AA
+        function: test_extract
+        title: Title 1
+        depends: [B,D]
+        done_if: " os.path.exists('/etc/hosts')'"
+    B:
+        description: Extract Description 2
+        function: test_extract
+        title: Title 2
+        depends: C
+    C:
+        description: Extract Description 3
+        function: test_extract
+        title: Title 3
+    D:
+        description: Extract Description 4
+        function: test_extract
+        title: Title 4
 identity:
     creator: clarinova.com
     dataset: test
     id: a141kc
-    revision: '1'
+    name: example.com-test-orig-a7d9
+    revision: 1
     source: example.com
-    subset: null
     variation: orig
+partitions:
+- example.com-test-orig-a7d9-time1.space1.example
+- example.com-test-orig-a7d9-time2.space1.example
+- example.com-test-orig-a7d9-time1.space2.example
+- example.com-test-orig-a7d9-time2.space2.example

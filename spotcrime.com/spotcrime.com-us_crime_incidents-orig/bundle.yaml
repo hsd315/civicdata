@@ -1,0 +1,64 @@
+about:
+    author: Spotcrime.com
+    description: San Diego Crime incidents from 2007 to 2010, generously provided
+        by [Spotcrime.com](http://spotcrime.com). These files include the date, category,
+        location and description of crime incidents  that were scraped from public
+        websites by SpotCrime.com, which makes the data available under [this disclaimer.](https://docs.google.com/document/pub?id=1B_wiJhPF8SClFOdaRKTRR_ddwRqnB3y9AEa43LuYtZQ)
+        Because these  records were scraped from a variety of websites with a program
+        that we don't have access to, the data should be  considered illustrative,
+        not definitive. Don't use this data  for statistical analysis without understanding
+        its limitations. Contact [ARJIS](http://argis.com) for official, recent,
+        data.
+    groups:
+    - Crime
+    homepage: http://spotcrime.com/#San%20Diego%20
+    license: other-open
+    maintainer: Spotcrime.com
+    tags:
+    - government
+    - gov-crime
+    title: San Diego Crime Incidents, 2007 to 2010
+build:
+    statesFile: meta/states.yaml
+    urlTemplate: http://ds.civicknowledge.org/spotcrime.com/free-access-incidents/{year}-{month}.csv.zip
+extracts:
+    csv:
+        description: "Crime incidents, extracted from the free Spotcrime.com database,\
+            \ for a subset of the types and regions. \n\n  * Types: {types} \n  *\
+            \ Area: {area} \n  * Geo extents ({min_lat},{min_lon}), ({max_lat},{max_lon})"
+        each:
+        -   -   title_type: Violent
+                types: Assault, Shooting
+                where: AND type in ('Assault', 'Shooting')
+            -   title_type: Property
+                types: Theft, Burglary, Robbery, Vandalism, Arson
+                where: AND type in ('Theft', 'Burglary', 'Robbery', 'Vandalism', 'Arson')
+            -   title_type: Other
+                types: Other, Arest
+                where: AND type in ('Other', 'Arrest')
+        -   -   area: California
+                max_lat: 41.983994
+                max_lon: -114.147949
+                min_lat: 32.814978
+                min_lon: -124.804687
+            -   area: San_Diego
+                max_lat: 33.47551
+                max_lon: -116.107189
+                min_lat: 32.004009
+                min_lon: -117.601255
+        for: 'True'
+        name: '{title_type}-{area}.csv'
+        partition: any
+        query: select  date, time, type, latitude, longitude from incidents where
+            latitude > {min_lat} and latitude < {max_lat} and longitude > {min_lon}
+            and longitude < {max_lon} {where}
+        title: '{title_type} Crime Incidents {area}, {p_time}'
+identity:
+    creator: eric@clarinova.com
+    dataset: us_crime_incidents
+    id: a2hjX5
+    name: spotcrime.com-us_crime_incidents-orig-7ba4
+    revision: 1
+    source: spotcrime.com
+    variation: orig
+partitions: []

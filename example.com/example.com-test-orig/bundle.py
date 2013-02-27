@@ -6,6 +6,7 @@ from  databundles.orm import Table, Column
 from databundles.dbexceptions import ConfigurationError
 import os.path
 import logging
+from numpy import *
 class Bundle(BuildBundle):
     ''' '''
  
@@ -112,6 +113,75 @@ class Bundle(BuildBundle):
 
         return True
        
+
+    def test_extract(self, data, file_name=None):
+        print "EXTRACT:", data
+        file_name = '/tmp/foobar'
+        with open(file_name,'w+') as f:
+            f.write('hi there\n')
+            
+        return file_name
+            
+       
+    def image_extract(self,file_name=None):
+        '''Collect the street_lights into a heat map. '''
+        from databundles.identity import PartitionIdentity
+        from databundles.geo.density import DensityImage, LinearMatrix,GaussianMatrix
+        
+        import random
+        from databundles.geo.util import BoundingBox
+        
+        
+        file_ = self.filesystem.path('extracts',"test1.tiff")
+        file2_ = self.filesystem.path('extracts',"test2.tiff")
+        file3_ = self.filesystem.path('extracts',"test3.tiff")
+    
+        bin_scale = 100 # cells per degree
+        matrix_size = 17
+        matrix_dia = 9
+
+        extents = BoundingBox(min_x=-1, min_y=-1, max_x=1, max_y=1)
+        x_size = (extents.max_x - extents.min_x) * bin_scale
+        y_size = (extents.max_y - extents.min_y) * bin_scale
+        
+        print "Matrix: ", matrix_size, matrix_dia
+        print "Size  : ",x_size, y_size
+        m = GaussianMatrix(matrix_size,matrix_dia)
+        di = DensityImage(extents, bin_scale,m)
+        
+        m = GaussianMatrix(int(matrix_size/2)+1,int(matrix_dia/2)+1)
+        di2 = DensityImage(extents, bin_scale,m)
+        
+        di3 = DensityImage(extents, bin_scale)
+        
+        print di.info()   
+        
+
+        for x in arange(extents.min_x, extents.max_x ,1./bin_scale*20,  float32):
+            for y in arange(extents.min_y, extents.max_y ,1./bin_scale*20,  float32):
+                di.add_matrix(x,y)
+                di2.add_matrix(x,y)
+                #di2.add_count(x,y, random.randint(1,10) )
+    
+        di.mask()
+        di.unity_norm()
+        
+        di2.mask()
+        print di2.info()
+        print di.write(file_)
+        di2.unity_norm()
+        print di2.info()   
+      
+        print di2.write(file2_)
+        
+        
+        di3.a = di.a - di2.a
+        
+        print di3.write(file3_)
+        
+        print self.log("WROTE: "+file_)
+        return file_    
+
 
 import sys
 

@@ -2,7 +2,7 @@ identity:
     creator: eric@clarinova.com
     dataset: tigerline
     id: a2lseu
-    revision: '1'
+    revision: 1
     source: census.gov
     subset: '2000'
     variation: orig
