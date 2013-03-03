@@ -103,6 +103,9 @@ class Bundle(BuildBundle):
             t.appendsqlite3(self.database.path, 'incidents')
     
         return True
+    
+
+    
 
 import sys
 

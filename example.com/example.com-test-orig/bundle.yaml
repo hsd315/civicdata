@@ -1,6 +1,6 @@
 extracts:
     A:
-        description: Extract Description 1
+        description: Extract Description A
         each:
         -   -   one: 1
                 three: 3
@@ -17,20 +17,30 @@ extracts:
         function: test_extract
         title: Title 1
         depends: [B,D]
-        done_if: " os.path.exists('/etc/hosts')'"
+        file_name: "/tmp/{one}-{bee}.foo"
+        done_if: "os.path.exists('/tmp/{one}-{bee}.foo')"
     B:
-        description: Extract Description 2
+        description: Extract Description B
         function: test_extract
         title: Title 2
         depends: C
+        file_name: "/tmp/B.foo"
     C:
-        description: Extract Description 3
+        description: Extract Description C
         function: test_extract
         title: Title 3
+        file_name: "/tmp/C.foo"
+        depends: [D,E]
     D:
-        description: Extract Description 4
+        description: Extract Description D
         function: test_extract
         title: Title 4
+        file_name: "/tmp/D.foo"
+    E:
+        description: Extract Description E
+        function: test_extract
+        title: Title 5
+        file_name: "/tmp/E.foo"
 identity:
     creator: clarinova.com
     dataset: test

@@ -65,7 +65,6 @@ class Bundle(BuildBundle):
             
         return self._sp_zones
         
-        
     def find_sp_zone(self, geometry):
         in_zone = None
         dist_zone = None
@@ -120,13 +119,13 @@ class Bundle(BuildBundle):
         extract the shape of each  place """
         import re 
         import ogr
+        from databundles.geo.analysisarea import  create_bb
         
         self.load_spcs()
         
         ogr.UseExceptions()  
 
         t = self.config.build.templates.place # URL Template for PLACE shapefiles
-        
         
         def rd(v):
             """Round down, to the nearest even 100"""
@@ -142,9 +141,14 @@ class Bundle(BuildBundle):
         
         # Iterate over the states first, since the place zone files are borken 
         # out by state. 
+        
+        count = 0
+        self.database.clean_table('places')
         query = "select state, name from states order by state asc"
         for row in r.bundle.database.connection.execute(query):
-            
+        
+            if row['state'] !=  6 :
+                continue
             
             url = t.format(state_fips=row['state'])
     
@@ -155,7 +159,6 @@ class Bundle(BuildBundle):
             for file_ in self.filesystem.unzip_dir(zip_file, 
                                 regex=re.compile('.*\.shp$')): pass # Should only be one
             
-      
             shapefile = ogr.Open(file_)
             layer = shapefile.GetLayer(0)
             
@@ -163,12 +166,11 @@ class Bundle(BuildBundle):
             ## Rasterize with: http://gdal.org/gdal__alg_8h.html#a50caf4bc34703f0bcf515ecbe5061a0a
             ##
 
-
-            self.database.clean_table('places')
             with self.database.inserter('places') as ins:
                 for i in range(layer.GetFeatureCount()):
                     
-                    if i%500 == 0:
+                    count += 1
+                    if count%500 == 0:
                         self.log("Loaded {} extents".format(i))
                     
                     feature = layer.GetFeature(i)
@@ -176,21 +178,37 @@ class Bundle(BuildBundle):
                     name = feature.GetField("NAME")
            
                     geometry = feature.GetGeometryRef()
-       
-                    env1 = geometry.GetEnvelope()
-                  
+
                     fips = self.find_sp_zone(geometry)
                     
                     zone_r = self.get_zone(fips)
            
                     srs = ogr.osr.SpatialReference(str(zone_r['srswkt']))
-                    try:
-                        geometry.TransformTo(srs)
-                    except Exception as e:
-                        self.error('Failed to transform with SRS: {}'.format(str(zone_r['srswkt'])))
-                        continue
-                    env2 = geometry.GetEnvelope()
+                    
+                    if False:
+                        try:
+                            geometry.TransformTo(srs)
+                        except Exception as e:
+                            self.error('Failed to transform with SRS: {}'.format(str(zone_r['srswkt'])))
+                            continue
+                        env2 = geometry.GetEnvelope()
 
+                    # Because of the diferent SRS, the envelope will probably rotate
+                    # when it is projected. So, we need to take the envelope of the projected (rotated)
+                    # envelope, to ensure the original envelope of the place fits entirely in the
+                    # analysis area. 
+                    #
+                    # So, we are (1) converting the place envelope to a shape, (2)
+                    # transforming it to the AnalysisArea SRS, then taking the envelope again, 
+                    # this time in the new SRS. 
+                    
+                    env1_bb = create_bb(geometry.GetEnvelope(), geometry.GetSpatialReference())
+                    env1_bb.TransformTo(srs)       
+                    env2_bb = create_bb(env1_bb.GetEnvelope(), env1_bb.GetSpatialReference())
+
+                    env1 = geometry.GetEnvelope()
+                    env2 = env1_bb.GetEnvelope()
+                    
                     r = {'spcs_id' : zone_r['spcs_id'],
                          'geoid' : feature.GetField("GEOID"),
                          'name' : name.decode('latin1'), # Handle 8-bit values
@@ -212,7 +230,18 @@ class Bundle(BuildBundle):
                     ins.insert(r)
                     
         return True
-             
+
+
+        
+    def test(self, *args, **kwargs):
+        
+   
+
+        t =  aa.get_transformer()
+        
+        print aa
+        print 'Min',t(-117.36082,33.11470)
+
 
 import sys
 

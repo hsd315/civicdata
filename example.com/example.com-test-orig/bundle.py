@@ -115,12 +115,14 @@ class Bundle(BuildBundle):
        
 
     def test_extract(self, data, file_name=None):
-        print "EXTRACT:", data
-        file_name = '/tmp/foobar'
+        print "EXTRACT: {}".format(data['description'])
+        file_name = data['file_name']
         with open(file_name,'w+') as f:
             f.write('hi there\n')
             
         return file_name
+            
+
             
        
     def image_extract(self,file_name=None):
