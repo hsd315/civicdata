@@ -16,6 +16,7 @@ about:
     - gov-crime
     title: San Diego Crime Analysis
 build:
+    aa_geoid: '0666000'
     crime_merges:
         Other:
         - Arrest

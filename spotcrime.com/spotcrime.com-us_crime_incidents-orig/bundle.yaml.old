@@ -7,8 +7,7 @@ about:
         Because these  records were scraped from a variety of websites with a program
         that we don't have access to, the data should be  considered illustrative,
         not definitive. Don't use this data  for statistical analysis without understanding
-        its limitations. \n\nContact [ARJIS](http://argis.com) for official, recent,
-        data.
+        its limitations. Contact [ARJIS](http://argis.com) for official, recent, data.
     groups:
     - Crime
     homepage: http://spotcrime.com/#San%20Diego%20
@@ -23,36 +22,22 @@ build:
     urlTemplate: http://ds.civicknowledge.org/spotcrime.com/free-access-incidents/{year}-{month}.csv.zip
 extracts:
     csv:
-        description: "Crime incidents, extracted from the free Spotcrime.com database,\
-            \ for a subset of the types and regions. \n\n  * Types: {types} \n  *\
-            \ Area: {area} \n  * Geo extents ({min_lat},{min_lon}), ({max_lat},{max_lon})"
+        description: Crime incidents, extracted from the free Spotcrime.com database,
+            for a subset of the types and regions.
         each:
-        -   -   title_type: Violent
-                types: Assault, Shooting
-                where: AND type in ('Assault', 'Shooting')
-            -   title_type: Property
-                types: Theft, Burglary, Robbery, Vandalism, Arson
-                where: AND type in ('Theft', 'Burglary', 'Robbery', 'Vandalism', 'Arson')
-            -   title_type: Other
-                types: Other, Arest
-                where: AND type in ('Other', 'Arrest')
-        -   -   area: California
-                max_lat: 41.983994
-                max_lon: -114.147949
-                min_lat: 32.814978
-                min_lon: -124.804687
-            -   area: San_Diego
-                max_lat: 33.47551
-                max_lon: -116.107189
-                min_lat: 32.004009
-                min_lon: -117.601255
+        -   -   aa:
+                    geoid: '0666000'
         for: 'True'
-        name: '{title_type}-{area}.csv'
+        name: crime-incidents-{aa_name}.csv
         partition: any
-        query: select  date, time, type, latitude, longitude from incidents where
-            latitude > {min_lat} and latitude < {max_lat} and longitude > {min_lon}
-            and longitude < {max_lon} {where}
-        title: '{title_type} Crime Incidents {area}, {p_time}'
+        query: select date, time, type, latitude, longitude,
+            latitude+cast(random()%1000 as float)/5000000.0 as rlat,
+            longitude+cast(random()%1000 as float)/5000000.0 as rlon,
+            description
+            from incidents
+            where latitude > {latmin} and latitude < {latmax} and longitude > {lonmin}
+            and longitude < {lonmax}
+        title: Crime Incidents, {aa_name}
 identity:
     creator: eric@clarinova.com
     dataset: us_crime_incidents

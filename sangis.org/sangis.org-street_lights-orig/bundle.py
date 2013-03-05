@@ -16,15 +16,8 @@ class Bundle(BuildBundle):
         
     ### Build the final package
 
+
     def build(self):
-
-        partition = self.build_import()
-
-        self.extract_density_tiff()
-
-        return True
-    
-    def build_import(self):
         """Perform the initial import, then convert to imported shapefile 
         partition to one that has lat and lon columns. """
         from databundles.identity import PartitionIdentity
@@ -34,6 +27,9 @@ class Bundle(BuildBundle):
 
         zip_file = self.filesystem.download(url)
         
+        # This is the geo partition, which holds a Spatialite database, 
+        # a sqlitedatabase with some special features, which aren't available unless
+        # you have Spatialite installed. 
         pid = PartitionIdentity(self.identity, table='street_lights_g')
         shape_partition = self.partitions.find(pid)
 
@@ -59,38 +55,7 @@ class Bundle(BuildBundle):
         return partition
 
         
-    def extract_density(self, data, file_name=None):
-  
-        '''Collect the street_lights into a heat map. '''
-        from databundles.identity import PartitionIdentity
-        from databundles.geo.density import DensityImage, LinearMatrix,GaussianMatrix
-        from numpy import histogram, ndenumerate, set_printoptions
 
-        
-        pid = PartitionIdentity(self.identity, table='street_lights')
-        partition = self.partitions.find(pid) 
-
-        bin_scale = 5000 # cells per degree
-        matrix_size = int((bin_scale / 500) / 2) * 2 + 1 # Maxtrix size must be odd
-        matrix_dia = matrix_size / 3 # Controls spread of matrix
-
-        di = DensityImage(partition.extents, bin_scale, GaussianMatrix(matrix_size,matrix_dia))
-   
-        #limit_where = 'where _db_lon < -117 and _db_lat < 32.8 and _db_lat >32.6'
-   
-        for i,row in enumerate(partition.database.connection.execute("select * from street_lights ")):
-            di.add_matrix(row['_db_lon'], row['_db_lat'])
-          
-        if not file_name:  
-            file_name = self.filesystem.path('extracts',partition.table.name+".tiff")
-
-        di.mask()
-        di.std_norm()
-        print di.info()
-                
-        print di.write(file_name)
-        
-        return file_name
   
 
 import sys

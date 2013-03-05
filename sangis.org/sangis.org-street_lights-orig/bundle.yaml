@@ -26,6 +26,7 @@ about:
     - gov-infrastructure
     title: San Diego Street Light Locations
 build:
+    aa_geoid: '0666000'
     url: http://rdw.sandag.org/file_store/Miscellaneous/Street_Light.zip
 extracts:
 -   description: A Geotif file, with .002 degree square cells, where each cell value

@@ -14,9 +14,6 @@ class Bundle(BuildBundle):
         self.super_.__init__(directory)
         self.array_cache = {}
 
-    def build(self):
-        return True
-      
     def prepare(self):
         from databundles.identity import PartitionIdentity
         
@@ -99,7 +96,7 @@ class Bundle(BuildBundle):
         '''
         
         from databundles.geo.analysisarea import get_analysis_area
-        aa = get_analysis_area(self.library, geoid = '0666000')    
+        aa = get_analysis_area(self.library, geoid = self.config.build.aa_geoid)    
         
         self.load_datasets(aa)
         self.merge_datasets(aa)
