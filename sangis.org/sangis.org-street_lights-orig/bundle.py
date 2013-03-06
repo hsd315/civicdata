@@ -25,8 +25,6 @@ class Bundle(BuildBundle):
         
         url = self.config.build.url
 
-        zip_file = self.filesystem.download(url)
-        
         # This is the geo partition, which holds a Spatialite database, 
         # a sqlitedatabase with some special features, which aren't available unless
         # you have Spatialite installed. 
@@ -34,11 +32,13 @@ class Bundle(BuildBundle):
         shape_partition = self.partitions.find(pid)
 
         if not shape_partition:  
-            # Need to use unzip_dir, and not break when we find the file, for Shapefiles. 
-            # The .shpfile opten cant be loaded without the ocrresponding .shx file in the
-            # same directory. 
-            for f in self.filesystem.unzip_dir(zip_file, regex=re.compile('.*\.shp$')):
-                shape_partition = self.partitions.new_geo_partition( pid, f)
+
+            # Use download_shape file instead of download an unzip to ensure that the whole
+            # shapefile is extracted before using the .shp file, which is often useless without the
+            # corresponding .shx. 
+            shp_file= self.filesystem.download_shapefile(url)
+ 
+            shape_partition = self.partitions.new_geo_partition( pid, shp_file)
           
         pid = PartitionIdentity(self.identity, table='street_lights')
         partition = self.partitions.find(pid)  
