@@ -32,9 +32,9 @@ build:
         - Shooting
     incident_query: select  * from incidents where latitude > {latmin} and latitude
         < {latmax} and longitude > {lonmin} and longitude < {lonmax}
-dependencies:
-    crime: spotcrime.com-us_crime_incidents-orig-7ba4
-    lamps: sangis.org-street_lights-orig-7ba4-street_lights
+    dependencies:
+        crime: clarinova.com-us_crime_incidents-state-7ba4-ca.incidents
+        lamps: sangis.org-street_lights-orig-7ba4-street_lights
 extracts:
     custom:
         description: This is a custom extract. Do whatever you want

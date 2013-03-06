@@ -30,13 +30,10 @@ extracts:
         for: 'True'
         name: crime-incidents-{aa_name}.csv
         partition: any
-        query: select date, time, type, latitude, longitude,
-            latitude+cast(random()%1000 as float)/5000000.0 as rlat,
-            longitude+cast(random()%1000 as float)/5000000.0 as rlon,
-            description
-            from incidents
-            where latitude > {latmin} and latitude < {latmax} and longitude > {lonmin}
-            and longitude < {lonmax}
+        query: select date, time, type, latitude, longitude, latitude+cast(random()%1000
+            as float)/5000000.0 as rlat, longitude+cast(random()%1000 as float)/5000000.0
+            as rlon, description from incidents where latitude > {latmin} and latitude
+            < {latmax} and longitude > {lonmin} and longitude < {lonmax}
         title: Crime Incidents, {aa_name}
 identity:
     creator: eric@clarinova.com

@@ -6,8 +6,8 @@ build:
     templates:
         place: http://www2.census.gov/geo/tiger/TIGER2012/PLACE/tl_2012_{state_fips:02d}_place.zip
     zone_file: meta/zones.csv
-dependencies:
-    geo: census.gov-geography-dim-orig-a7d9
+    dependencies:
+        geo: census.gov-geography-dim-orig-a7d9
 identity:
     creator: eric@clarinova.com
     dataset: extents

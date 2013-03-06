@@ -47,8 +47,9 @@ class Bundle(BuildBundle):
     
     def build(self):
 
-        source1 = get_library().get(self.config.queries.source1) 
-        source2 = get_library().get(self.config.queries.source2)  
+        source1 = self.library.dep('geo2000')
+        source2 = self.library.dep('geo2010')
+
         template = self.config.queries.template
         data = self.config.queries.data
         

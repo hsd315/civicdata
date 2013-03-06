@@ -1,13 +1,13 @@
 about:
     homepage: http://www.census.gov/cgi-bin/geo/shapefiles2010/layers.cgi
 build:
+    dependencies:
+        geo: census.gov-geography-dim-orig-a7d9
     schema_file: meta/schema.csv
     stateplane_url: http://faculty.unlv.edu/jensen/gisdata/referencemaps/usstpln83.zip
     templates:
         place: http://www2.census.gov/geo/tiger/TIGER2012/PLACE/tl_2012_{state_fips:02d}_place.zip
     zone_file: meta/zones.csv
-dependencies:
-    geo: census.gov-geography-dim-orig-a7d9
 identity:
     creator: eric@clarinova.com
     dataset: extents

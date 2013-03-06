@@ -270,13 +270,12 @@ class Bundle(BuildBundle):
         # to our array coordinates, and produce an image. 
         
         # Get a reference to the bundle named as "crime" in the bundle.yaml configuration
-        # file.   
+        # file.   crime = spotcrime.com-us_crime_incidents-orig-7ba4
         r = self.library.dep('crime')
 
         # Fill in the values for the extents of the analysis area into the
         # query template. 
         q = self.config.build.incident_query.format(**aa.__dict__)
-        
         q += " AND type = 'Theft' "
         
         # A 'Kernel' is a matrix in a process called 'convolution'. We're doing something
@@ -291,8 +290,8 @@ class Bundle(BuildBundle):
         
         # We're going to need an output array. This creates a numpy array that 
         # has the correct size
-        a = aa.new_array()
-        ar = aa.new_array()
+        a = aa.new_array() # Main array
+        ar = aa.new_array() # Array with random perturbation 
         rs = 4
         print "Array shape: ",a.shape
         

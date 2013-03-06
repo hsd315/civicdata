@@ -11,7 +11,7 @@ class Bundle(BuildBundle):
     ''' '''
  
     header = ['Date', 'Type', 'Address', 'Latitude', 'Longitude', 'Link', 'Description', 'state', 'city']
-    types  = [str,      str,    str,     float,      float,        str,    str,           str,     str]
+    types  = [str,     str,    str,     float,      float,        str,    str,           str,     str]
  
     def __init__(self,directory=None):
         self.super_ = super(Bundle, self)
@@ -84,10 +84,19 @@ class Bundle(BuildBundle):
         zip_file = self.filesystem.download(url, 'zip')
         csv_file = self.filesystem.unzip(zip_file)
 
+        print csv_file
+
+        def extract_city(rec):
+            try:
+                return rec['Address'].split(',')[-2].strip().lower().capitalize()
+            except:
+                return "FAILED"
+
         t = ( petlf.fromcsv(csv_file)
                  .addfield('state',lambda rec: rec['Address'].split(',')[-1].strip())
-                 .addfield('city',lambda rec: rec['Address'].split(',')[-2].strip().lower().capitalize())
+                 .addfield('city',extract_city)
                  .convert(dict(zip(self.header, self.types)))
+                 .convert( ('Type', 'Address', 'Description', 'city'), lambda v: v.strip().decode('latin1').encode('ascii','xmlcharrefreplace') )
                  .setheader(map(str.lower,self.header))
                 )
         
@@ -95,19 +104,32 @@ class Bundle(BuildBundle):
         
     def build(self):
         
-        street_address = self.street_address()
+        parts = {}
+        for partition in self.partitions:
+           ins = partition.database.inserter('incidents')
+           parts[partition.identity.space] = (partition, ins)
         
         for url, month,year in self.generate_urls():
+            self.log("Importing {}".format(url))
             t = self.import_csv(url)
 
+            
             for row in t.records():
-                print row
-               
-                   
-        return True
-    
+                if len(row['state']) == 2:
+                    try:
+                        partition, ins = parts[row['state'].lower()]
+                        ins.insert(row)
+                    except:
+                        # There are crime records for London and UK
+                        pass
+                    
         
-  
+        for state, x in parts.items():
+            partition, ins = x
+            ins.close()
+                              
+        return True
+
  
 import sys
 
