@@ -121,9 +121,7 @@ class Bundle(BuildBundle):
             f.write('hi there\n')
             
         return file_name
-            
 
-            
        
     def image_extract(self,file_name=None):
         '''Collect the street_lights into a heat map. '''
@@ -184,6 +182,17 @@ class Bundle(BuildBundle):
         print self.log("WROTE: "+file_)
         return file_    
 
+
+    def demo1(self):
+        import databundles.library as library
+        
+        #r  = self.library.get("clarinova.com-us_crime_incidents-state-7ba4-ca.incidents")
+        r  = self.library.get("source-dataset-subset-variation-ca0d-tone")
+        
+        print r.partition.database.path
+        
+        for row in r.partition.database.connection.execute("select * from incidents limit 10"):
+            print row['date'],row['lattitude'],row['longitude']
 
 import sys
 
