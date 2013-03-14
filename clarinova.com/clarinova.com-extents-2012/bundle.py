@@ -76,7 +76,7 @@ class Bundle(BuildBundle):
         for fips,  zone in self.sp_zones.items():   
             zcentroid = zone.Centroid()
             
-            if zone.Contains(centroid) or zone.Intersects(geometry):
+            if zone.Contains(centroid) or zone.Intersect(geometry):
                 in_zone = fips
     
             #print "  ",fips, dist_zone, dist, min_dist

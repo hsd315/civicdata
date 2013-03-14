@@ -174,7 +174,7 @@ class Bundle(BuildBundle):
       
         print di2.write(file2_)
         
-        
+
         di3.a = di.a - di2.a
         
         print di3.write(file3_)
@@ -187,7 +187,20 @@ class Bundle(BuildBundle):
         import databundles.library as library
         
         #r  = self.library.get("clarinova.com-us_crime_incidents-state-7ba4-ca.incidents")
-        r  = self.library.get("source-dataset-subset-variation-ca0d-tone")
+        r  = self.library.get("census.gov-2010_population-geo-orig-a7d9-geofile.40")
+        
+        # Get the metro and non metro areas from the state file, then calculate the 
+        # population densities for the different areas. 
+        q= """
+        SELECT me.name, me.arealand AS metro_area, me.pop100 AS metro_pop,
+        ru.arealand AS rural_area, ru.pop100 AS rural_pop,
+        (cast(me.pop100 as float) / me.arealand)*2590000 as metro_density,
+        (cast(ru.pop100 as float) / ru.arealand)*2590000 as rural_density
+        FROM geofile AS me
+        LEFT JOIN geofile AS ru ON ru.state = me.state
+        WHERE me.geocomp = 'C0' AND  ru.geocomp = 'G0' AND me.fileid = 'SF1ST' AND ru.fileid = 'SF1ST'
+        ORDER BY metro_density DESC;
+        """
         
         print r.partition.database.path
         
