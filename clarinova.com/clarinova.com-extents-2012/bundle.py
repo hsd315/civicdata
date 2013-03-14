@@ -48,7 +48,7 @@ class Bundle(BuildBundle):
         
         for i in range(layer.GetFeatureCount()):
             feature = layer.GetFeature(i)
-            fips = feature.GetField("FIPSZONE83")
+            fips = feature.GetField("FIPSZONE83") # FIPS Code of the stateplane zone
             geometry = feature.GetGeometryRef()
             #print i, name, geometry.GetEnvelope()
         
@@ -71,16 +71,14 @@ class Bundle(BuildBundle):
         min_dist = None
         
         centroid = geometry.Centroid()
-        
-        #print i,name
+
         for fips,  zone in self.sp_zones.items():   
+            
             zcentroid = zone.Centroid()
             
             if zone.Contains(centroid) or zone.Intersect(geometry):
                 in_zone = fips
-    
-            #print "  ",fips, dist_zone, dist, min_dist
-            
+
             # The zone file is very coarse, so not all of the places are actually in
             # any zone, so try to find the nearest zone. 
             dist = zone.Distance(centroid)
@@ -168,6 +166,7 @@ class Bundle(BuildBundle):
             ##
 
             with self.database.inserter('places') as ins:
+                prefix = 'CG' # For Census geoids
                 for i in range(layer.GetFeatureCount()):
                     
                     count += 1
@@ -211,7 +210,7 @@ class Bundle(BuildBundle):
                     env2 = env1_bb.GetEnvelope()
                     
                     r = {'spcs_id' : zone_r['spcs_id'],
-                         'geoid' : feature.GetField("GEOID"),
+                         'geoid' : prefix+feature.GetField("GEOID"),
                          'name' : name.decode('latin1'), # Handle 8-bit values
                          'statefp': feature.GetField("STATEFP"),
                          'placens': feature.GetField("PLACENS"),
