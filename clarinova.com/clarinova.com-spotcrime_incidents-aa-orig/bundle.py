@@ -112,7 +112,7 @@ class Bundle(BuildBundle):
         for row in p.query("select date, time, cellx, celly from incidents"):
             k.apply_add(a, row['cellx'],row['celly'] )
       
-        print np.sum(a)
+     
       
 import sys
 
