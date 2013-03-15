@@ -1,0 +1,6 @@
+
+
+For San Diego county, the list of build.analysisarea entries are taken from the query:
+
+$ dbmanage library get -o a2v74l
+sqlite> select geoid, name  from places where lonmin <-116.8 and latmax < 33.4 order by name asc;

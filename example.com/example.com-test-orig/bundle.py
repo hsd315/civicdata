@@ -202,10 +202,8 @@ class Bundle(BuildBundle):
         ORDER BY metro_density DESC;
         """
         
-        print r.partition.database.path
-        
-        for row in r.partition.database.connection.execute("select * from incidents limit 10"):
-            print row['date'],row['lattitude'],row['longitude']
+        for row in r.partition.database.query(q):
+            print row;
 
 import sys
 
