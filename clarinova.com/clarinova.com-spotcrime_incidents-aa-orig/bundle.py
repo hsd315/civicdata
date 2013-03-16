@@ -86,6 +86,7 @@ class Bundle(BuildBundle):
                     p = trans(row['longitude'], row['latitude'])
                     nr['cellx'] = p.x
                     nr['celly'] = p.y
+
                     ins.insert(nr)
         
         for aa, part, ins, trans in aas:
@@ -111,9 +112,7 @@ class Bundle(BuildBundle):
          
         for row in p.query("select date, time, cellx, celly from incidents"):
             k.apply_add(a, row['cellx'],row['celly'] )
-      
-     
-      
+
 import sys
 
 if __name__ == '__main__':
