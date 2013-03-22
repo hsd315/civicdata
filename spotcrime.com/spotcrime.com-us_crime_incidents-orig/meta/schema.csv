@@ -1,0 +1,1 @@
+table,column,is_pk,is_fk,i1,i2,type,default,descriptionincidents,date,,,1,,DATE,,incidents,type,,,,1,TEXT,,incidents,address,,,,,TEXT,,incidents,latitude,,,,,FLOAT,,incidents,longitude,,,,,FLOAT,,incidents,link,,,,,TEXT,,incidents,description,,,,,TEXT,,incidents,time,,,1,,TIME,,incidents,state,,,,,TEXT,,

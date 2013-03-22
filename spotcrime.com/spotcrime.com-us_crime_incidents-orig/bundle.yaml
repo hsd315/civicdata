@@ -19,6 +19,7 @@ about:
     title: San Diego Crime Incidents, 2007 to 2010
 build:
     statesFile: meta/states.yaml
+    schemaFile: meta/schema.csv
     urlTemplate: http://ds.civicknowledge.org/spotcrime.com/free-access-incidents/{year}-{month}.csv.zip
 extracts:
     csv:

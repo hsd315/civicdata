@@ -1,5 +1,6 @@
 '''
-
+Minor conversion  of the SpotCrime free crime database that re-codes text
+and loads the records into a database. 
 '''
 
 from  databundles.bundle import BuildBundle
@@ -7,8 +8,6 @@ from  databundles.bundle import BuildBundle
 class Bundle(BuildBundle):
     ''' '''
  
-    header = ['Date', 'Type', 'Address', 'Latitude', 'Longitude', 'Link', 'Description', 'time','state']
-    types  = [str,      str,    str,     float,      float,        str,    str,           str, str]
 
     def __init__(self,directory=None):
         import yaml
@@ -34,24 +33,23 @@ class Bundle(BuildBundle):
         # Create schema
         #
    
-        type_map = {
-            str:Column.DATATYPE_TEXT,
-            float: Column.DATATYPE_REAL
-             }
-            
-        cols = dict(zip(self.header,  self.types))
-       
-        t = self.schema.add_table('incidents')
-        #self.schema.add_column(t,'id',datatype = Column.DATATYPE_INTEGER,is_primary_key=True )
-         
-        for field in self.header:
-            # Dont iterate dict; columns must be in sam order as header
-            self.schema.add_column(t,field,datatype = type_map[ cols[field]])
-           
+        with open(self.filesystem.path(self.config.build.schemaFile), 'rbU') as f:
+               self.schema.schema_from_file(f)     
+   
         self.database.session.commit()
         self.schema.create_tables()
-     
+
         return True
+        
+    @property
+    def header(self):
+        header = []
+        types = []
+        for c in self.schema.table('incidents').columns:
+            header.append(str(c.name))
+            types.append(c.python_type)
+            
+        return header, types
         
     def generate_urls(self):
         
@@ -80,19 +78,21 @@ class Bundle(BuildBundle):
             except:
                 return None
         
-        print csv_file
+        header, types = self.header 
+
         t = ( petlf.fromcsv(csv_file)
-                .addfield('time', lambda rec: parse_time(rec['Date']))
+                .addfield('Time', lambda rec: parse_time(rec['Date']))
                 .convert('Date', lambda v: dateutil.parser.parse(v).date().isoformat())
-                .addfield('state',lambda rec: rec['Address'].split(',')[-1].strip())
-                .convert(dict(zip(self.header, self.types)))
+                .addfield('State',lambda rec: rec['Address'].split(',')[-1].strip())
                 .convert( ('Type', 'Address', 'Description'), lambda v: v.strip().decode('latin1').encode('ascii','xmlcharrefreplace') )
-                .setheader(map(str.lower,self.header))
+                .setheader(map(str.lower,header))
+                .convert(dict(zip(header, types)))
                 )
 
         return t
         
     def build(self):
+        
         import petl
         from databundles.partition import PartitionIdentity
         

@@ -56,57 +56,25 @@ class Bundle(BuildBundle):
         
         if not self.database.exists():
             self.database.create()  
-            
-        #
-        # First, create the schema for the download page cache. 
-        #
-       
-        t = self.schema.add_table('page_cache')
-        ac = self.schema.add_column
-        ac(t,'id',datatype = Column.DATATYPE_INTEGER, is_primary_key = True)
-        ac(t,'date',datatype = Column.DATATYPE_DATE)
-        ac(t,'city',datatype = Column.DATATYPE_TEXT)
-        ac(t,'license_type',datatype = Column.DATATYPE_INTEGER)
-        ac(t,'report_type',datatype = Column.DATATYPE_TEXT)
-        ac(t,'page',datatype = Column.DATATYPE_TEXT)
-                   
-        self.database.session.commit()
-        self.schema.create_tables()
-            
-        pid = PartitionIdentity(self.identity, table='page_cache')
     
-        partition = self.partitions.new_partition(pid)
-        partition.create_with_tables()     
         
-        #
-        # Now the schema for the database records
-        #
-       
-        t = self.schema.add_table('licenses')
-        ac = self.schema.add_column
-        ac(t,'id',datatype = Column.DATATYPE_INTEGER, is_primary_key = True)
-        ac(t,'scrape_date',datatype = Column.DATATYPE_DATE)  
-        ac(t,'licenseno',datatype = Column.DATATYPE_INTEGER)
-        ac(t,'status',datatype = Column.DATATYPE_TEXT)  
-        ac(t,'licensetype',datatype = Column.DATATYPE_INTEGER)  
-        ac(t,'issuedate',datatype = Column.DATATYPE_DATE)        
-        ac(t,'exprdate',datatype = Column.DATATYPE_DATE)  
-        ac(t,'owner',datatype = Column.DATATYPE_TEXT) 
-        ac(t,'premisesaddress',datatype = Column.DATATYPE_TEXT) 
-        ac(t,'tract',datatype = Column.DATATYPE_TEXT)           
-        ac(t,'business',datatype = Column.DATATYPE_TEXT)
-        ac(t,'mailaddress',datatype = Column.DATATYPE_TEXT)
-        ac(t,'geocode',datatype = Column.DATATYPE_INTEGER)                 
-                           
+        self.log("Loading schema from file")
+        with open(self.config.build.schema_file, 'rbU') as f:
+            self.schema.schema_from_file(f)        
+ 
         self.database.session.commit()
-        self.schema.create_tables()
-            
+         
+        pid = PartitionIdentity(self.identity, table='page_cache')
+        partition = self.partitions.new_partition(pid)
+        partition.create_with_tables()  
+           
         # One partition per year. 
         pid = PartitionIdentity(self.identity, table='licenses', time=str(datetime.date.today().year))
         partition = self.partitions.new_partition(pid)
-        partition.create_with_tables()   
+        partition.create_with_tables()      
         
-        return True  
+        return True 
+                    
   
     def download_page(self, city_name, report_type=None):
         """Cache a page, or return a cached version if it is less than a month old. """
@@ -192,7 +160,7 @@ class Bundle(BuildBundle):
             else:
                 self.log("Page was cached")
             
-            bf = BeautifulSoup(page)
+            bf = BeautifulSoup(page,'lxml')
         
             table = []
             for html_row in bf.find("table").find_all('tr', {"class":"report_column"}):
@@ -228,6 +196,43 @@ class Bundle(BuildBundle):
                     ins.insert(row)
             
         return True
+
+    def geocode(self):
+        """Geocode the premises and mailing addresses"""
+        import databundles.orm as orm
+        from databundles.identity import PartitionIdentity
+        from geopy import geocoders  
+        import datetime, re
+        from sqlalchemy.ext.declarative import declarative_base
+        from sqlalchemy import Table
+        
+        Base = declarative_base()
+
+        key = self.config.group('accounts').yahoo.key
+
+        pid = PartitionIdentity(self.identity, table='licenses', time=str(datetime.date.today().year))
+        partition = self.partitions.find(pid)
+
+        class Licenses(Base):
+            __table__ = Table('licenses', Base.metadata,
+                            autoload=True, autoload_with=partition.database.engine)
+     
+     
+        session = partition.database.session
+        y = geocoders.Yahoo(key)  
+        for i, row in enumerate(session.query(Licenses)):
+            
+            #place, (lat, lng) = y.geocode(row.premisesaddress)  
+            print '-----'
+            print '  ',  row.premisesaddress
+            print '  ',  row.geocode
+            
+            
+            #print '  ',  place
+            #print '  ',  lat, lng
+            
+            if i > 5:
+                break;
 
 
         
