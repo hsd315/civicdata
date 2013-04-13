@@ -1,0 +1,12 @@
+identity:
+    creator: eric@sandiegodata.org
+    dataset: crimeincidents
+    id: a2JI8T
+    revision: 1
+    source: sandag.org
+    subset: null
+    variation: cleaned
+build:
+  schema_file: meta/schema.csv
+  dependencies:
+    incidents: sandag.org-crimeincidents-orig-429e-incidents

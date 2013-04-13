@@ -22,6 +22,13 @@ class Bundle(BuildBundle):
 
     ### Prepare is run before building, part of the devel process.  
 
+    def list_states(self):
+        bundle,_ = self.library.dep('geodim')
+        
+        for row in bundle.query("SELECT * from states"):
+            print row
+        
+
     def prepare(self):
         from databundles.orm import Column
         from databundles.partition import PartitionIdentity
@@ -105,6 +112,29 @@ class Bundle(BuildBundle):
         return True
     
 
+    def test_addresses(self):
+        from random import randint
+        import re
+
+        from databundles.geo.address import Address
+        
+        ap = Address()
+
+        
+        for row in self.database.query('select * from incidents'):
+            r = randint(0,99)
+            
+            a1 =  re.sub('XX',"{:02d}".format(r), row['address'])
+
+            print "{0:40s} --------".format(a1)
+            print '123456789_' *8
+            
+            try:
+                a2 = ap.parse(a1)
+                print a2.dump()
+            except:
+                print "Failed: ", a1
+            
     
 
 import sys

@@ -138,7 +138,7 @@ class Bundle(BuildBundle):
         r = self.library.dep('geo')
     
         
-        # Iterate over the states first, since the place zone files are borken 
+        # Iterate over the states first, since the place zone files are broken 
         # out by state. 
         
         count = 0
@@ -230,12 +230,8 @@ class Bundle(BuildBundle):
                     ins.insert(r)
                     
         return True
-
-
-        
+ 
     def test(self, *args, **kwargs):
-        
-   
 
         t =  aa.get_transformer()
         

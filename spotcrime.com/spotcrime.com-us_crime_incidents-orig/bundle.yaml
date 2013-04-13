@@ -21,6 +21,8 @@ build:
     statesFile: meta/states.yaml
     schemaFile: meta/schema.csv
     urlTemplate: http://ds.civicknowledge.org/spotcrime.com/free-access-incidents/{year}-{month}.csv.zip
+    dependencies:
+      geodim: census.gov-geography-dim-orig-a7d9
 extracts:
     csv:
         description: Crime incidents, extracted from the free Spotcrime.com database,

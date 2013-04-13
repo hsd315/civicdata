@@ -18,5 +18,11 @@ Extract a feature to a shapefile:
 
 ogr2ogr -f "ESRI Shapefile" -where "COUNTYFP10 = '001'" ouput.shp input.shp 
 
+Or, you can extract a set of features within a bounding box with: 
+
+	 -spat xmin ymin xmax ymax
+
+Rasterize it:
+
 gdal_rasterize -ot Int16  -tr .001 .001  -where "COUNTYFP10 = '001'"  -a COUNTYFP10 -l county1 county1.shp county1.tiff
 
