@@ -56,24 +56,6 @@ class Bundle(BuildBundle):
             
         return self.part_cache[year]
 
-    row_i = 0
-    start_t  = 0
-    def log_rate(self, clear=False):
-        import time 
-        
-        if clear:
-            self.row_i = 0
-        
-        if self.row_i == 0:
-            self.t_start = time.time()      
-        
-        self.row_i += 1
-    
-        if self.row_i % 5000 == 0:
-            # Prints the processing rate in 1,000 records per sec.
-            self.log(str(int( self.row_i/(time.time()-self.t_start)))+'/s '+str(self.row_i/1000)+"K ")       
-
-
     def build(self):
 
         # All incidents
@@ -89,6 +71,8 @@ class Bundle(BuildBundle):
             row[5] = unicode(row[5],errors='ignore').strip()
             
             ins = self.get_partition(dt.year)
+
+            drow = [ v if v else None for v in row ]
 
             try:
                 ins.insert(row)

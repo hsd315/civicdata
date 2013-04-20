@@ -1,0 +1,56 @@
+about:
+    description: null
+    title: US Crime Incidents, 2007 to 2013
+build:
+    analysisareas:
+        CG0611194: Carlsbad
+        CG0613392: Chula Vista
+        CG0621712: El Cajon
+        CG0622804: Escondido
+        CG0653322: Oceanside
+        CG0666000: San Diego
+        CG0668196: San Marcos
+        CG0682996: Vista
+    dependencies:
+        crime: sandag.org-crimeincidents-cleaned-429e
+        extents: clarinova.com-extents-2012-7ba4
+    incident_query: SELECT  date(datetime) date, CAST(strftime('%m', datetime) AS
+        INTEGER) as month, CAST(strftime('%W', datetime) AS INTEGER)  AS week, CAST(strftime('%w',
+        datetime) AS INTEGER) AS dow, time(datetime) time, CAST(strftime('%H',datetime)
+        AS INTEGER)  AS hour, legend,  number, street, city, state, zip, lat,lon,
+        description FROM incidents, addresses WHERE lat BETWEEN {latmin} AND {latmax}
+        AND lon BETWEEN {lonmin} AND {lonmax} AND syn_address_id = addresses_id
+    schema_file: meta/schema.csv
+    type_map:
+        ARSON: arson
+        ASSAULT: assault
+        BURGLARY: burglary
+        DRUGS/ALCOHOL VIOLATIONS: drugs
+        DUI: dui
+        FRAUD: fraud
+        HOMICIDE: homocide
+        MOTOR VEHICLE THEFT: auto_theft
+        ROBBERY: robbery
+        SEX CRIMES: sex_crime
+        THEFT/LARCENY: theft
+        VANDALISM: vandalism
+        VEHICLE BREAK-IN/THEFT: auto_breakin_theft
+        WEAPONS: weapons
+identity:
+    creator: eric@sandiegodata.org
+    dataset: sandag_crime_incidents
+    id: a2M9nT
+    name: clarinova.com-sandag_crime_incidents-aa-orig-429e
+    revision: 1
+    source: clarinova.com
+    subset: aa
+    variation: orig
+partitions:
+- clarinova.com-sandag_crime_incidents-aa-orig-429e-incidents.CG0611194
+- clarinova.com-sandag_crime_incidents-aa-orig-429e-incidents.CG0613392
+- clarinova.com-sandag_crime_incidents-aa-orig-429e-incidents.CG0621712
+- clarinova.com-sandag_crime_incidents-aa-orig-429e-incidents.CG0622804
+- clarinova.com-sandag_crime_incidents-aa-orig-429e-incidents.CG0653322
+- clarinova.com-sandag_crime_incidents-aa-orig-429e-incidents.CG0666000
+- clarinova.com-sandag_crime_incidents-aa-orig-429e-incidents.CG0668196
+- clarinova.com-sandag_crime_incidents-aa-orig-429e-incidents.CG0682996

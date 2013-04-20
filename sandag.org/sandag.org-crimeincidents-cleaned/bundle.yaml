@@ -1,12 +1,44 @@
+about:
+    author: San Diego Regional Data Library
+    description: !include '/Users/eric/proj/Bundles/src/civicdata/sandag.org/sandag.org-crimeincidents-cleaned/config/about.description.md'
+    groups:
+    - Crime
+    homepage: https://sandiegodata.atlassian.net/wiki/display/SDD/Crime+Analysis
+    license: other-open
+    maintainer: San Diego Regional Data Library
+    tags:
+    - government
+    - gov-crime
+    title: San Diego Region Crime Incidents 2007 - 2013
+build:
+    dependencies:
+        incidents: sandag.org-crimeincidents-orig-429e-incidents
+    schema_file: meta/schema.csv
+extracts:
+    csv:
+        description: Incident points in CSV format.
+        each:
+        -   -   year: 2007
+            -   year: 2008
+            -   year: 2009
+            -   year: 2010
+            -   year: 2011
+            -   year: 2012
+            -   year: 2013
+        name: incidents-{year}.csv
+        partition: bundle
+        query: SELECT  date(datetime) date, CAST(strftime('%m', datetime) AS INTEGER)
+            as month, CAST(strftime('%W', datetime) AS INTEGER)  AS week, CAST(strftime('%w',
+            datetime) AS INTEGER) AS dow, time(datetime) time, CAST(strftime('%H',datetime)
+            AS INTEGER)  AS hour, legend as type, lat,lon, description FROM incidents,
+            addresses WHERE syn_address_id = addresses_id AND lat between 31 and 33
+            AND CAST(strftime('%Y', datetime) AS INTEGER) = {year}
 identity:
     creator: eric@sandiegodata.org
     dataset: crimeincidents
     id: a2JI8T
+    name: sandag.org-crimeincidents-cleaned-429e
     revision: 1
     source: sandag.org
-    subset: null
     variation: cleaned
-build:
-  schema_file: meta/schema.csv
-  dependencies:
-    incidents: sandag.org-crimeincidents-orig-429e-incidents
+partitions: []

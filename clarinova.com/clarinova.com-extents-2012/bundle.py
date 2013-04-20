@@ -230,13 +230,7 @@ class Bundle(BuildBundle):
                     ins.insert(r)
                     
         return True
- 
-    def test(self, *args, **kwargs):
 
-        t =  aa.get_transformer()
-        
-        print aa
-        print 'Min',t(-117.36082,33.11470)
 
 
 import sys
