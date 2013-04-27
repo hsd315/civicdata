@@ -1,0 +1,11 @@
+identity:
+    creator: eric@sandiegodata.org
+    dataset: parcels
+    id: a2NZ6j
+    revision: 1
+    source: sangis.org
+    subset: null
+    variation: orig
+build:
+    sources:
+        parcels: http://rdw.sandag.org/file_store/Parcel/Parcels.zip

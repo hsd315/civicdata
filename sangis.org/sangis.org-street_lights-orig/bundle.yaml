@@ -28,19 +28,22 @@ about:
 build:
     aa_geoid: '0666000'
     url: http://rdw.sandag.org/file_store/Miscellaneous/Street_Light.zip
+    dependencies:
+        extents: clarinova.com-extents-2012-7ba4        
 extracts:
--   description: A Geotif file, with .002 degree square cells, where each cell value
-        is the count of the number of traffic lights in the area. There is no accounting
-        for the type of light, so this is not an accurate representation of the quantity
-        of light
-    function: extract_density
-    title: Raster of Light Counts
--   description: Extract of the table in the original ESRI shape file, but with the
+  csv:
+    description: Extract of the table in the original ESRI shape file, but with the
         addition of two columns for the WGS84 lat/lon
     name: sandiego_street_lights.csv
     partition: sangis.org-street_lights-orig-7ba4-street_lights
     query: select * from street_lights
     title: San Diego Street Light Locations
+    
+  images:
+    description: A grayscale GeoTIFF heatmap.
+    function: extract_image
+    name: sandiego-lights.tiff
+    title: Light heatmap
 identity:
     creator: eric@clarinova.com
     dataset: street_lights

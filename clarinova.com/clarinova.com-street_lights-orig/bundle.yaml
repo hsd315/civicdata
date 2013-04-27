@@ -1,0 +1,21 @@
+identity:
+    creator: eric@sandiegodata.org
+    dataset: street_lights
+    id: a2NgLC
+    revision: 1
+    source: clarinova.com
+    subset: null
+    variation: orig
+build:
+  source_file_date: '20130422'
+  sources:
+    lights: http://50.18.177.135/CItyPOC/SL_{date}.kmz
+  dependencies:
+    extents: clarinova.com-extents-2012-7ba4     
+  schema_file: meta/schema.csv         
+extracts:
+  images:
+    description: A grayscale GeoTIFF heatmap.
+    function: extract_image
+    name: sandiego-lights.tiff
+    title: Light heatmap

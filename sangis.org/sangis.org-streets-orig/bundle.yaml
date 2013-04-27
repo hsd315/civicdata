@@ -1,10 +1,6 @@
 about:
     author: City of San Diego, General Services Dept., Street Division
-    description: Comversions to database format for the roads, intersections and addresses
-        shape files. These files were released in April 2013. See the meta data links
-        for descriptions of the columns. This GIS data was derived and modified from
-        SanGIS downloadable data - www.sangis.org Copyright SanGIS 2009. Use of the
-        data is subject to SANGIS [Terms and Conditions] (http://rdw.sandag.org)
+    description: !include 'config/about.description.md'
     documents:
     -   description: The PDF file of metadata for the addresses shapefile.
         title: Addresses file metadata
@@ -31,6 +27,9 @@ build:
         addresses: http://rdw.sandag.org/file_store/Address/Address_APN.zip
         intersections: http://rdw.sandag.org/file_store/Transportation/Roads_Intersection.zip
         roads: http://rdw.sandag.org/file_store/Transportation/Roads_All.zip
+    codes: meta/codes.yaml
+    zips: meta/zips.yaml
+    schema_file: meta/schema.csv
 identity:
     creator: eric@sandiegodata.org
     dataset: streets

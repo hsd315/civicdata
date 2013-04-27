@@ -1,0 +1,47 @@
+about:
+    author: City of San Diego, General Services Dept., Street Division
+    description: Comversions to database format for the roads, intersections and addresses
+        shape files. These files were released in April 2013. See the meta data links
+        for descriptions of the columns. This GIS data was derived and modified from
+        SanGIS downloadable data - www.sangis.org Copyright SanGIS 2009. Use of the
+        data is subject to SANGIS [Terms and Conditions] (http://rdw.sandag.org)
+    documents:
+    -   description: The PDF file of metadata for the addresses shapefile.
+        title: Addresses file metadata
+        url: http://rdw.sandag.org/file_store/Address/Address_APN.pdf
+    -   description: The PDF file of metadata for the roads shapefile.
+        title: Roads file metadata
+        url: http://rdw.sandag.org/file_store/Transportation/Roads_All.pdf
+    -   description: The PDF file of metadata for the intersections shapefile.
+        title: Intersections file metadata
+        url: http://rdw.sandag.org/file_store/Transportation/Roads_Intersection.pdf
+    -   description: The terms and conditions that apply to the original shapefiles.
+            Users must accept these terms before using the file.
+        title: Terms and Conditions
+        url: http://www.sangis.org/Legal_Notice.htm
+    homepage: http://rdw.sandag.org/Default.aspx?dir=Miscellaneous
+    license: other-open
+    maintainer: City of San Diego, General Services Dept., Street Division
+    tags:
+    - government
+    - gov-infrastructure
+    title: Roads and Addresses
+build:
+    sources:
+        addresses: http://rdw.sandag.org/file_store/Address/Address_APN.zip
+        intersections: http://rdw.sandag.org/file_store/Transportation/Roads_Intersection.zip
+        roads: http://rdw.sandag.org/file_store/Transportation/Roads_All.zip
+    codes: meta/codes.yaml
+    schema_file: meta/schema.csv
+identity:
+    creator: eric@sandiegodata.org
+    dataset: streets
+    id: a2MCi4
+    name: sangis.org-streets-orig-429e
+    revision: 1
+    source: sangis.org
+    variation: orig
+partitions:
+- sangis.org-streets-orig-429e-addresses
+- sangis.org-streets-orig-429e-roads
+- sangis.org-streets-orig-429e-intersections

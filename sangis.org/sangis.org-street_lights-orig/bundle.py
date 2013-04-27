@@ -28,9 +28,12 @@ class Bundle(BuildBundle):
         # This is the geo partition, which holds a Spatialite database, 
         # a sqlitedatabase with some special features, which aren't available unless
         # you have Spatialite installed. 
-        pid = PartitionIdentity(self.identity, table='street_lights_g')
-        shape_partition = self.partitions.find(pid)
-
+        
+        pid = PartitionIdentity(self.identity, table='street_lights')
+        
+        try: shape_partition = self.partitions.find(pid)
+        except: shape_partition = None
+        
         if not shape_partition:  
 
             # Use download_shape file instead of download an unzip to ensure that the whole
@@ -40,23 +43,40 @@ class Bundle(BuildBundle):
  
             shape_partition = self.partitions.new_geo_partition( pid, shp_file)
           
-        pid = PartitionIdentity(self.identity, table='street_lights')
-        partition = self.partitions.find(pid)  
-        
-        if not partition:  
-            def progress_f(i):
-                if i%10000 == 0:
-                    self.log("Converted {} records".format(i))
-                    
-            shape_partition.convert('street_lights', progress_f = progress_f )
-        
-            partition = self.partitions.find(pid)  
-        
-        return partition
+        return True
 
+    def extract_image(self, data):
         
+        import databundles.geo as dg
+        from databundles.geo.analysisarea import get_analysis_area
+        from osgeo.gdalconst import GDT_Float32
+        
+        aa = get_analysis_area(self.library, geoid='CG0666000')
+        trans = aa.get_translator()
 
-  
+        a = aa.new_array()
+        
+        k = dg.GaussianKernel(33,11)
+        
+        p = self.partitions.find(table='street_lights')
+        
+        for row in p.query("""
+            SELECT 
+                X(Transform(geometry, 4326)) AS lon, 
+                Y(Transform(geometry, 4326)) AS lat 
+            FROM street_lights"""):
+            
+            p = trans(row['lon'], row['lat'])
+       
+            k.apply_add(a, p)  
+
+        file_name = self.filesystem.path('extracts','{}'.format(data['name']))
+
+        aa.write_geotiff(file_name, 
+                    a[...], #std_norm(ma.masked_equal(i,0)),  
+                    data_type=GDT_Float32)
+        
+        return file_name
 
 import sys
 

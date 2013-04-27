@@ -1,6 +1,6 @@
 about:
     author: San Diego Regional Data Library
-    description: !include '/Users/eric/proj/Bundles/src/civicdata/sandag.org/sandag.org-crimeincidents-cleaned/config/about.description.md'
+    description: !include 'config/about.description.md'
     groups:
     - Crime
     homepage: https://sandiegodata.atlassian.net/wiki/display/SDD/Crime+Analysis
@@ -13,6 +13,8 @@ about:
 build:
     dependencies:
         incidents: sandag.org-crimeincidents-orig-429e-incidents
+        geoaddresses: clarinova.com-geocode-sandiego-orig-429e-addresses
+        codes: sangis.org-streets-orig-429e
     schema_file: meta/schema.csv
 extracts:
     csv:

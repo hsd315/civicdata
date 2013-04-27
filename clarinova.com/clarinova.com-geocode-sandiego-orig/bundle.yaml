@@ -1,0 +1,27 @@
+build:
+    county_geoid: '06073'
+    dependencies:
+        addresses: sangis.org-streets-orig-429e-addresses
+        geoaddresses: clarinova.com-geocode-sandiego-orig-429e-addresses
+        blockpoly: census.gov-geography-dim-orig-a7d9-polygon.CA.blocks
+        blocks: census.gov-geography-dim-orig-a7d9-blocks.ca
+        codes: sangis.org-streets-orig-429e
+        crime: sandag.org-crimeincidents-orig-429e-incidents
+        extents: clarinova.com-extents-2012-7ba4
+        intersections: sangis.org-streets-orig-429e-intersections
+        municipalities: sangis.org-municipalities-orig-429e-municipalities
+        poly: census.gov-geography-dim-orig-a7d9-polygon.CA
+        roads: sangis.org-streets-orig-429e-roads
+    schema_file: meta/schema.csv
+identity:
+    creator: eric@sandiegodata.org
+    dataset: geocode
+    id: a2MZh6
+    name: clarinova.com-geocode-sandiego-orig-429e
+    revision: 1
+    source: clarinova.com
+    subset: sandiego
+    variation: orig
+partitions:
+- clarinova.com-geocode-sandiego-orig-429e-segments
+- clarinova.com-geocode-sandiego-orig-429e-addresses

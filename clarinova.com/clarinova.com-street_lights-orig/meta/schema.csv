@@ -1,0 +1,9 @@
+"table","column","is_pk","is_fk","i1","i2","i3","i4","i5","i6","i7","ui1","type","description"
+"lights","lights_id",1,,,,,,,,,,"INTEGER",
+"lights","status",,,,1,,,,,,,"TEXT",
+"lights","old_wattage",,,,,1,,,,,,"INTEGER",
+"lights","new_wattage",,,,,,1,,,,,"INTEGER",
+"lights","old_type",,,,,,,1,,,,"TEXT",
+"lights","new_type",,,,,,,,1,,,"TEXT",
+"lights","lat",,,1,,,,,,,,"REAL",
+"lights","lon",,,1,,,,,,,,"REAL",

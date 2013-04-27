@@ -1,0 +1,128 @@
+codes:
+  dedication_status:
+    A: Abandoned
+    D: Dedicated
+    L: Dedicated, but unofficially named Alley
+    O: Offer for dedication (street reservation
+    P: Private street
+    Q: Undocumented
+    U: Undedicated
+  fire_drivability:
+    D: Fire rig drivable
+    L: Limited drivability
+    M: Major access road
+    N: Not used
+    P: Proposed
+    T: Fire truck non-drivable
+  functional_class:
+    1: Freeway to freeway ramp
+    2: Light (2-lane) collector street
+    3: Rural collector road
+    4: Major road/4-lane major road
+    5: Rural light collector/local road
+    6: Prime (primary) arterial
+    7: Private street
+    8: Recreational parkway
+    9: Rural mountain road
+    A: Alley
+    B: Class I bicycle path
+    C: Collector/4-lane collector street
+    D: Two-lane major street
+    E: Expressway
+    F: Freeway
+    L: Local street/cul-de-sac
+    M: Military street within base
+    P: Paper street
+    Q: Undocumented
+    R: Freeway/expressway on/off ramp
+    S: Six-lane major street
+    T: Transitway
+    U: Unpaved road
+    W: Pedestrianway/bikeway
+  jurisdiction:
+    CB: Carlsbad
+    CN: Unincorporated
+    CO: Coronado
+    CV: Chula Vista
+    DM: Del Mar
+    EC: El Cajon
+    EN: Encinitas
+    ES: Escondido
+    IB: Imperial Beach 
+    LG: Lemon Grove
+    LM: La Mesa
+    NC: National City
+    OC: Oceanside
+    PW: Poway
+    SD: San Diego
+    SM: San Marcos
+    SO: Solana Beach
+    ST: Santee
+    VS: Vista
+  oneway:
+    BLANK : two-way streets
+    F: 'Address & traffic run in same direction'
+    T: 'Address & traffic run opposite direction'
+  road_segment_status:
+    E: Easement
+    R: Right of way
+  segment_class:
+    1: Freeway/Expressway
+    2: Highway/State Routes
+    3: Minor Highway/Major Roads
+    4: Arterial or Collector
+    5: Local Street
+    6: Unpaved Road
+    7: Private Road
+    8: Freeway Transition Ramp
+    9: Freeway On/Off Ramp
+    A: Alley
+    H: Speed Hump
+    M: Military Street within Base
+    P: Paper Street
+    Q: Undocumented
+    W: Walkway
+  road_suffix:
+    AL: ALLEY
+    AR: ARCADE
+    AV: AVENUE
+    BL: BOULEVARD
+    BP: BIKEPATH
+    BR: BRIDGE
+    BY: BYPASS
+    CE: CORTE
+    CG: CROSSING
+    CP: CAPE
+    CR: CIRCLE
+    CS: CRESCENT
+    CT: COURT
+    CV: COVE
+    CY: CAUSEWAY
+    DR: DRIVE 
+    DY: DRIVEWAY
+    EX: EXTENSION
+    EY: EXPRESSWAY
+    FR: FERRY
+    FY: FREEWAY
+    HY: HIGHWAY
+    IN: INTERCHANGE
+    LN: LANE
+    LP: LOOP
+    ML: MALL
+    PA: PATH
+    PE: POINTE
+    PL: PLACE
+    PS: PASS
+    PT: POINT
+    PY: PARKWAY
+    PZ: PLAZA
+    RA: RAMP
+    RD: ROAD
+    RW: ROW
+    SQ: SQUARE
+    ST: STREET
+    TL: TRAIL
+    TR: TERRACE
+    TT: TRUCKTRAIL
+    WK: WALK
+    WY: WAY

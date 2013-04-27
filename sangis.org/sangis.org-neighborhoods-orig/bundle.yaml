@@ -1,0 +1,11 @@
+identity:
+    creator: eric@sandiegodata.org
+    dataset: neighborhoods
+    id: a2Ol01
+    revision: '1'
+    source: sangis.org
+    subset: null
+    variation: orig
+build:
+    sources:
+        neighborhoods: http://rdw.sandag.org/file_store/Community/Neighborhoods_SD.ZIP
