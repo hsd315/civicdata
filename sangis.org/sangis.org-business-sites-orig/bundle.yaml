@@ -1,47 +1,54 @@
 about:
-    author: City of San Diego, General Services Dept., Street Division
-    description: Comversions to database format for the roads, intersections and addresses
-        shape files. These files were released in April 2013. See the meta data links
-        for descriptions of the columns. This GIS data was derived and modified from
-        SanGIS downloadable data - www.sangis.org Copyright SanGIS 2009. Use of the
-        data is subject to SANGIS [Terms and Conditions] (http://rdw.sandag.org)
+    author: San Diego County Assessor / SanGIS feature dataset
+    description: Point locations of business sites. Published Jan 2013.
     documents:
-    -   description: The PDF file of metadata for the addresses shapefile.
-        title: Addresses file metadata
-        url: http://rdw.sandag.org/file_store/Address/Address_APN.pdf
-    -   description: The PDF file of metadata for the roads shapefile.
-        title: Roads file metadata
-        url: http://rdw.sandag.org/file_store/Transportation/Roads_All.pdf
-    -   description: The PDF file of metadata for the intersections shapefile.
-        title: Intersections file metadata
-        url: http://rdw.sandag.org/file_store/Transportation/Roads_Intersection.pdf
+    -   description: Business point locations source file.
+        title: Business point locations source file.
+        url: http://rdw.sandag.org/file_store/Business/Business_Sites.pdf
+    -   description: Metadata for the source file.
+        title: File Metadata
+        url: http://rdw.sandag.org/file_store/Business/Business_Sites.pdf
     -   description: The terms and conditions that apply to the original shapefiles.
             Users must accept these terms before using the file.
         title: Terms and Conditions
         url: http://www.sangis.org/Legal_Notice.htm
     homepage: http://rdw.sandag.org/Default.aspx?dir=Miscellaneous
     license: other-open
-    maintainer: City of San Diego, General Services Dept., Street Division
+    maintainer: San Diego County Assessor / SanGIS feature dataset
     tags:
-    - government
-    - gov-infrastructure
-    title: Roads and Addresses
+    - economy
+    title: Business Locations
 build:
-    sources:
-        addresses: http://rdw.sandag.org/file_store/Address/Address_APN.zip
-        intersections: http://rdw.sandag.org/file_store/Transportation/Roads_Intersection.zip
-        roads: http://rdw.sandag.org/file_store/Transportation/Roads_All.zip
-    codes: meta/codes.yaml
+    dependencies:
+        extents: clarinova.com-extents-2012-7ba4
     schema_file: meta/schema.csv
+    sources:
+        businesses: http://rdw.sandag.org/file_store/Business/Business_Sites.zip
+extracts:
+    images:
+        description: A grayscale GeoTIFF density map.
+        function: extract_image
+        name: sandiego-businesses.tiff
+        title: San Diego business density map
+        each:
+        -   -   type: assault
+            -   type: homocide
+            -   type: theft
+            -   type: burglary
+            -   type: robbery
+            -   type: vandalism
+            -   type: arson
+            -   type: auto
+            -   type: dui
+            -   type: property
+            -   type: violent
 identity:
     creator: eric@sandiegodata.org
-    dataset: streets
+    dataset: business
     id: a2MCi4
-    name: sangis.org-streets-orig-429e
+    name: sangis.org-business-sites-orig-429e
     revision: 1
     source: sangis.org
+    subset: sites
     variation: orig
-partitions:
-- sangis.org-streets-orig-429e-addresses
-- sangis.org-streets-orig-429e-roads
-- sangis.org-streets-orig-429e-intersections
+partitions: []

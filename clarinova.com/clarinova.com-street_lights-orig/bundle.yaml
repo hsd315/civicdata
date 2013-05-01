@@ -1,21 +1,32 @@
+build:
+    dependencies:
+        extents: clarinova.com-extents-2012-7ba4
+        neighborhoods: sangis.org-neighborhoods-orig-429e-communities.sd
+        streetlights: sangis.org-street_lights-orig-7ba4-street_lights
+    schema_file: meta/schema.csv
+extracts:
+    csv:
+        description: Streetlight locations in CSV format.
+        name: street_lights.csv
+        partition: clarinova.com-street_lights-orig-429e-streetlights
+        query: SELECT * from streetlights
+    images:
+        description: A grayscale GeoTIFF heatmap.
+        function: extract_image
+        name: sandiego-lights.tiff
+        title: Light heatmap
+    stats:
+        description: A grayscale GeoTIFF heatmap.
+        function: stats
+        name: stats.csv
+        title: Stats for lights and density per neighborhood
 identity:
     creator: eric@sandiegodata.org
     dataset: street_lights
     id: a2NgLC
+    name: clarinova.com-street_lights-orig-429e
     revision: 1
     source: clarinova.com
-    subset: null
     variation: orig
-build:
-  source_file_date: '20130422'
-  sources:
-    lights: http://50.18.177.135/CItyPOC/SL_{date}.kmz
-  dependencies:
-    extents: clarinova.com-extents-2012-7ba4     
-  schema_file: meta/schema.csv         
-extracts:
-  images:
-    description: A grayscale GeoTIFF heatmap.
-    function: extract_image
-    name: sandiego-lights.tiff
-    title: Light heatmap
+partitions:
+- clarinova.com-street_lights-orig-429e-streetlights

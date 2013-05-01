@@ -18,8 +18,7 @@ build:
         INTEGER) as month, CAST(strftime('%W', datetime) AS INTEGER)  AS week, CAST(strftime('%w',
         datetime) AS INTEGER) AS dow, time(datetime) time, CAST(strftime('%H',datetime)
         AS INTEGER)  AS hour, legend,  number, street, city, state, zip, lat,lon,
-        description FROM incidents, addresses WHERE lat BETWEEN {latmin} AND {latmax}
-        AND lon BETWEEN {lonmin} AND {lonmax} AND syn_address_id = addresses_id
+        description FROM incidents WHERE lat BETWEEN {latmin} AND {latmax} AND lon BETWEEN {lonmin} AND {lonmax} 
     schema_file: meta/schema.csv
     type_map:
         ARSON: arson

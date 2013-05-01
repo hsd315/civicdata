@@ -1,35 +1,52 @@
-"table","column","is_pk","is_fk","i1","i2","i3","i4","i5","i6","i7","i8","i9","ui1","type","description"
-"addresses","addresses_id",1,,,,,,,,,,,,"INTEGER",
-"addresses","addr_source_id",,,,,,,,,,,,1,"INTEGER","ID Number of address in upstream source"
-"addresses","segment_id",,,,,,,,,,1,,,"INTEGER","Segment id that this addresses is on"
-"addresses","parcel_source_id",,,,,,,,,,,,,"INTEGER",
-"addresses","type",,,1,,,,,,,,,,"TEXT",
-"addresses","number",,,,1,,,,,,,,,"TEXT","House number, or start of addresses range"
-"addresses","street",,,,,1,,,,,,,,"TEXT","Street name, or first street of intersection"
-"addresses","street_type",,,,,1,,,,,,,,"TEXT","Street type suffix: ave, pl, rd, etc. "
-"addresses","street_source_id",,,,,,,1,,,,,,"INTEGER","ID Number of road in upstream source"
-"addresses","city",,,,,,,,1,,,,,"TEXT",
-"addresses","state",,,,,,,,1,,,,,"TEXT",
-"addresses","zip",,,,,,,,1,,,,,"INTEGER",
-"addresses","lat",,,,,,,,,1,,,,"REAL",
-"addresses","lon",,,,,,,,,1,,,,"REAL",
-"addresses","x",,,,,,,,,,,1,,"INTEGER",
-"addresses","y",,,,,,,,,,,1,,"INTEGER",
-"addresses","geocoder",,,,,,,,,,,,,"TEXT",
-"addresses","gc_place",,,,,,,,,,,,,"TEXT",
-,,,,,,,,,,,,,,,
-"nodes","nodes_id",1,,,,,,,,,,,,"INTEGER",
-"nodes","type",,,1,,,,,,,,,,"TEXT","I' for intersection, 'r' for road segment"
-"nodes","source_id",,,,1,,,,,,,,,"INTEGER","ID Number of intersection or road in upstream source"
-,,,,,,,,,,,,,,,
-"segments","segment_id",1,,,,,,,,,,,,"INTEGER",
-"segments","source_id",,,1,,,,,,,,,,"INTEGER",
-"segments","address1_id",,"addresses",,1,,,,,,,,,"INTEGER",
-"segments","node1_source_id",,,,,1,,,,,,,,"INTEGER",
-"segments","address2_id",,"addresses",,,,1,,,,,,,"INTEGER",
-"segments","node2_source_id",,,,,,,1,,,,,,"INTEGER",
-"segments","x1",,,,,,,,,,,,,"INTEGER",
-"segments","y1",,,,,,,,,,,,,"INTEGER",
-"segments","x2",,,,,,,,,,,,,"INTEGER",
-"segments","y2",,,,,,,,,,,,,"INTEGER",
-"segments","length",,,,,,,,,,,,,"INTEGER",
+"table","column","is_pk","is_fk","i1","i2","i3","i4","i5","i6","i7","i8","i9","i10","ui1","type","description"
+"addresses","addresses_id",1,,,,,,,,,,,,,"INTEGER",
+"addresses","addr_source_id",,,,,,,,,,,,,,"INTEGER","ID Number of address in upstream source"
+"addresses","segments_id",,,1,,,,,,,,,,,"INTEGER","Segment id that this addresses is on"
+"addresses","apn_id",,,,1,,,,,,,,,,"INTEGER","Assessor parcel number"
+"addresses","parcel_source_id",,,,,1,,,,,,,,,"INTEGER",
+"addresses","segment_source_id",,,,,,1,,,,,,,,"INTEGER","ID Number of road in upstream source"
+"addresses","road_source_id",,,,,,,1,,,,,,,"INTEGER","ID Number of road in upstream source"
+"addresses","type",,,,,,,,,,,,,,"TEXT",
+"addresses","number",,,,,,,,1,,,,,,"TEXT","House number, or start of addresses range"
+"addresses","city",,,,,,,,,1,,,,,"TEXT",
+"addresses","zip",,,,,,,,,,,,,,"INTEGER",
+"addresses","lat",,,,,,,,,,1,,,,"REAL",
+"addresses","lon",,,,,,,,,,1,,,,"REAL",
+"addresses","x",,,,,,,,,,,1,,,"INTEGER",
+"addresses","y",,,,,,,,,,,1,,,"INTEGER",
+"addresses","geocoder",,,,,,,,,,,,,,"TEXT",
+"addresses","error_notes",,,,,,,,,,,,,,"TEXT","Notes, as a JSON array of dicts"
+,,,,,,,,,,,,,,,,
+"nodes","nodes_id",1,,,,,,,,,,,,,"INTEGER",
+"nodes","type",,,1,,,,,,,,,,,"TEXT","I' for intersection, 'r' for road segment"
+"nodes","source_id",,,,1,,,,,,,,,,"INTEGER","ID Number of intersection or road in upstream source"
+,,,,,,,,,,,,,,,,
+"segments","segments_id",1,,,,,,,,,,,,,"INTEGER",
+"segments","street",,,1,,,,,,,,,,,"TEXT","Street name, or first street of intersection"
+"segments","street_metaphone",,,,1,,,,,,,,,,"TEXT","Street name, or first street of intersection"
+"segments","street_dir",,,1,1,,,,,,,,,,"TEXT",
+"segments","street_type",,,,,,,,,,,,,,"TEXT","Street type suffix: ave, pl, rd, etc. "
+"segments","segment_source_id",,,,,,,,,,,,,1,"INTEGER","ID Number of road in upstream source"
+"segments","road_source_id",,,,,,,,,,,,1,,"INTEGER",
+"segments","rcity",,,,,1,,,,,,,,,"TEXT",
+"segments","lcity",,,,,1,,,,,,,,,"TEXT",
+"segments","rzip",,,,," ",1,,,,,,,,"INTEGER",
+"segments","lzip",,,,," ",1,,,,,,,,"INTEGER",
+"segments","lnumber",,,,,,,1,,,,,,,"INTEGER",
+"segments","hnumber",,,,,,,1,,,,,,,"INTEGER",
+"segments","speed",,,,,,,,,,,,,,"INTEGER",
+"segments","rblock",,,,,,,,1,,,,,,"INTEGER",
+"segments","lblock",,,,,,,,1,,,,,,"INTEGER",
+"segments","segclass",,,,,,,,,,,,,,"TEXT",
+"segments","funclass",,,,,,,,,,,,,,"TEXT",
+"segments","has_addresses",,,,,,,,,,,,,,"INTEGER",
+"segments","node1_source_id",,,,,,,,,1,,,,,"INTEGER",
+"segments","node2_source_id",,,,,,,,,,1,,,,"INTEGER",
+"segments","x1",,,,,,,,,,,,,,"INTEGER",
+"segments","y1",,,,,,,,,,,,,,"INTEGER",
+"segments","x2",,,,,,,,,,,,,,"INTEGER",
+"segments","y2",,,,,,,,,,,,,,"INTEGER",
+"segments","xm",,,,,,,,,,,1,,,"INTEGER","Midpoint X coordinate"
+"segments","ym",,,,,,,,,,,1,,,"INTEGER","Midpoint X coordinate"
+"segments","length",,,,,,,,,,,,,,"INTEGER",
+"segments","wkb",,,,,,,,,,,,,,"BLOB",

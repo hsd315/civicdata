@@ -27,23 +27,24 @@ about:
     title: San Diego Street Light Locations
 build:
     aa_geoid: '0666000'
-    url: http://rdw.sandag.org/file_store/Miscellaneous/Street_Light.zip
     dependencies:
-        extents: clarinova.com-extents-2012-7ba4        
+        codes: sangis.org-streets-orig-429e
+        extents: clarinova.com-extents-2012-7ba4
+        geoaddresses: clarinova.com-geocode-sandiego-orig-429e-addresses
+    url: http://rdw.sandag.org/file_store/Miscellaneous/Street_Light.zip
 extracts:
-  csv:
-    description: Extract of the table in the original ESRI shape file, but with the
-        addition of two columns for the WGS84 lat/lon
-    name: sandiego_street_lights.csv
-    partition: sangis.org-street_lights-orig-7ba4-street_lights
-    query: select * from street_lights
-    title: San Diego Street Light Locations
-    
-  images:
-    description: A grayscale GeoTIFF heatmap.
-    function: extract_image
-    name: sandiego-lights.tiff
-    title: Light heatmap
+    csv:
+        description: Extract of the table in the original ESRI shape file, but with
+            the addition of two columns for the WGS84 lat/lon
+        name: sandiego_street_lights.csv
+        partition: sangis.org-street_lights-orig-7ba4-street_lights
+        query: select * from street_lights
+        title: San Diego Street Light Locations
+    images:
+        description: A grayscale GeoTIFF heatmap.
+        function: extract_image
+        name: sandiego-lights.tiff
+        title: Light heatmap
 identity:
     creator: eric@clarinova.com
     dataset: street_lights
@@ -53,5 +54,4 @@ identity:
     source: sangis.org
     variation: orig
 partitions:
-- sangis.org-street_lights-orig-7ba4-street_lights_g
 - sangis.org-street_lights-orig-7ba4-street_lights

@@ -27,42 +27,129 @@ class Bundle(BuildBundle):
                 self.schema.create_tables()     
 
         return True
-   
         
     def build(self):
         
         from datetime import date
         from databundles.identity import PartitionIdentity
-        import re
+        import ogr
         
-        #today = date.today().strftime('%Y%m%d')
-        today = self.config.build.source_file_date
+        _, neighborhoods = self.library.dep('neighborhoods')
+        _, streetlights = self.library.dep('streetlights')
+        p = self.partitions.find_or_new(table='streetlights')   
+          
+        p.database.query("DELETE FROM streetlights")
+          
+        with p.database.inserter() as ins:
+            
+            for nb in neighborhoods.query("""
+            SELECT objectid, cpname as name,  Area(geometry) as area, AsText(Transform(geometry, 4326)) AS wkt 
+            FROM communities"""):
+
+                g = ogr.CreateGeometryFromWkt(nb['wkt'])
+                e = g.GetEnvelope()
+                
+                self.log("Neighborhoods: {}".format(nb['name'].title()))
+                
+                i = 0
+                for row in streetlights.query("""
+                    SELECT *,  X(Transform(geometry, 4326)) AS lon, Y(Transform(geometry, 4326)) AS lat 
+                    FROM street_lights
+                    WHERE lon BETWEEN {x1} AND {x2} AND lat BETWEEN {y1} and {y2}
+                """.format(x1=e[0], x2=e[1], y1=e[2], y2=e[3])):
+                
+                    p = ogr.Geometry(ogr.wkbPoint)
+                    p.SetPoint_2D(0, row['lon'], row['lat'])
     
-        zf = self.filesystem.download(self.config.build.sources.lights.format(date=today))
+                    if g.Contains(p):
+                        i += 1
+                        row = dict(row)
+                        row['neighborhood'] = nb['name'].title()
+                        row['neighborhood_id'] = nb['objectid']
+                        
+                        ins.insert(row)
+                    
+                self.log("{} lights".format(i))
 
-        sf = self.filesystem.unzip(zf, re.compile('^.*\.kml$'))
-
-        pid = PartitionIdentity(self.identity, table='lights_g')
-           
-        try: shape_partition = self.partitions.find(pid)
-        except: shape_partition = None # Fails with ValueError because table does not exist. 
-        
-        if not shape_partition:
-            shape_partition = self.partitions.new_geo_partition( pid, sf)
-
-        self.convert_partition()
-        
         return True
+ 
+    def stats(self, data):
+        """Produce stats for count of lamps and densities. """
+        from csv import writer
+        
+        p = self.partitions.find_or_new(table='streetlights')   
+        _, neighborhoods = self.library.dep('neighborhoods')
+        
+        p.database.attach(neighborhoods,'nb')
+ 
+        name = data['name']
+        
+        # The areas are in square feet. WTF?
+        feetperm = 3.28084
+        feetperkm = feetperm * 1000
+        
+        
+        with open(self.filesystem.path('extracts',name), 'wb') as f:
+            writer = writer(f)
+            writer.writerow(['count', 'neighborhood','area-sqft','area-sqm','area-sqkm', 'density-sqkm',])
+            
+            for row in p.database.query("""
+            SELECT count(streetlights_id) as count, objectid, cpname, shape_area
+            FROM streetlights, {nb}.communities
+            WHERE streetlights.neighborhood_id = {nb}.communities.objectid
+            GROUP BY {nb}.communities.objectid
+            """):
+                
+                n = float(row['count'])
+                area = float(row['shape_area'])
+                
+                writer.writerow([ 
+                n,  
+                row['cpname'].title(),
+                area,
+                area / (feetperm * feetperm),
+                area / (feetperkm * feetperkm),
+                n / (area / (feetperkm * feetperkm)) 
+                ])
 
-    def convert_partition(self):
+ 
+    def extract_image(self, data):
+        
+        import databundles.geo as dg
+        from databundles.geo.analysisarea import get_analysis_area
+        from osgeo.gdalconst import GDT_Float32
+        
+        aa = get_analysis_area(self.library, geoid='CG0666000')
+        trans = aa.get_translator()
+
+        a = aa.new_array()
+        
+        k = dg.GaussianKernel(33,11)
+        
+        p = self.partitions.find(table='streetlights')
+        
+        for row in p.query("""SELECT * FROM streetlights"""):
+            
+            p = trans(row['lon'], row['lat'])
+       
+            k.apply_add(a, p)  
+
+        file_name = self.filesystem.path('extracts','{}'.format(data['name']))
+
+        aa.write_geotiff(file_name, 
+                    a[...], #std_norm(ma.masked_equal(i,0)),  
+                    data_type=GDT_Float32)
+        
+        return file_name
+
+
+    def convert_partition_from_evari(self):
         
         from lxml import etree
         from StringIO import StringIO
         from pprint import pprint
         import re
-        
-        p = self.partitions.find(table='lights_g')   
-        
+
         lr = self.init_log_rate(message='Convert lights partition: ')
         
         dest_p = self.partitions.find_or_new(table='lights')
@@ -134,7 +221,8 @@ class Bundle(BuildBundle):
                     
                     ins.insert(r)
 
-    def extract_image(self, data):
+
+    def evari_extract_image(self, data):
         
         import databundles.geo as dg
         from databundles.geo.analysisarea import get_analysis_area
@@ -182,6 +270,8 @@ class Bundle(BuildBundle):
         
         
         return fnp('total')
+ 
+
     
 import sys
 

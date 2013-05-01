@@ -12,9 +12,8 @@ about:
     title: San Diego Region Crime Incidents 2007 - 2013
 build:
     dependencies:
+        geoaddresses: clarinova.com-geocode-sandiego-orig-429e-segments
         incidents: sandag.org-crimeincidents-orig-429e-incidents
-        geoaddresses: clarinova.com-geocode-sandiego-orig-429e-addresses
-        codes: sangis.org-streets-orig-429e
     schema_file: meta/schema.csv
 extracts:
     csv:
@@ -32,9 +31,8 @@ extracts:
         query: SELECT  date(datetime) date, CAST(strftime('%m', datetime) AS INTEGER)
             as month, CAST(strftime('%W', datetime) AS INTEGER)  AS week, CAST(strftime('%w',
             datetime) AS INTEGER) AS dow, time(datetime) time, CAST(strftime('%H',datetime)
-            AS INTEGER)  AS hour, legend as type, lat,lon, description FROM incidents,
-            addresses WHERE syn_address_id = addresses_id AND lat between 31 and 33
-            AND CAST(strftime('%Y', datetime) AS INTEGER) = {year}
+            AS INTEGER)  AS hour, legend as type, lat,lon, description FROM incidents
+            WHERE  CAST(strftime('%Y', datetime) AS INTEGER) = {year}
 identity:
     creator: eric@sandiegodata.org
     dataset: crimeincidents

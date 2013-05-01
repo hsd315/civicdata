@@ -50,20 +50,6 @@ class Bundle(BuildBundle):
 
         return True
 
-    def hash_address(self, row):
-        import hashlib 
-        
-        m = hashlib.md5()
-        m.update(str(row['number']) if row.get('number',False) else '' )
-        m.update(row['street'].lower()  if row.get('street',False) else '' )
-        m.update(row['street2'].lower()  if row.get('street2',False) else '' )
-        m.update(row['city'].lower()  if row['city'] else '' )
-        m.update(row['state'].lower()  if row.get('state',False) else '' ) 
-        m.update(str(row['zip'])  if row['zip'] else '' ) 
-        m.update(str(row['zip'])  if row['zip'] else '' ) 
-        return m.hexdigest()
- 
-
     def build(self):
 
         import dateutil.parser
@@ -71,7 +57,7 @@ class Bundle(BuildBundle):
         
         g = Geocoder(self.library, addresses_ds='geoaddresses')
                 
-        log_rate = self.init_log_rate(5000)
+        log_rate = self.init_log_rate(1000)
      
         _,incidents = self.library.dep('incidents')
     
@@ -90,17 +76,26 @@ class Bundle(BuildBundle):
                 ins.insert(row)
                 
 
+        return True
+
     def prep_row_address(self,geocoder,row):
         import dateutil.parser
         from random import choice
+        import pprint 
         
         candidates = geocoder.geocode_semiblock(row['blockaddress'], row['city'], 'CA')
             
         if  len(candidates) != 1:
-            #self.error(row['blockaddress'])
+            #print "( '{}', '{}' ),".format(row['blockaddress'], row['city'])
             return None
 
         s =  candidates.popitem()[1]
+    
+        
+        if len(s) > 3:
+            print "( '{}', '{}' ),".format(row['blockaddress'], row['city'])
+            #pprint.pprint(s)
+        
         
         address = choice(s)
         address['datetime'] = dateutil.parser.parse(row['datetime'])

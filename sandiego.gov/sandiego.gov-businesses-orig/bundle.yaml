@@ -1,0 +1,29 @@
+identity:
+    creator: eric@sandiegodata.org
+    dataset: businesses
+    id: a2PlFO
+    revision: '1'
+    source: sandiego.gov
+    subset: null
+    variation: orig
+build:
+    sources:
+        business_a: http://www.sandiego.gov/treasurer/csv/nbl/active1.csv
+        business_l: http://www.sandiego.gov/treasurer/csv/nbl/active2.csv
+    dependencies:
+        codes: sangis.org-streets-orig-429e
+        geoaddresses: clarinova.com-geocode-sandiego-orig-429e-addresses
+about:
+    author: San Diego City Treasurer
+    description: 
+    documents:
+    -   description: Source page
+        title: City website page with links to files. 
+        url: http://www.sandiego.gov/treasurer/taxesfees/btax/nblactive.shtml
+    homepage: http://rdw.sandag.org/Default.aspx?dir=Miscellaneous
+    license: other-open
+    maintainer: San Diego City Treasurer
+    tags:
+    - government
+    - gov-business
+    title: Business Tax Master Business Listings

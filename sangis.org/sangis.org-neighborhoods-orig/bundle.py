@@ -14,8 +14,11 @@ class Bundle(BuildBundle):
     def build(self):
         from databundles.identity import PartitionIdentity
 
-        pid = PartitionIdentity(self.identity, table='neighborhoods')
-        gp = self.partitions.new_geo_partition(pid, self.config.build.sources.neighborhoods)
+        pid = PartitionIdentity(self.identity, table='neighborhoods', space='sd')
+        gp = self.partitions.new_geo_partition(pid, self.config.build.sources.sdneighborhoods)
+
+        pid = PartitionIdentity(self.identity, table='communities', space='sd')
+        gp = self.partitions.new_geo_partition(pid, self.config.build.sources.sdcommunities)
 
         return True
 

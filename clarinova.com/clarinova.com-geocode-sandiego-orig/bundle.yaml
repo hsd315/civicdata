@@ -2,12 +2,12 @@ build:
     county_geoid: '06073'
     dependencies:
         addresses: sangis.org-streets-orig-429e-addresses
-        geoaddresses: clarinova.com-geocode-sandiego-orig-429e-addresses
         blockpoly: census.gov-geography-dim-orig-a7d9-polygon.CA.blocks
         blocks: census.gov-geography-dim-orig-a7d9-blocks.ca
         codes: sangis.org-streets-orig-429e
         crime: sandag.org-crimeincidents-orig-429e-incidents
         extents: clarinova.com-extents-2012-7ba4
+        geoaddresses: clarinova.com-geocode-sandiego-orig-429e-addresses
         intersections: sangis.org-streets-orig-429e-intersections
         municipalities: sangis.org-municipalities-orig-429e-municipalities
         poly: census.gov-geography-dim-orig-a7d9-polygon.CA
@@ -24,4 +24,10 @@ identity:
     variation: orig
 partitions:
 - clarinova.com-geocode-sandiego-orig-429e-segments
-- clarinova.com-geocode-sandiego-orig-429e-addresses
+views:
+    geocode_address: SELECT number, street, street_metaphone, street_dir, street_type,
+        city, zip, x, y, lat, lon, addresses_id, addresses.segment_source_id, parcel_source_id
+        FROM addresses, segments WHERE addresses.segment_source_id == segments.segment_source_id
+    geocode_block: SELECT lnumber, hnumber, street, street_metaphone, street_dir,
+        street_type, lcity, rcity,  xm, ym, segments_id, segment_source_id FROM segments
+        WHERE has_addresses = 1
