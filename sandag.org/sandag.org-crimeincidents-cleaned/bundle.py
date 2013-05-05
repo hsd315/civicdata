@@ -1,32 +1,14 @@
 '''
 
 '''
-import sqlalchemy
-from sqlalchemy import orm
-from sqlalchemy import event
-from sqlalchemy import Column as SAColumn, Integer, Boolean
-from sqlalchemy import Float as Real,  Text, ForeignKey
-from sqlalchemy.orm import relationship, deferred
-from sqlalchemy.types import TypeDecorator, TEXT, PickleType
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.ext.mutable import Mutable
 
-from sqlalchemy.sql import text
 from databundles.identity import  DatasetNumber, ColumnNumber
 from databundles.identity import TableNumber, PartitionNumber, ObjectNumber
 
 import json
 
-Base = declarative_base()
-
 from  databundles.bundle import BuildBundle
  
-class SavableMixin(object):
-    
-    def save(self):
-        self.session.commit()
-
-
 class Bundle(BuildBundle):
     ''' '''
  
@@ -34,76 +16,120 @@ class Bundle(BuildBundle):
         self.super_ = super(Bundle, self)
         self.super_.__init__(directory)
 
-    def prepare(self):
-        '''Create the datbase and load the schema from a file, if the file exists. '''
-        from databundles.partition import PartitionIdentity
-      
-        if not self.database.exists():
-            self.database.create()
-
-        if self.config.build.get('schema_file', False):
-            with open(self.filesystem.path(self.config.build.schema_file), 'rbU') as f:
-                self.schema.schema_from_file(f)      
-                self.schema.create_tables()     
-
-        self.schema.write_orm()
-
-        return True
 
     def build(self):
 
         import dateutil.parser
         from databundles.geo.geocoder import Geocoder
+        from random import choice
+        import pprint
         
         g = Geocoder(self.library, addresses_ds='geoaddresses')
                 
         log_rate = self.init_log_rate(1000)
      
+        p = self.partitions.find_or_new(table='incidents')
+     
         _,incidents = self.library.dep('incidents')
     
-        self.database.query("DELETE FROM incidents")
+        p.query("DELETE FROM incidents")
  
-        with self.database.inserter('incidents') as ins:
+        with p.database.inserter() as ins:
             for i, inct in enumerate(incidents.query("SELECT * FROM incidents")):
                 row = dict(inct)
-                
-                log_rate('Load: ')
-    
-                row = self.prep_row_address(g,row)
+
+                candidates = g.geocode_semiblock(row['blockaddress'], row['city'], 'CA')
+                    
+                if len(candidates) == 0:
+                    continue
+                    
+                s =  candidates.popitem()[1]
         
-                if not row: continue
-            
-                ins.insert(row)
+                if not len(s):
+                    continue
+        
+                address = choice(s)
+
+                address['datetime'] = dateutil.parser.parse(row['datetime'])
+                address['lat'] = address['latc']
+                address['lon'] = address['lonc']
+                address['x'] = address['xc']
+                address['y'] = address['yc']
+                address['address'] = "{} {}".format(row['blockaddress'].title(),row['city'].title())
                 
+                for k,v in address.items():
+                    row[k] = v
+
+                log_rate('Load: ')
+
+                row['city'] = row['city'].title()
+
+                ins.insert(row)
 
         return True
 
-    def prep_row_address(self,geocoder,row):
-        import dateutil.parser
-        from random import choice
-        import pprint 
-        
-        candidates = geocoder.geocode_semiblock(row['blockaddress'], row['city'], 'CA')
-            
-        if  len(candidates) != 1:
-            #print "( '{}', '{}' ),".format(row['blockaddress'], row['city'])
-            return None
 
-        s =  candidates.popitem()[1]
-    
+    def seg_incidents(self):
+        import os
+        import pprint
         
-        if len(s) > 3:
-            print "( '{}', '{}' ),".format(row['blockaddress'], row['city'])
-            #pprint.pprint(s)
-        
-        
-        address = choice(s)
-        address['datetime'] = dateutil.parser.parse(row['datetime'])
+        incidents = self.partitions.find_or_new(table='incidents')
 
-        for k,v in address.items():
-            row[k] = v
+        _, segments = self.library.dep('segments')
 
-        return row
+        incidents.database.attach(segments, 'seg')
+
+        lr = self.init_log_rate(100, "Incidents:")
+
+        si = self.partitions.find_or_new_geo(table='segincident')
+        
+        if os.path.exists(si.database.path):
+            os.remove(si.database.path)
+        
+        with si.database.inserter(source_srs=segments.get_srs()) as ins:
+            for row in incidents.query("""
+            SELECT incidents.type,  incidents.agency, incidents.legend, incidents.description,
+            incidents.datetime, incidents.segment_id, incidents.segment_source_id,  
+            cast(count(*) as float)/cast(Length(geometry) as float)*1000 as density,
+            AsText(geometry) AS geometry
+            FROM incidents, {seg}.roads AS seg
+            WHERE incidents.segment_source_id = seg.roadsegid
+            group by seg.roadsegid
+            """):
+
+                lr()
+           
+                ins.insert(dict(row))
+
+    def find_area(self):
+        """Update the incidents to include the neighborhood and community for San Diego"""
+        from databundles.geo.util import segment_points
+        
+        incidents = self.partitions.find_or_new(table='incidents')
+        
+        lr = self.init_log_rate(1000)
+        
+        with incidents.database.updater('incidents') as upd:
+            for name, id_, where, is_in in segment_points(self, "communities"):
+                for incident in incidents.query("SELECT * FROM incidents WHERE {}".format(where)):
+                    if is_in(incident['lon'], incident['lat']):
+                        lr("Community "+name)
+
+                        upd.update({'_incidents_id': incident['incidents_id'],
+                               '_community_id' : id_,
+                               '_community' : name.title()
+                               })
+        
+        with incidents.database.updater('incidents') as upd:
+            for name, id_, where, is_in in segment_points(self, "neighborhoods"):
+                for incident in incidents.query("SELECT * FROM incidents WHERE {}".format(where)):
+                    if is_in(incident['lon'], incident['lat']):
+                        lr("Neighborhood "+name)
+
+                        upd.update({'_incidents_id': incident['incidents_id'],
+                               '_neighborhood_id' : id_,
+                               '_neighborhood' : name.title()
+                               })
 
 
 

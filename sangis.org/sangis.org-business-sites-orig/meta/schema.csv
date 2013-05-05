@@ -1,6 +1,0 @@
-"table","column","is_pk","is_fk","i1","i2","i3","i4","i5","i6","i7","ui1","type","description"
-"codes","codes_id",1,,,,,,,,,,"INTEGER",
-"codes","group",,,,,,,,,,,"TEXT","Category name for the codes"
-"codes","key",,,,,,,,,,,"TEXT","Code used in the data"
-"codes","value",,,,,,,,,,,"TEXT","String value for the code"
-"codes","value_id",,,,,,,,,,,"TEXT","ID Value, such as geoid of a city. "

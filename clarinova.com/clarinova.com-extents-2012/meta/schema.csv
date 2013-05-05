@@ -4,7 +4,7 @@
 "places","statefp",,,,,,,,,"INTEGER",,,,
 "places","placens",,,,,,,,,"INTEGER",,,,
 "places","placefp",,,,,,,,,"INTEGER",,,,
-"places","spcs_id",,1,,,,,,,"INTEGER",,,,
+"places","spcs_id",,"spcs",,,,,,,"INTEGER",,,,
 "places","name",,,,,,,,,"TEXT",,,,
 "places","latmin",,,,1,,,,,"REAL",,,"Bounding box extracted from feature",
 "places","latmax",,,,1,,,,,"REAL",,,"Bounding box extracted from feature",

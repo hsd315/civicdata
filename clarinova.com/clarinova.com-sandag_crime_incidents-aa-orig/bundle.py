@@ -75,19 +75,12 @@ class Bundle(BuildBundle):
         
         rows = 0
         for row in cr.bundle.query(q):
-            rows += 1
-            if rows % 10000 == 0:
-                self.log("Processed {} Rows".format(rows))
 
             row = dict(row)
             nr = dict(row)
             nr['lat'] = row['lat']
             nr['lon'] = row['lon']
             nr['type'] = type_map[row['legend']]
-            
-            if row['number']:
-                row['number'] = str(int(row['number']) / 100)+'xx'
-            nr['address'] = "{number} {street}, {city}, {zip}".format(**row)
             
             for aa, part, ins, trans in aas:
                 if aa.is_in_ll(row['lon'],row['lat']):
@@ -103,24 +96,6 @@ class Bundle(BuildBundle):
         
         return True
    
-    def demo(self):
-        from databundles.library import QueryCommand as q
-        from databundles.geo.analysisarea import get_analysis_area
-        from databundles.geo.kernel import GaussianKernel
-        import numpy as np
-        
-        aa = get_analysis_area(self.library, geoid='CG0666000')
-        
-        r =  self.library.find(q().identity(id='a2z2HM').partition(table='incidents',space=aa.geoid)).pop()
-    
-        p = self.library.get(r.partition).partition
-         
-        a = aa.new_array()
-         
-        k = GaussianKernel(33,11)
-         
-        for row in p.query("select date, time, cellx, celly from incidents"):
-            k.apply_add(a, row['cellx'],row['celly'] )
 
 import sys
 

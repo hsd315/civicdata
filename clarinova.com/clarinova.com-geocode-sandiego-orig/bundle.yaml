@@ -25,9 +25,8 @@ identity:
 partitions:
 - clarinova.com-geocode-sandiego-orig-429e-segments
 views:
-    geocode_address: SELECT number, street, street_metaphone, street_dir, street_type,
-        city, zip, x, y, lat, lon, addresses_id, addresses.segment_source_id, parcel_source_id
-        FROM addresses, segments WHERE addresses.segment_source_id == segments.segment_source_id
-    geocode_block: SELECT lnumber, hnumber, street, street_metaphone, street_dir,
-        street_type, lcity, rcity,  xm, ym, segments_id, segment_source_id FROM segments
-        WHERE has_addresses = 1
+    geocode_address: SELECT number, lnumber, hnumber, street, street_metaphone, street_dir,
+        street_type, city, lcity, rcity, zip, x, y, lat, lon, addresses_id, addresses.segment_source_id,
+        parcel_source_id, segments.road_source_id FROM addresses, segments WHERE segments.segment_source_id
+        == segments.segment_source_id AND has_addresses = 1
+    geocode_block: SELECT * FROM segments

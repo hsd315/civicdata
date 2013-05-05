@@ -117,7 +117,7 @@ class Bundle(BuildBundle):
         extract the shape of each  place """
         import re 
         import ogr
-        from databundles.geo.analysisarea import  create_bb
+        from databundles.geo.util import  create_bb
         
         self.load_spcs()
         

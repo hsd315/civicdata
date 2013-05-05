@@ -68,6 +68,8 @@ class Bundle(BuildBundle):
                 toxcoord AS x2, toycoord AS y2, 
                 frxcoord AS x1, frycoord AS y1, 
                 midxcoord AS xm, midycoord AS ym,
+                X(Transform(Centroid(geometry), 4326)) AS lonc, Y(Transform(Centroid(geometry), 4326)) as latc,
+                X(Centroid(geometry)) AS xc, Y(Centroid(geometry)) as yc,
                 length, 
                 AsBinary(geometry) as wkb
                 FROM roads

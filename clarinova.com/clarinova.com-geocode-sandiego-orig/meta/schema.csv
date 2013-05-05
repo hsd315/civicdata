@@ -47,6 +47,10 @@
 "segments","x2",,,,,,,,,,,,,,"INTEGER",
 "segments","y2",,,,,,,,,,,,,,"INTEGER",
 "segments","xm",,,,,,,,,,,1,,,"INTEGER","Midpoint X coordinate"
-"segments","ym",,,,,,,,,,,1,,,"INTEGER","Midpoint X coordinate"
+"segments","ym",,,,,,,,,,,1,,,"INTEGER","Midpoint Y coordinate"
+"segments","xc",,,,,,,,,,,,,,"INTEGER","X coordinate of centroid"
+"segments","yc",,,,,,,,,,,,,,"INTEGER","Ycoordinate of Centroid"
+"segments","latc",,,,,,,,,,,,,,"REAL","Latitude of centroid"
+"segments","lonc",,,,,,,,,,,,,,"REAL","Longitude of centroid"
 "segments","length",,,,,,,,,,,,,,"INTEGER",
 "segments","wkb",,,,,,,,,,,,,,"BLOB",
