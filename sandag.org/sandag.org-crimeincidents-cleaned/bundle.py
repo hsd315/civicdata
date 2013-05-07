@@ -18,6 +18,13 @@ class Bundle(BuildBundle):
 
 
     def build(self):
+        
+        self.initial_build()
+        self.add_places()
+        
+        return True
+
+    def initial_build(self):
 
         import dateutil.parser
         from databundles.geo.geocoder import Geocoder
@@ -70,9 +77,10 @@ class Bundle(BuildBundle):
 
 
     def seg_incidents(self):
+        """Combine crimes onto street segments, computing the count and linear density
+        of crime per segment. Creates a geo partition that includes the street segment.  """
         import os
-        import pprint
-        
+
         incidents = self.partitions.find_or_new(table='incidents')
 
         _, segments = self.library.dep('segments')
@@ -82,10 +90,7 @@ class Bundle(BuildBundle):
         lr = self.init_log_rate(100, "Incidents:")
 
         si = self.partitions.find_or_new_geo(table='segincident')
-        
-        if os.path.exists(si.database.path):
-            os.remove(si.database.path)
-        
+
         with si.database.inserter(source_srs=segments.get_srs()) as ins:
             for row in incidents.query("""
             SELECT incidents.type,  incidents.agency, incidents.legend, incidents.description,
@@ -101,38 +106,47 @@ class Bundle(BuildBundle):
            
                 ins.insert(dict(row))
 
-    def find_area(self):
-        """Update the incidents to include the neighborhood and community for San Diego"""
+
+    def add_places(self):      
         from databundles.geo.util import segment_points
-        
-        incidents = self.partitions.find_or_new(table='incidents')
-        
+
         lr = self.init_log_rate(1000)
         
-        with incidents.database.updater('incidents') as upd:
-            for name, id_, where, is_in in segment_points(self, "communities"):
-                for incident in incidents.query("SELECT * FROM incidents WHERE {}".format(where)):
-                    if is_in(incident['lon'], incident['lat']):
-                        lr("Community "+name)
-
-                        upd.update({'_incidents_id': incident['incidents_id'],
-                               '_community_id' : id_,
-                               '_community' : name.title()
-                               })
+        incidents = self.partitions.find(table='incidents')
         
-        with incidents.database.updater('incidents') as upd:
-            for name, id_, where, is_in in segment_points(self, "neighborhoods"):
+        _, places = self.library.dep('places')
+        
+        for area, where, is_in in segment_points(places, 
+                                        "SELECT *, AsText(geometry) AS wkt FROM places",
+                                        "lon BETWEEN {x1} AND {x2} AND lat BETWEEN {y1} and {y2}"):
+            self.log("{} {} {}".format(area['type'], area['name'], where))
+            with incidents.database.updater('incidents') as upd:
                 for incident in incidents.query("SELECT * FROM incidents WHERE {}".format(where)):
+    
                     if is_in(incident['lon'], incident['lat']):
-                        lr("Neighborhood "+name)
+                        lr("Add place: {} {}".format(area['type'], area['name']))
+                    
+                        u = {'_incidents_id': incident['incidents_id'],
+                               '_'+area['type'] : area['code']
+                               }
+          
+                        upd.update(u)
 
-                        upd.update({'_incidents_id': incident['incidents_id'],
-                               '_neighborhood_id' : id_,
-                               '_neighborhood' : name.title()
-                               })
-
-
-
+ 
+    def extract_shapefiles(self, data):
+        import pprint
+        from databundles.geo.sfschema import TableShapefile
+        
+        name = data['name']
+        fpath = self.filesystem.path('extracts', name)
+        
+        incidents = self.partitions.find(table='segincident')
+        
+        tsf = TableShapefile(self, fpath, incidents.table, source_srs = incidents.database.get_srs())
+                  
+        pprint.pprint(data)
+    
+    
 import sys
 
 if __name__ == '__main__':

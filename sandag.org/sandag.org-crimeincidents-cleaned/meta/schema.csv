@@ -10,12 +10,10 @@
 "incidents","road_source_id",,,,,,,,,,,,,,,,"INTEGER","ID of SANGIS road ",
 "incidents","address",,,,,,,,,,,,,,,,"TEXT","Block address from original incident",
 "incidents","city",,,,,,,,,1,,,,,,,"TEXT","Name of city",
-"incidents","neighborhood_id",,,,,,,,,,1,,,,,,"INTEGER","SANGIS code for San Diego neighborhood",
-"incidents","neighborhood",,,,,,,,,,,,,,,,"TEXT",,
-"incidents","community_id",,,,,,,,,,,,,,,,"INTEGER","SANGIS code for San Diego community planning area",
-"incidents","community",,,,,,,,,,,,,,,,"TEXT",,
-"incidents","place_id",,,,,,,,,,,1,,,,,"TEXT","Census geoid of place",
-"incidents","place",,,,,,,,,,,,,,,,"TEXT","Census name for place",
+"incidents","neighborhood",,,,,,,,,,,,,,,,"TEXT","Neighborhood code",
+"incidents","community",,,,,,,,,,,,,,,,"TEXT","Community planning area code",
+"incidents","council",,,,,,,,,,,,,,,,"TEXT","City council district",
+"incidents","place",,,,,,,,,,,,,,,,"TEXT","Census geoid for place",
 "incidents","landuse",,,,,,,,,,,,,,,,"INTEGER","Land use code ( future)",
 "incidents","x",,,,,,,,,,,,1,,,,"INTEGER","UTM X Position of street segment centroid",
 "incidents","y",,,,,,,,,,,,1,,,,"INTEGER","UTM Y Position of street segment centroid",
@@ -38,7 +36,9 @@
 "segincident","address",,,,,,,,,,,,,,,,"TEXT",,100
 "segincident","city",,,,,,,,,1,,,,,,,"TEXT",,30
 "segincident","neighborhood",,,,,,,,,,1,,,,,,"TEXT",,30
-"segincident","place",,,,,,,,,,,1,,,,,"TEXT",,30
+"segincident","community",,,,,,,,,,,1,,,,,"TEXT",,
+"segincident","council",,,,,,,,,,,,1,,,,"TEXT",,
+"segincident","place",,,,,,,,,,,,,1,,,"TEXT",,30
 "segincident","gcquality",,,,,,,,,,,,,,,,"INTEGER",,
 "segincident","density",,,,,,,,,,,,,,,,"REAL",,
 "segincident","geometry",,,,,,,,,,,,,,,,"BLOB",,

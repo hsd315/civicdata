@@ -15,8 +15,7 @@ build:
         geoaddresses: clarinova.com-geocode-sandiego-orig-429e-segments
         incidents: sandag.org-crimeincidents-orig-429e-incidents
         segments: sangis.org-streets-orig-429e-roads
-        neighborhoods: sangis.org-neighborhoods-orig-429e-neighborhoods.sd
-        communities: sangis.org-neighborhoods-orig-429e-communities.sd
+        places: sangis.org-places-orig-429e-places
     schema_file: meta/schema.csv
 extracts:
     csv:
@@ -34,8 +33,24 @@ extracts:
         query: SELECT  date(datetime) date, CAST(strftime('%m', datetime) AS INTEGER)
             as month, CAST(strftime('%W', datetime) AS INTEGER)  AS week, CAST(strftime('%w',
             datetime) AS INTEGER) AS dow, time(datetime) time, CAST(strftime('%H',datetime)
-            AS INTEGER)  AS hour, legend as type, neighborhood, neighborhood_id, lat,lon, description FROM incidents
+            AS INTEGER)  AS hour, legend as type, neighborhood, community, council, lat,lon, description FROM incidents
             WHERE  CAST(strftime('%Y', datetime) AS INTEGER) = {year}
+    shapefiles:
+        description: Shape file of incident points in {format} format. The file includes
+            attributes for time, date, type, description and address of the incidnets.
+        each:
+        -   -   format: kml
+            -   format: sqlite
+            -   format: shapefile
+        -   -   year: 2007
+            -   year: 2008
+            -   year: 2009
+            -   year: 2010
+            -   year: 2011
+            -   year: 2012
+            -   year: 2013
+        function: extract_shapefiles
+        name: incidents-{year}.{format}
 identity:
     creator: eric@sandiegodata.org
     dataset: crimeincidents
