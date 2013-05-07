@@ -62,9 +62,11 @@ class Bundle(BuildBundle):
         allp = self.partitions.find_or_new(table='incidents');
         allins = allp.database.inserter()
         
+        lr = self.init_log_rate(1000)
+        
         for row in self.generate_incidents():
             
-            self.log_rate()
+            lr()
             
             dt = datetime.datetime.strptime(row[2], "%m/%d/%y %H:%M")
             row[2] = dt

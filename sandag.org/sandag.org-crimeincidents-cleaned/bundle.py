@@ -119,6 +119,10 @@ class Bundle(BuildBundle):
         for area, where, is_in in segment_points(places, 
                                         "SELECT *, AsText(geometry) AS wkt FROM places",
                                         "lon BETWEEN {x1} AND {x2} AND lat BETWEEN {y1} and {y2}"):
+            
+            if area['code'] == 'CN': # Skip the county for now. 
+                continue
+            
             self.log("{} {} {}".format(area['type'], area['name'], where))
             with incidents.database.updater('incidents') as upd:
                 for incident in incidents.query("SELECT * FROM incidents WHERE {}".format(where)):
