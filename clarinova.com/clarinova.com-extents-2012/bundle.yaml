@@ -16,4 +16,6 @@ identity:
     revision: 1
     source: clarinova.com
     variation: 2012
-partitions: []
+partitions:
+- clarinova.com-extents-2012-7ba4-spzones_orig
+- clarinova.com-extents-2012-7ba4-spzones

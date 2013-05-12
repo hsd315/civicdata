@@ -62,7 +62,7 @@ class Bundle(BuildBundle):
         allp = self.partitions.find_or_new(table='incidents');
         allins = allp.database.inserter()
         
-        lr = self.init_log_rate(1000)
+        lr = self.init_log_rate(10000)
         
         for row in self.generate_incidents():
             

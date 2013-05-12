@@ -116,16 +116,20 @@ class Bundle(BuildBundle):
         
         _, places = self.library.dep('places')
         
+        # This query is ordered from smallest area to largest, ans the inner loop ignored items that already have
+        # a value set. This gets the smaller areas out of the way first, and reduces the points that have to be
+        # checked for the larger areas. 
         for area, where, is_in in segment_points(places, 
-                                        "SELECT *, AsText(geometry) AS wkt FROM places",
-                                        "lon BETWEEN {x1} AND {x2} AND lat BETWEEN {y1} and {y2}"):
+            "SELECT *, AsText(geometry) AS wkt FROM places  ORDER BY area ASC",
+            "lon BETWEEN {x1} AND {x2} AND lat BETWEEN {y1} and {y2}"):
             
             if area['code'] == 'CN': # Skip the county for now. 
                 continue
             
             self.log("{} {} {}".format(area['type'], area['name'], where))
             with incidents.database.updater('incidents') as upd:
-                for incident in incidents.query("SELECT * FROM incidents WHERE {}".format(where)):
+                for incident in incidents.query(
+                    "SELECT * FROM incidents WHERE {} AND {} IS NULL ".format(where, area['type'])):
     
                     if is_in(incident['lon'], incident['lat']):
                         lr("Add place: {} {}".format(area['type'], area['name']))
@@ -136,7 +140,6 @@ class Bundle(BuildBundle):
           
                         upd.update(u)
 
- 
     def extract_shapefiles(self, data):
         import pprint
         from databundles.geo.sfschema import TableShapefile
@@ -144,11 +147,15 @@ class Bundle(BuildBundle):
         name = data['name']
         fpath = self.filesystem.path('extracts', name)
         
-        incidents = self.partitions.find(table='segincident')
+        incidents = self.partitions.find(table='incidents')
         
-        tsf = TableShapefile(self, fpath, incidents.table, source_srs = incidents.database.get_srs())
+        tsf = TableShapefile(self, fpath, incidents.table.name, source_srs = 4326)
                   
-        pprint.pprint(data)
+        self.log("Extracting {}".format(name))
+        lr = self.init_log_rate()
+        for i in incidents.query("SELECT * FROM incidents WHERE CAST(strftime('%Y', datetime) AS INTEGER) = ?", data['year']):
+            lr("Extract feature for {} ".format(name))
+            tsf.add_feature(dict(i))
     
     
 import sys

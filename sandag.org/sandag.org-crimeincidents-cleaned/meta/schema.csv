@@ -1,19 +1,19 @@
 "table","column","is_pk","is_fk","i1","i2","i3","i4","i5","i6","i7","i8","i9","i10","i11","ui1","ui2","type","description","size"
 "incidents","incidents_id",1,,,,,,,,,,,,,,,"INTEGER",,
-"incidents","type",,,1,,,,,,,,,,,,,"TEXT","Local type value",
-"incidents","agency",,,,,,,,,,,,,,,,"TEXT","Police agency that originated the incident",
+"incidents","type",,,1,,,,,,,,,,,,,"TEXT","Local type value",10
+"incidents","agency",,,,,,,,,,,,,,,,"TEXT","Police agency that originated the incident",30
 "incidents","datetime",,,,,1,,,,,,,,,,,"TIMESTAMP","Date and time in ISO format",
-"incidents","legend",,,,,,1,,,,,,,,,,"TEXT","Short category description",
-"incidents","description",,,,,,,,,,,,,,,,"TEXT","Long description",
+"incidents","legend",,,,,,1,,,,,,,,,,"TEXT","Short category description",30
+"incidents","description",,,,,,,,,,,,,,,,"TEXT","Long description",100
 "incidents","segment_id",,,,,,,1,,,,,,,,,"INTEGER","ID of Data Library segment",
 "incidents","segment_source_id",,,,,,,,1,,,,,,,,"INTEGER","ID of SANGIS street segment",
 "incidents","road_source_id",,,,,,,,,,,,,,,,"INTEGER","ID of SANGIS road ",
-"incidents","address",,,,,,,,,,,,,,,,"TEXT","Block address from original incident",
-"incidents","city",,,,,,,,,1,,,,,,,"TEXT","Name of city",
-"incidents","neighborhood",,,,,,,,,,,,,,,,"TEXT","Neighborhood code",
-"incidents","community",,,,,,,,,,,,,,,,"TEXT","Community planning area code",
-"incidents","council",,,,,,,,,,,,,,,,"TEXT","City council district",
-"incidents","place",,,,,,,,,,,,,,,,"TEXT","Census geoid for place",
+"incidents","address",,,,,,,,,,,,,,,,"TEXT","Block address from original incident",50
+"incidents","city",,,,,,,,,1,,,,,,,"TEXT","Name of city",30
+"incidents","neighborhood",,,,,,,,,,,,,,,,"TEXT","Neighborhood code",7
+"incidents","community",,,,,,,,,,,,,,,,"TEXT","Community planning area code",7
+"incidents","council",,,,,,,,,,,,,,,,"TEXT","City council district",7
+"incidents","place",,,,,,,,,,,,,,,,"TEXT","Census geoid for place",10
 "incidents","landuse",,,,,,,,,,,,,,,,"INTEGER","Land use code ( future)",
 "incidents","x",,,,,,,,,,,,1,,,,"INTEGER","UTM X Position of street segment centroid",
 "incidents","y",,,,,,,,,,,,1,,,,"INTEGER","UTM Y Position of street segment centroid",

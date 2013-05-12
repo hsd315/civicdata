@@ -33,6 +33,43 @@ class Bundle(BuildBundle):
 
         return True
 
+    def build(self):
+        
+        self.load_zones()
+
+    def load_zones(self):
+        """Create a table of State Plane zones, linking the geometry and the FIPS code from one source to the
+        SRSWKT and Proj4text from another. """
+        
+        from csv import DictReader
+        spo = self.partitions.new_geo_partition(table='spzones_orig', shape_file=self.config.build.stateplane_url)
+ 
+    
+        zones = self.partitions.new_geo_partition(table='spzones')
+    
+        zones_by_fips = {}
+    
+        with open(self.filesystem.path(self.config.build.zone_file)) as f:
+            reader = DictReader(f)
+            for row in reader:
+                zones_by_fips[row['fips']] = row
+              
+        with zones.database.inserter() as ins: 
+            for zone in spo.query("SELECT *, AsText(Transform(GEOMETRY, 4326)) as wkt from spzones_orig"):
+                
+                zbf = zones_by_fips[zone['fipszone83']]
+                
+                row = {
+                       'srid' : zbf['srid'],
+                       'fips' : zone['fipszone83'],
+                       'name' : zbf['name'],
+                       'proj4text' : zbf['proj4text'],
+                       'srswkt' : zbf['srswkt'],
+                       'geometry' : zone['wkt']
+                       }
+                ins.insert(row)
+
+
     def get_zones(self):
         """Get the GDAL geometry object for each of the StatePlane zones, so 
         we can determine which state plane zone each city, county, etc is in"""
@@ -112,7 +149,8 @@ class Bundle(BuildBundle):
               
         return self.database.session.execute(query).first()
         
-    def build(self):
+        
+    def old_build(self):
         """Download a TIGER shapefile for the places in each state, then
         extract the shape of each  place """
         import re 
