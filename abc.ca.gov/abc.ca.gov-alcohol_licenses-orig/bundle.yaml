@@ -1,41 +1,52 @@
-identity:
-  creator: eric@clarinova.com
-  dataset: alcohol_licenses
-  id: a2iLPd
-  revision: 1
-  source: abc.ca.gov
-  subset: null
-  variation: orig
 about:
-  title: 'SANDAG City Alcohol Permits'
-  description: > 
-    Records extracted from the California Alcohol Beverage Control website for
-    the 18 SANDAG cities:
-      
-    Carlsbad, Chula Vista, Coronado, Del Mar, El Cajon, Encinitas, Escondido, 
-    Imperial Beach, La Mesa, Lemon Grove, National City, Oceanside, 
-    Poway, San Diego, San Marcos, Santee, Solana Beach, Vista
-  maintainer: Eric Busboom
-  author: Eric Busboom
-  homepage: http://www.abc.ca.gov/datport/AHCity.asp
-  url: http://www.abc.ca.gov/datport/AHCity.asp
-  license: other-open
-  tags: [government,gov-licenses,business, bus-economy]
+    author: Eric Busboom
+    description: "Records extracted from the California Alcohol Beverage Control website\
+        \ for the 18 SANDAG cities:\n  \nCarlsbad, Chula Vista, Coronado, Del Mar,\
+        \ El Cajon, Encinitas, Escondido,  Imperial Beach, La Mesa, Lemon Grove, National\
+        \ City, Oceanside,  Poway, San Diego, San Marcos, Santee, Solana Beach, Vista\n"
+    homepage: http://www.abc.ca.gov/datport/AHCity.asp
+    license: other-open
+    maintainer: Eric Busboom
+    tags:
+    - government
+    - gov-licenses
+    - business
+    - bus-economy
+    title: SANDAG City Alcohol Permits
+    url: http://www.abc.ca.gov/datport/AHCity.asp
 build:
-  api_url: 'http://www.abc.ca.gov/datport/AHCityRep.asp'
-  # Payloads for report that do specify a license type
-  lt_payload_template: 'q_CityLOV={city}&q_LTLOV={license_type}&RPTYPE=p_Lictype&SUBMIT1=Continue'
-  # Payload for reports that don't specify a particular liscentype. Must speify the report type
-  report_payload_template: 'q_CityLOV={city}&q_LTLOV=01&RPTYPE={report_type}&SUBMIT1=Continue'
-  schema_file: meta/schema.csv
+    api_url: http://www.abc.ca.gov/datport/AHCityRep.asp
+    dependencies:
+        geocoder: clarinova.com-geocode-casnd-429e-segments
+    lt_payload_template: q_CityLOV={city}&q_LTLOV={license_type}&RPTYPE=p_Lictype&SUBMIT1=Continue
+    report_payload_template: q_CityLOV={city}&q_LTLOV=01&RPTYPE={report_type}&SUBMIT1=Continue
+    schema_file: meta/schema.csv
+extracts:
+-   description: 'Alcohol Beverage Control licenses, for the SANDAG cities, for the
+        year {p_time}
+
+        '
+    for: partition.identity.table == 'licenses'
+    name: licenses-{p_time}.csv
+    partition: any
+    query: select * from licenses
+    title: SANDAG Cities ABC Licenses, {p_time}
+identity:
+    creator: eric@clarinova.com
+    dataset: alcohol_licenses
+    id: a2iLPd
+    name: abc.ca.gov-alcohol_licenses-orig-7ba4
+    revision: 1
+    source: abc.ca.gov
+    variation: orig
 meta:
-  meta_url: http://www.abc.ca.gov/datport/AHCity.asp
-  license_categories:
-    p_OnSale: 'Active On-Sale Retail Licenses: Restaurants and bars'
-    p_OffSale: 'Active Off-Sale Retail Licenses: Stores'
-    p_Retail: 'On-Sale and Off-Sale'
-    p_NonRetail: 'Non-Retail: Wineries and Distileries'
-  target_cities: # Cities that we actually do requests for
+    license_categories:
+        p_NonRetail: 'Non-Retail: Wineries and Distileries'
+        p_OffSale: 'Active Off-Sale Retail Licenses: Stores'
+        p_OnSale: 'Active On-Sale Retail Licenses: Restaurants and bars'
+        p_Retail: On-Sale and Off-Sale
+    meta_url: http://www.abc.ca.gov/datport/AHCity.asp
+    target_cities:
     - CARLSBAD
     - CHULA VISTA
     - CORONADO
@@ -54,14 +65,6 @@ meta:
     - SANTEE
     - SOLANA BEACH
     - VISTA
-extracts:
-  - partition: any
-    query: 'select * from licenses'
-    title: 'SANDAG Cities ABC Licenses, {p_time}'
-    description: > 
-      Alcohol Beverage Control licenses, for the
-      SANDAG cities, for the year {p_time}
-    name: 'licenses-{p_time}.csv'
-    for: "partition.identity.table == 'licenses'"
-
-  
+partitions:
+- abc.ca.gov-alcohol_licenses-orig-7ba4-page_cache
+- abc.ca.gov-alcohol_licenses-orig-7ba4-licenses.2013

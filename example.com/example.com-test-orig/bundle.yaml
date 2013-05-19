@@ -1,6 +1,22 @@
+about:
+    author: Clarinova
+    description: Foo test
+    groups:
+    - Crime
+    homepage: https://sandiegodata.atlassian.net/wiki/display/SDD/Crime+Analysis
+    license: other-open
+    maintainer: Clarinova
+    tags:
+    - government
+    - gov-crime
+    title: Test Example Foobar
 extracts:
     A:
+        depends:
+        - B
+        - D
         description: Extract Description A
+        done_if: os.path.exists('/tmp/{one}-{bee}.foo')
         each:
         -   -   one: 1
                 three: 3
@@ -14,33 +30,38 @@ extracts:
             -   bee: BB
                 cee: CC
                 eay: AA
+        file_name: /tmp/{one}-{bee}.foo
         function: test_extract
         title: Title 1
-        depends: [B,D]
-        file_name: "/tmp/{one}-{bee}.foo"
-        done_if: "os.path.exists('/tmp/{one}-{bee}.foo')"
     B:
+        depends: C
         description: Extract Description B
+        file_name: /tmp/B.foo
         function: test_extract
         title: Title 2
-        depends: C
-        file_name: "/tmp/B.foo"
     C:
+        depends:
+        - D
+        - E
         description: Extract Description C
+        file_name: /tmp/C.foo
         function: test_extract
         title: Title 3
-        file_name: "/tmp/C.foo"
-        depends: [D,E]
     D:
         description: Extract Description D
+        file_name: /tmp/D.foo
         function: test_extract
         title: Title 4
-        file_name: "/tmp/D.foo"
     E:
         description: Extract Description E
+        file_name: /tmp/E.foo
         function: test_extract
         title: Title 5
-        file_name: "/tmp/E.foo"
+    csv:
+        description: Example extract
+        name: s3extract.csv
+        partition: example.com-test-orig-a7d9-example.space1.time1
+        query: SELECT * FROM example
 identity:
     creator: clarinova.com
     dataset: test
@@ -50,7 +71,7 @@ identity:
     source: example.com
     variation: orig
 partitions:
-- example.com-test-orig-a7d9-time1.space1.example
-- example.com-test-orig-a7d9-time2.space1.example
-- example.com-test-orig-a7d9-time1.space2.example
-- example.com-test-orig-a7d9-time2.space2.example
+- example.com-test-orig-a7d9-example.space1.time1
+- example.com-test-orig-a7d9-example.space1.time2
+- example.com-test-orig-a7d9-example.space2.time1
+- example.com-test-orig-a7d9-example.space2.time2

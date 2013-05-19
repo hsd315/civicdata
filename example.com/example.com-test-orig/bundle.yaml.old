@@ -1,29 +1,67 @@
+about:
+    author: Clarinova
+    description: Foo test
+    groups:
+    - Crime
+    homepage: https://sandiegodata.atlassian.net/wiki/display/SDD/Crime+Analysis
+    license: other-open
+    maintainer: Clarinova
+    tags:
+    - government
+    - gov-crime
+    title: Test Example Foobar
 extracts:
-  A:
-      description: Extract Description 1
-      each:
-      -   -   one: 1
-              three: 3
-              two: 2
-          -   one: 11
-              three: 33
-              two: 22
-      -   -   bee: B
-              cee: C
-              eay: A
-          -   bee: BB
-              cee: CC
-              eay: AA
-      function: test_extract
-      title: Title 1
-  B:     
-      description: Extract Description 2
-      function: test_extract
-      title: Title 2
-  C:  
-      description: Extract Description 3
-      function: test_extract
-      title: Title 3
+    A:
+        depends:
+        - B
+        - D
+        description: Extract Description A
+        done_if: os.path.exists('/tmp/{one}-{bee}.foo')
+        each:
+        -   -   one: 1
+                three: 3
+                two: 2
+            -   one: 11
+                three: 33
+                two: 22
+        -   -   bee: B
+                cee: C
+                eay: A
+            -   bee: BB
+                cee: CC
+                eay: AA
+        file_name: /tmp/{one}-{bee}.foo
+        function: test_extract
+        title: Title 1
+    B:
+        depends: C
+        description: Extract Description B
+        file_name: /tmp/B.foo
+        function: test_extract
+        title: Title 2
+    C:
+        depends:
+        - D
+        - E
+        description: Extract Description C
+        file_name: /tmp/C.foo
+        function: test_extract
+        title: Title 3
+    D:
+        description: Extract Description D
+        file_name: /tmp/D.foo
+        function: test_extract
+        title: Title 4
+    E:
+        description: Extract Description E
+        file_name: /tmp/E.foo
+        function: test_extract
+        title: Title 5
+    csv:
+        description: Example extract
+        name: s3extract.csv
+        partition: example.com-test-orig-a7d9-example.space1.time1
+        query: SELECT * FROM example
 identity:
     creator: clarinova.com
     dataset: test
@@ -33,7 +71,7 @@ identity:
     source: example.com
     variation: orig
 partitions:
-- example.com-test-orig-a7d9-time1.space1.example
-- example.com-test-orig-a7d9-time2.space1.example
-- example.com-test-orig-a7d9-time1.space2.example
-- example.com-test-orig-a7d9-time2.space2.example
+- example.com-test-orig-a7d9-example.space1.time1
+- example.com-test-orig-a7d9-example.space1.time2
+- example.com-test-orig-a7d9-example.space2.time1
+- example.com-test-orig-a7d9-example.space2.time2

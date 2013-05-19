@@ -205,6 +205,11 @@ class Bundle(BuildBundle):
         for row in r.partition.database.query(q):
             print row;
 
+    def test_web(self):
+        
+        print self.web.schema_table('example')
+        
+
 import sys
 
 if __name__ == '__main__':

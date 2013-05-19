@@ -1,0 +1,17 @@
+identity:
+    creator: eric@clarinova.com
+    dataset: crime
+    id: a2VkvZ
+    revision: '1'
+    source: crimemapping.com
+    subset: incidents
+    variation: orig
+build:
+  xmin: -13052838.881777097
+  ymin: 3851258.077400502
+  xmax: -13029621.134435505
+  ymax: 3866641.029342873
+  template:  "http://www.crimemapping.com/DetailedReport.aspx?db={start}+00:00:00&de={end}+23:59:00&ccs=FR,VB&{bbox}&faid=137a7b29-7112-471f-9d43-728ca7ec478f"
+  full_template: "http://www.crimemapping.com/DetailedReport.aspx?db={start}+00:00:00&de={end}+23:59:00&ccs=AR,AS,BU,DP,DR,DU,FR,HO,VT,RO,SX,TH,VA,VB,WE&xmin=-13052838.881777097&ymin=3850990.547801504&xmax=-13029621.134435505&ymax=3866641.029342873"
+  dependencies:
+    incidents: sandag.org-crimeincidents-orig-429e-incidents
