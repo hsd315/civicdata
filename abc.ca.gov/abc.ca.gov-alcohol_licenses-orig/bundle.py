@@ -66,12 +66,12 @@ class Bundle(BuildBundle):
          
         pid = PartitionIdentity(self.identity, table='page_cache')
         partition = self.partitions.new_partition(pid)
-        partition.create_with_tables()  
+        partition.create()  
            
         # One partition per year. 
         pid = PartitionIdentity(self.identity, table='licenses', time=str(datetime.date.today().year))
         partition = self.partitions.new_partition(pid)
-        partition.create_with_tables()      
+        partition.create()      
         
         return True 
                     

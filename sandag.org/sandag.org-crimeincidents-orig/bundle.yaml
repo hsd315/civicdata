@@ -1,14 +1,7 @@
-build:
-    repo:
-        key: ce37e442-bfb6-4c9f-b62e-e0ae100f010c
-        package: sandag-crime-incidents
-        url: http://data.sandiegodata.org/api/1
-        user: guest
-    schema_file: meta/schema.csv
 about:
     author: San Diego Regional Data Library
-    description: Crime incidents provided by SANDAG in response to Public Records Request
-      12-075, covering the period from 1 Jan 2007 to 31 March 2013. 
+    description: Crime incidents provided by SANDAG in response to Public Records
+        Request 12-075, covering the period from 1 Jan 2007 to 31 March 2013.
     groups:
     - Crime
     homepage: http://sandag.org
@@ -18,6 +11,13 @@ about:
     - government
     - gov-crime
     title: SANDAG Crime Incidents, 2007 - March 2013
+build:
+    repo:
+        key: ce37e442-bfb6-4c9f-b62e-e0ae100f010c
+        package: raw-san-diego-county-crime-incidents-2007-2013
+        url: http://data.sandiegodata.org/api/1
+        user: guest
+    schema_file: meta/schema.csv
 identity:
     creator: eric@sandiegodata.org
     dataset: crimeincidents
