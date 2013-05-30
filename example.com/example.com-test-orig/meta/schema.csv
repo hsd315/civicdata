@@ -1,0 +1,9 @@
+"table","column","is_pk","i1","i2","type","description"
+"incidents","type",,,,"TEXT",
+"incidents","agency",,,,"TEXT",
+"incidents","datetime",,,,"TIMESTAMP",
+"incidents","legend",,,,"TEXT",
+"incidents","description",,,,"TEXT",
+"incidents","blockaddress",,,1,"TEXT",
+"incidents","city",,1,,"TEXT",
+"incidents","zip",,,,"INTEGER",
