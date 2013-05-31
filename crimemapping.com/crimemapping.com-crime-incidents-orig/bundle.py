@@ -76,14 +76,11 @@ class Bundle(BuildBundle):
 
     def link(self):
         
-        
-        _, in1 = self.library.dep('incidents')
-        
+        in1 = self.library.dep('incidents')
         
         in2 = self.partitions.find(table='incidents')
         
-
-        in2.database.attach(in1, 'in1')
+        in2.database.attach(in1.partition, 'in1')
         
         print in1.database.path
         print in2.database.path

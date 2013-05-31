@@ -23,7 +23,7 @@ class Bundle(BuildBundle):
     ### Prepare is run before building, part of the devel process.  
 
     def list_states(self):
-        bundle,_ = self.library.dep('geodim')
+        bundle = self.library.dep('geodim')
         
         for row in bundle.query("SELECT * from states"):
             print row
