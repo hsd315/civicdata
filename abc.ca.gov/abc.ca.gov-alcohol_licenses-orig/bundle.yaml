@@ -1,9 +1,9 @@
 about:
     author: Eric Busboom
-    description: "Records extracted from the California Alcohol Beverage Control website\
-        \ for the 18 SANDAG cities:\n  \nCarlsbad, Chula Vista, Coronado, Del Mar,\
-        \ El Cajon, Encinitas, Escondido,  Imperial Beach, La Mesa, Lemon Grove, National\
-        \ City, Oceanside,  Poway, San Diego, San Marcos, Santee, Solana Beach, Vista\n"
+    description: "Records extracted from the California Alcohol Beverage Control website
+      for the 18 SANDAG cities: Carlsbad, Chula Vista, Coronado, Del Mar,
+      El Cajon, Encinitas, Escondido,  Imperial Beach, La Mesa, Lemon Grove, National
+      City, Oceanside,  Poway, San Diego, San Marcos, Santee, Solana Beach, Vista"
     homepage: http://www.abc.ca.gov/datport/AHCity.asp
     license: other-open
     maintainer: Eric Busboom
@@ -12,7 +12,7 @@ about:
     - gov-licenses
     - business
     - bus-economy
-    title: SANDAG City Alcohol Permits
+    title: San Diego County Alcohol Permits
     url: http://www.abc.ca.gov/datport/AHCity.asp
 build:
     api_url: http://www.abc.ca.gov/datport/AHCityRep.asp
