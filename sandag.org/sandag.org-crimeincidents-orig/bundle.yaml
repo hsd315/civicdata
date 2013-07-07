@@ -14,8 +14,8 @@ about:
 build:
     repo:
         key: ce37e442-bfb6-4c9f-b62e-e0ae100f010c
-        package: raw-san-diego-county-crime-incidents-2007-2013
-        url: http://data.sandiegodata.org/api/1
+        package: raw-san-diego-county-crime-incidents-2007-2013-rev-2
+        url: http://data.sandiegodata.org/api
         user: guest
     schema_file: meta/schema.csv
 identity:
@@ -23,15 +23,15 @@ identity:
     dataset: crimeincidents
     id: a2JzK8
     name: sandag.org-crimeincidents-orig-429e
-    revision: 1
+    revision: 2
     source: sandag.org
     variation: orig
 partitions:
 - sandag.org-crimeincidents-orig-429e-incidents
 - sandag.org-crimeincidents-orig-429e-incidents.2007
 - sandag.org-crimeincidents-orig-429e-incidents.2008
+- sandag.org-crimeincidents-orig-429e-incidents.2013
 - sandag.org-crimeincidents-orig-429e-incidents.2009
 - sandag.org-crimeincidents-orig-429e-incidents.2010
 - sandag.org-crimeincidents-orig-429e-incidents.2011
 - sandag.org-crimeincidents-orig-429e-incidents.2012
-- sandag.org-crimeincidents-orig-429e-incidents.2013

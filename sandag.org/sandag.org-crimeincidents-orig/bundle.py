@@ -29,14 +29,17 @@ class Bundle(BuildBundle):
 
         return True
 
-    def generate_incidents(self):
+               
+
+    def generate_incidents(self, table):
         from databundles.client.ckan import Ckan
       
         repo = Ckan(self.config.build.repo.url, self.config.build.repo.key)
    
         pkg = repo.get_package(self.config.build.repo.package)
         
-        for resource in pkg['resources']:          
+        for resource in pkg['resources']:    
+                  
             f = self.filesystem.download(resource['url'])
             uz = self.filesystem.unzip(f)
                    
@@ -44,9 +47,14 @@ class Bundle(BuildBundle):
 
             with open(uz, 'rbU') as csvfile:
                 reader = csv.reader(csvfile)
-                reader.next()
+                header = reader.next()
+                
+                fh = [ c.data['fileheader'] for c in table.columns]
+                if  fh != header:
+                    raise Exception("Header mismatch: {} != {} ".format(fh, header))
+                
                 for row in reader:
-                    yield list(row)
+                    yield  list(row)
 
     def get_partition(self,year):
         
@@ -57,18 +65,21 @@ class Bundle(BuildBundle):
         return self.part_cache[year]
 
     def build(self):
-
+        from dateutil.parser import parse
         # All incidents
         allp = self.partitions.find_or_new(table='incidents');
         allins = allp.database.inserter()
         
+        table = allp.table
+        
         lr = self.init_log_rate(10000)
         
-        for row in self.generate_incidents():
+        for row in self.generate_incidents(table):
+            
             
             lr()
-            
-            dt = datetime.datetime.strptime(row[2], "%m/%d/%y %H:%M")
+
+            dt = parse(row[2])
             row[2] = dt
             row[5] = unicode(row[5],errors='ignore').strip()
             
@@ -76,9 +87,12 @@ class Bundle(BuildBundle):
 
             drow = [ v if v else None for v in row ]
 
+            if not drow[6]:
+                drow[6] = -1 # Zips
+
             try:
-                ins.insert(row)
-                allins.insert(row)
+                ins.insert(drow)
+                allins.insert(drow)
             except:
                 print row
                 raise

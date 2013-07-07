@@ -1,0 +1,9 @@
+table,column,id,is_pk,is_fk,type,default,description
+incidents,type,d2JzK80101,,,TEXT,NONE,
+incidents,agency,d2JzK80102,,,TEXT,NONE,
+incidents,datetime,d2JzK80103,,,TIMESTAMP,,
+incidents,legend,d2JzK80104,,,TEXT,NONE,
+incidents,description,d2JzK80105,,,TEXT,NONE,
+incidents,blockaddress,d2JzK80106,,,TEXT,NONE,
+incidents,city,d2JzK80107,,,TEXT,NONE,
+incidents,zip,d2JzK80108,,,INTEGER,-1,

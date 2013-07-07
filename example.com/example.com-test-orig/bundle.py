@@ -52,7 +52,7 @@ class Bundle(BuildBundle):
                 partition = self.partitions.new_partition(pid)
                 partition.database.session.commit()
                 self.log('Creating: '+partition.identity.name)
-                partition.create_with_tables()
+                partition.create()
                         
         return True
 

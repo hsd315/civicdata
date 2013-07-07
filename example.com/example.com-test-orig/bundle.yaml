@@ -67,7 +67,7 @@ identity:
     dataset: test
     id: a141kc
     name: example.com-test-orig-a7d9
-    revision: 1
+    revision: 2
     source: example.com
     variation: orig
 partitions:

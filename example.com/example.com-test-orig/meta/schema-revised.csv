@@ -1,0 +1,10 @@
+table,column,id,is_pk,is_fk,type,default,description
+example,rand1,d141kc0101,,,INTEGER,,
+example,rand2,d141kc0102,,,REAL,,
+example,rand3,d141kc0103,,,INTEGER,,
+example,rand4,d141kc0104,,,REAL,,
+example,rand5,d141kc0105,,,INTEGER,,
+example,rand6,d141kc0106,,,REAL,,
+example,uuid,d141kc0107,,,TEXT,,
+example,tag,d141kc0108,,,TEXT,,
+example,flags,d141kc0109,,,TEXT,,
