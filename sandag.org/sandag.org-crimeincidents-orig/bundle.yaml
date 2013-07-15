@@ -26,12 +26,14 @@ identity:
     revision: 2
     source: sandag.org
     variation: orig
+    vid: a2JzK8/002
+    vname: sandag.org-crimeincidents-orig-429e-r2
 partitions:
-- sandag.org-crimeincidents-orig-429e-incidents
-- sandag.org-crimeincidents-orig-429e-incidents.2007
-- sandag.org-crimeincidents-orig-429e-incidents.2008
-- sandag.org-crimeincidents-orig-429e-incidents.2013
-- sandag.org-crimeincidents-orig-429e-incidents.2009
-- sandag.org-crimeincidents-orig-429e-incidents.2010
-- sandag.org-crimeincidents-orig-429e-incidents.2011
-- sandag.org-crimeincidents-orig-429e-incidents.2012
+- sandag.org-crimeincidents-orig-429e.incidents
+- sandag.org-crimeincidents-orig-429e.incidents.2007
+- sandag.org-crimeincidents-orig-429e.incidents.2008
+- sandag.org-crimeincidents-orig-429e.incidents.2013
+- sandag.org-crimeincidents-orig-429e.incidents.2009
+- sandag.org-crimeincidents-orig-429e.incidents.2010
+- sandag.org-crimeincidents-orig-429e.incidents.2011
+- sandag.org-crimeincidents-orig-429e.incidents.2012

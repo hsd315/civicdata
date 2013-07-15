@@ -1,9 +1,9 @@
 about:
     author: Eric Busboom
-    description: "Records extracted from the California Alcohol Beverage Control website
-      for the 18 SANDAG cities: Carlsbad, Chula Vista, Coronado, Del Mar,
-      El Cajon, Encinitas, Escondido,  Imperial Beach, La Mesa, Lemon Grove, National
-      City, Oceanside,  Poway, San Diego, San Marcos, Santee, Solana Beach, Vista"
+    description: 'Records extracted from the California Alcohol Beverage Control website
+        for the 18 SANDAG cities: Carlsbad, Chula Vista, Coronado, Del Mar, El Cajon,
+        Encinitas, Escondido,  Imperial Beach, La Mesa, Lemon Grove, National City,
+        Oceanside,  Poway, San Diego, San Marcos, Santee, Solana Beach, Vista'
     homepage: http://www.abc.ca.gov/datport/AHCity.asp
     license: other-open
     maintainer: Eric Busboom
@@ -17,7 +17,7 @@ about:
 build:
     api_url: http://www.abc.ca.gov/datport/AHCityRep.asp
     dependencies:
-        geocoder: clarinova.com-geocode-casnd-429e-segments
+        geocoder: clarinova.com-geocode-casnd-429e.segments
     lt_payload_template: q_CityLOV={city}&q_LTLOV={license_type}&RPTYPE=p_Lictype&SUBMIT1=Continue
     report_payload_template: q_CityLOV={city}&q_LTLOV=01&RPTYPE={report_type}&SUBMIT1=Continue
     schema_file: meta/schema.csv
@@ -39,6 +39,8 @@ identity:
     revision: 1
     source: abc.ca.gov
     variation: orig
+    vid: a2iLPd/001
+    vname: abc.ca.gov-alcohol_licenses-orig-7ba4-r1
 meta:
     license_categories:
         p_NonRetail: 'Non-Retail: Wineries and Distileries'
@@ -66,5 +68,5 @@ meta:
     - SOLANA BEACH
     - VISTA
 partitions:
-- abc.ca.gov-alcohol_licenses-orig-7ba4-page_cache
-- abc.ca.gov-alcohol_licenses-orig-7ba4-licenses.2013
+- abc.ca.gov-alcohol_licenses-orig-7ba4.page_cache
+- abc.ca.gov-alcohol_licenses-orig-7ba4.licenses.2013

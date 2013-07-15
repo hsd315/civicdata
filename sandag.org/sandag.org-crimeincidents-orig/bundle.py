@@ -29,8 +29,6 @@ class Bundle(BuildBundle):
 
         return True
 
-               
-
     def generate_incidents(self, table):
         from databundles.client.ckan import Ckan
       
