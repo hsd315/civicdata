@@ -208,14 +208,5 @@ class Bundle(BuildBundle):
     def test_web(self):
         
         print self.web.schema_table('example')
-        
 
-import sys
-
-if __name__ == '__main__':
-    import databundles.run
-      
-    databundles.run.run(sys.argv[1:], Bundle)
-     
-    
     

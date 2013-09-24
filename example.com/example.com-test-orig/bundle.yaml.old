@@ -70,8 +70,10 @@ identity:
     revision: 2
     source: example.com
     variation: orig
+    vid: a141kc/002
+    vname: example.com-test-orig-a7d9-r2
 partitions:
-- example.com-test-orig-a7d9-example.space1.time1
-- example.com-test-orig-a7d9-example.space1.time2
-- example.com-test-orig-a7d9-example.space2.time1
-- example.com-test-orig-a7d9-example.space2.time2
+- example.com-test-orig-a7d9.example.space1.time1
+- example.com-test-orig-a7d9.example.space1.time2
+- example.com-test-orig-a7d9.example.space2.time1
+- example.com-test-orig-a7d9.example.space2.time2
