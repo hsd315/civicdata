@@ -1,0 +1,127 @@
+table,column,is_pk,is_fk,i1,type,size,default,,description,d_title
+,,,,,,,,,,
+,,,,,,,,,,
+collision,Case Id,,,,VARCHAR,19,,,the unique identifier of the collision report (barcode beginning 2002; 19 digit code prior to 2002),Case Id
+collision,Collision Year,,,,INTEGER,4,,,the year when the collision occurred,Collision Year
+collision,Process Date,,,,DATE,8,,,(YYYYMMDD),Process Date
+collision,Jurisdiction,,,,INTEGER,4,,,Four numerics assigned by DOJ,Jurisdiction
+collision,Collision Date,,,,DATE,8,,,the date when the collision occurred (YYYYMMDD),Collision Date
+collision,Collision Time,,,,TIME,4,,,the time when the collision occurred (24 hour time),Collision Time
+collision,Officer Id,,,,VARCHAR,8,,,,Officer Id
+collision,Reporting District,,,,VARCHAR,5,,,,Reporting District
+collision,Day of Week,,,,CHAR,1,,,the code for the day of the week when the collision occurred,Day of Week
+collision,CHP Shift,,,,CHAR,1,,,,CHP Shift
+collision,Population,,,,CHAR,1,,,,Population
+collision,County City Location,,,,VARCHAR,4,,,the location code of where the collision occurred,County City Location
+collision,Special Condition,,,,CHAR,1,,,,Special Condition
+collision,Beat Type,,,,CHAR,1,,,,Beat Type
+collision,CHP Beat Type,,,,CHAR,1,,,,CHP Beat Type
+collision,City Division LAPD,,,,CHAR,1,,,,City Division LAPD
+collision,CHP Beat Class,,,,CHAR,1,,,,CHP Beat Class
+collision,Beat INTEGER,,,,VARCHAR,6,,,,Beat INTEGER
+collision,Primary Rd,,,,VARCHAR,50,,,,Primary Rd
+collision,Secondary Rd,,,,VARCHAR,50,,,,Secondary Rd
+collision,Distance,,,,INTEGER,9,,,,Distance
+collision,Direction,,,,CHAR,1,,,,Direction
+collision,Intersection,,,,CHAR,1,,,,Intersection
+collision,Weather 1,,,,CHAR,1,,,the weather condition at the time of the collision,Weather 1
+collision,Weather 2,,,,CHAR,1,,,"the weather condition at the time of the collision, 
+If a second description is necessary",Weather 2
+collision,State Highway Indicator,,,,CHAR,1,,,,State Highway Indicator
+collision,Caltrans County,,,,VARCHAR,3,,,,Caltrans County
+collision,Caltrans District,,,,INTEGER,2,,,,Caltrans District
+collision,State Route,,,,INTEGER,3,,,,State Route
+collision,Route Suffix,,,,CHAR,1,,,,Route Suffix
+collision,Postmile Prefix,,,,CHAR,1,,,,Postmile Prefix
+collision,Postmile,,,,INTEGER,6,,,,Postmile
+collision,Location Type,,,,CHAR,1,,,,Location Type
+collision,Ramp Intersection,,,,CHAR,1,,,,Ramp Intersection
+collision,Side Of Highway,,,,CHAR,1,,,"Code provided by Caltrans Coders; applies to divided highway, 
+Based on nominal direction of route;
+for single vehicle is same as nominal direction of travel, 
+overruled by impact with second vehicle after crossing median",Side Of Highway
+collision,Tow Away,,,,CHAR,1,,,,Tow Away
+collision,Collision Severity,,,,CHAR,1,,,"the injury level severity of the collision
+(highest level of injury in collision)",Collision Severity
+collision,Killed victims,,,,INTEGER,3,,,counts victims in the collision with degree of injury of 1,Killed victims
+collision,Injured victims,,,,INTEGER,3,,,"counts victims in the collision with degree of injury of 2, 3, or 4",Injured victims
+collision,Party Count,,,,INTEGER,3,,,counts total parties in the collision,Party Count
+collision,Primary Collision Factor,,,,CHAR,1,,,,Primary Collision Factor
+collision,PCF Violation Code,,,,CHAR,1,,,,PCF Violation Code
+collision,PCF Violation Category,,,,VARCHAR,2,,,,PCF Violation Category
+collision,PCF Violation,,,,INTEGER,5,,,,PCF Violation
+collision,PCF Violation Subsection,,,,CHAR,1,,,,PCF Violation Subsection
+collision,Hit And Run,,,,CHAR,1,,,,Hit And Run
+collision,Type of Collision,,,,CHAR,1,,,,Type of Collision
+collision,Motor Vehicle Involved With,,,,CHAR,1,,,,Motor Vehicle Involved With
+collision,Ped Action,,,,CHAR,1,,,,Ped Action
+collision,Road Surface,,,,CHAR,1,,,,Road Surface
+collision,Road Condition 1,,,,CHAR,1,,,,Road Condition 1
+collision,Road Condition 2,,,,CHAR,1,,,,Road Condition 2
+collision,Lighting,,,,CHAR,1,,,,Lighting
+collision,Control Device,,,,CHAR,1,,,,Control Device
+collision,CHP Road Type,,,,CHAR,1,,,,CHP Road Type
+collision,Pedestrian Collision,,,,CHAR,1,,,indicates whether the collision involved a pedestrian,Pedestrian Collision
+collision,Bicycle Collision,,,,CHAR,1,,,indicates whether the collision involved a bicycle,Bicycle Collision
+collision,Motorcycle Collision,,,,CHAR,1,,,indicates whether the collision involved a motorcycle,Motorcycle Collision
+collision,Truck Collision,,,,CHAR,1,,,indicates whether the collision involved a big truck,Truck Collision
+collision,Not Private Property,,,,CHAR,1,,,indicates whether the collision occurred on private property,Not Private Property
+collision,Alcohol Involved,,,,CHAR,1,,,indicates whether the collision involved a party that had been drinking,Alcohol Involved
+collision,Statewide Vehicle Type At Fault,,,,CHAR,1,,,indicates the Statewide Vehicle Type of the party who is at fault,Statewide Vehicle Type At Fault
+collision,CHP Vehicle Type At Fault,,,,CHAR,2,,,indicates the CHP Vehicle Type of the party who is at fault,CHP Vehicle Type At Fault
+collision,Severe Injury count,,,,INTEGER,3,,,counts victims in the collision with degree of injury of 2,Severe Injury count
+collision,Other Visible Injury count,,,,INTEGER,3,,,counts victims in the collision with degree of injury of 3,Other Visible Injury count
+collision,Complaint of Pain Injury count,,,,INTEGER,3,,,counts victims in the collision with degree of injury of 4,Complaint of Pain Injury count
+collision,Pedestrian Killed count,,,,INTEGER,3,,,Counts the victims in the collision with party type of 2 and degree of injury is 1,Pedestrian Killed count
+collision,Pedestrian Injured count,,,,INTEGER,3,,,"Counts the victims in the collision with party type of 2 and degree of injury is 2, 3, or 4",Pedestrian Injured count
+collision,Bicyclist Killed count,,,,INTEGER,3,,,Counts the victims in the collision with party type of 4 and degree of injury is 1,Bicyclist Killed count
+collision,Bicyclist Injured count,,,,INTEGER,3,,,"Counts the victims in the collision with party type of 4 and degree of injury is 2, 3, or 4",Bicyclist Injured count
+collision,Motorcyclist Killed count,,,,INTEGER,3,,,counts victims in the collision with statewide vehicle type of C or O and degree of injury of 1,Motorcyclist Killed count
+collision,Motorcyclist Injured count,,,,INTEGER,3,,,"counts victims in the collision with statewide vehicle type of C or O and degree of injury of 2, 3, or 4",Motorcyclist Injured count
+collision,Primary Ramp,,,,CHAR,2,,,,Primary Ramp
+collision,Secondary Ramp,,,,CHAR,2,,,,Secondary Ramp
+collision,Latitude,,,,REAL,,,,,Latitude
+collision,Longitude,,,,REAL,,,,,Longitude
+,,,,,,,,,,
+party,Case Id,,,,CHAR,19,,,the unique identifier of the collision report (barcode beginning 2002; 19 digit code prior to 2002),Case Id
+party,Party Number,,,,INTEGER,3,,,,Party Number
+party,Party Type,,,,CHAR,1,,,,Party Type
+party,At Fault,,,,CHAR,1,,,indicates whether the party was at fault in the collision,At Fault
+party,Party Sex,,,,CHAR,1,,,the code of the sex of the party,Party Sex
+party,Party Age,,,,INTEGER,3,,,the age of the party at the time of the collision,Party Age
+party,Party Sobriety,,,,CHAR,1,,,,Party Sobriety
+party,Party Drug Physical,,,,CHAR,1,,,,Party Drug Physical
+party,Direction Of Travel,,,,CHAR,1,,,,Direction Of Travel
+party,Party Safety Equipment 1,,,,CHAR,1,,,,Party Safety Equipment 1
+party,Party Safety Equipment 2,,,,CHAR,1,,,,Party Safety Equipment 2
+party,Financial Responsibility,,,,CHAR,1,,,,Financial Responsibility
+party,Special Information 1,,,,CHAR,1,,,,Special Information 1
+party,Special Information 2,,,,CHAR,1,,,,Special Information 2
+party,Special Information 3,,,,CHAR,1,,,,"Special Information
+3"
+party,OAF Violation Code,,,,CHAR,1,,,,OAF Violation Code
+party,OAF Violation Category,,,,CHAR,2,,,,OAF Violation Category
+party,OAF Violation Section,,,,INTEGER,5,,,,OAF Violation Section
+party,OAF Violation Suffix,,,,CHAR,1,,,,OAF Violation Suffix
+party,Other Associated Factor 1,,,,CHAR,1,,,,Other Associated Factor 1
+party,Other Associated Factor 2,,,,CHAR,1,,,,Other Associated Factor 2
+party,Party Number Killed,,,,INTEGER,3,,,counts victims in the party with degree of injury of 1,Party Number Killed
+party,Party Number Injured,,,,INTEGER,3,,,"counts victims in the party with degree of injury of 2, 3, or 4",Party Number Injured
+party,Movement Preceding Collision,,,,CHAR,1,,,,Movement Preceding Collision
+party,Vehicle Year,,,,INTEGER,4,,,the model year of the party's vehicle,Vehicle Year
+party,Vehicle Make,,,,VARCHAR,50,,,the full description of the make of the party's vehicle,Vehicle Make
+party,Statewide Vehicle Type,,,,CHAR,1,,,,
+party,CHP Vehicle Type Towing,,,,CHAR,2,,,,CHP Vehicle Type Towing
+party,CHP Vehicle Type Towed,,,,CHAR,2,,,,CHP Vehicle Type Towed
+party,Party Race,,,,CHAR,1,,,,Party Race
+,,,,,,,,,,
+victim,Case Id,,,,VARCHAR,19,,,the unique identifier of the collision report (barcode beginning 2002; 19 digit code prior to 2002),Case Id
+victim,Party Number,,,,INTEGER ,3,,,,Party Number
+victim,Victim Role,,,,CHAR,1,,,,Victim Role
+victim,Victim Sex,,,,CHAR,1,,,,Victim Sex
+victim,Victim Age,,,,INTEGER,3,,,the age of the victim at the time of the collision,Victim Age
+victim,Victim Degree of Injury,,,,CHAR,1,,,,Victim Degree of Injury
+victim,Victim Seating Position,,,,CHAR,1,,,,Victim Seating Position
+victim,Victim Safety Equipment 1,,,,CHAR,1,,,,Victim Safety Equipment 1
+victim,Victim Safety Equipment 2,,,,CHAR,1,,,,Victim Safety Equipment 2
+victim,Victim Ejected,,,,CHAR,1,,,,Victim Ejected

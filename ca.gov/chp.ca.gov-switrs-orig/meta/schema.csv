@@ -1,0 +1,128 @@
+table,seq,column,is_pk,i1,i2,i3,i4,i5,i6,is_fk,type,size,description,d_title,id
+collisions,1,CASE_ID,1,,,,,,,,VARCHAR,19,the unique identifier of the collision report (barcode beginning 2002; 19 digit code prior to 2002),Case Id,d3lH3w0101
+collisions,2,ACCIDENT_YEAR,,,,,,,,,INTEGER,4,the year when the collision occurred,Collision Year,d3lH3w0102
+collisions,3,PROC_DATE,,1,,,,,,,DATE,8,(YYYYMMDD),Process Date,d3lH3w0103
+collisions,4,JURIS,,, ,,,,,,INTEGER,4,Four numerics assigned by DOJ,Jurisdiction,d3lH3w0104
+collisions,5,COLLISION_DATE,, ,1,,,,,,DATE,8,the date when the collision occurred (YYYYMMDD),Collision Date,d3lH3w0105
+collisions,6,COLLISION_TIME,,, ,1,,,,,TIME,4,the time when the collision occurred (24 hour time),Collision Time,d3lH3w0106
+collisions,7,OFFICER_ID,,,,,,,,,VARCHAR,8,,Officer Id,d3lH3w0107
+collisions,8,REPORTING_DISTRICT,,,,,,,,,VARCHAR,5,,Reporting District,d3lH3w0108
+collisions,9,DAY_OF_WEEK,,,, ,1,,,,CHAR,1,the code for the day of the week when the collision occurred,Day of Week,d3lH3w0109
+collisions,10,CHP_SHIFT,,,,,,,,,CHAR,1,,CHP Shift,d3lH3w010a
+collisions,11,POPULATION,,,,,,,,,CHAR,1,,Population,d3lH3w010b
+collisions,12,CNTY_CITY_LOC,,,,,,1,,,VARCHAR,4,the location code of where the collision occurred,County City Location,d3lH3w010c
+collisions,13,SPECIAL_COND,,,,,,,,,CHAR,1,,Special Condition,d3lH3w010d
+collisions,14,BEAT_TYPE,,,,,,,,,CHAR,1,,Beat Type,d3lH3w010e
+collisions,15,CHP_BEAT_TYPE,,,,,,,,,CHAR,1,,CHP Beat Type,d3lH3w010f
+collisions,16,CITY_DIVISION_LAPD,,,,,,,,,CHAR,1,,City Division LAPD,d3lH3w010g
+collisions,17,CHP_BEAT_CLASS,,,,,,,,,CHAR,1,,CHP Beat Class,d3lH3w010h
+collisions,18,BEAT_NUMBER,,,,,,,,,VARCHAR,6,,Beat INTEGER,d3lH3w010i
+collisions,19,PRIMARY_RD,,,,,,,,,VARCHAR,50,,Primary Rd,d3lH3w010j
+collisions,20,SECONDARY_RD,,,,,,,,,VARCHAR,50,,Secondary Rd,d3lH3w010k
+collisions,21,DISTANCE,,,,,,,,,INTEGER,9,,Distance,d3lH3w010l
+collisions,22,DIRECTION,,,,,,,,,CHAR,1,,Direction,d3lH3w010m
+collisions,23,INTERSECTION,,,,,,,,,CHAR,1,,Intersection,d3lH3w010n
+collisions,24,WEATHER_1,,,,,,,,,CHAR,1,the weather condition at the time of the collision,Weather 1,d3lH3w010o
+collisions,25,WEATHER_2,,,,,,,,,CHAR,1,"the weather condition at the time of the collision, 
+If a second description is necessary",Weather 2,d3lH3w010p
+collisions,26,STATE_HWY_IND,,,,,,,,,CHAR,1,,State Highway Indicator,d3lH3w010q
+collisions,27,CALTRANS_COUNTY,,,,,,,,,VARCHAR,3,,Caltrans County,d3lH3w010r
+collisions,28,CALTRANS_DISTRICT,,,,,,,,,INTEGER,2,,Caltrans District,d3lH3w010s
+collisions,29,STATE_ROUTE,,,,,,,,,INTEGER,3,,State Route,d3lH3w010t
+collisions,30,ROUTE_SUFFIX,,,,,,,,,CHAR,1,,Route Suffix,d3lH3w010u
+collisions,31,POSTMILE_PREFIX,,,,,,,,,CHAR,1,,Postmile Prefix,d3lH3w010v
+collisions,32,POSTMILE,,,,,,,,,INTEGER,6,,Postmile,d3lH3w010w
+collisions,33,LOCATION_TYPE,,,,,,,,,CHAR,1,,Location Type,d3lH3w010x
+collisions,34,RAMP_INTERSECTION,,,,,,,,,CHAR,1,,Ramp Intersection,d3lH3w010y
+collisions,35,SIDE_OF_HWY,,,,,,,,,CHAR,1,"Code provided by Caltrans Coders; applies to divided highway, 
+Based on nominal direction of route;
+for single vehicle is same as nominal direction of travel, 
+overruled by impact with second vehicle after crossing median",Side Of Highway,d3lH3w010z
+collisions,36,TOW_AWAY,,,,,,,,,CHAR,1,,Tow Away,d3lH3w010A
+collisions,37,COLLISION_SEVERITY,,,,,,,,,CHAR,1,"the injury level severity of the collision
+(highest level of injury in collision)",Collision Severity,d3lH3w010B
+collisions,38,NUMBER_KILLED,,,,,,,,,INTEGER,3,counts victims in the collision with degree of injury of 1,Killed victims,d3lH3w010C
+collisions,39,NUMBER_INJURED,,,,,,,,,INTEGER,3,"counts victims in the collision with degree of injury of 2, 3, or 4",Injured victims,d3lH3w010D
+collisions,40,PARTY_COUNT,,,,,,,,,INTEGER,3,counts total parties in the collision,Party Count,d3lH3w010E
+collisions,41,PRIMARY_COLL_FACTOR,,,,,,,,,CHAR,1,,Primary Collision Factor,d3lH3w010F
+collisions,42,PCF_CODE_OF_VIOL,,,,,,,,,CHAR,1,,PCF Violation Code,d3lH3w010G
+collisions,43,PCF_VIOL_CATEGORY,,,,,,,,,VARCHAR,2,,PCF Violation Category,d3lH3w010H
+collisions,44,PCF_VIOLATION,,,,,,,,,INTEGER,5,,PCF Violation,d3lH3w010I
+collisions,45,PCF_VIOL_SUBSECTION,,,,,,,,,CHAR,1,,PCF Violation Subsection,d3lH3w010J
+collisions,46,HIT_AND_RUN,,,,,,,,,CHAR,1,,Hit And Run,d3lH3w010K
+collisions,47,TYPE_OF_COLLISION,,,,,,,,,CHAR,1,,Type of Collision,d3lH3w010L
+collisions,48,MVIW,,,,,,,,,CHAR,1,,Motor Vehicle Involved With,d3lH3w010M
+collisions,49,PED_ACTION,,,,,,,,,CHAR,1,,Ped Action,d3lH3w010N
+collisions,50,ROAD_SURFACE,,,,,,,,,CHAR,1,,Road Surface,d3lH3w010O
+collisions,51,ROAD_COND_1,,,,,,,,,CHAR,1,,Road Condition 1,d3lH3w010P
+collisions,52,ROAD_COND_2,,,,,,,,,CHAR,1,,Road Condition 2,d3lH3w010Q
+collisions,53,LIGHTING,,,,,,,,,CHAR,1,,Lighting,d3lH3w010R
+collisions,54,CONTROL_DEVICE,,,,,,,,,CHAR,1,,Control Device,d3lH3w010S
+collisions,55,CHP_ROAD_TYPE,,,,,,,,,CHAR,1,,CHP Road Type,d3lH3w010T
+collisions,56,PEDESTRIAN_ACCIDENT,,,,,,,,,CHAR,1,indicates whether the collision involved a pedestrian,Pedestrian Collision,d3lH3w010U
+collisions,57,BICYCLE_ACCIDENT,,,,,,,,,CHAR,1,indicates whether the collision involved a bicycle,Bicycle Collision,d3lH3w010V
+collisions,58,MOTORCYCLE_ACCIDENT,,,,,,,,,CHAR,1,indicates whether the collision involved a motorcycle,Motorcycle Collision,d3lH3w010W
+collisions,59,TRUCK_ACCIDENT,,,,,,,,,CHAR,1,indicates whether the collision involved a big truck,Truck Collision,d3lH3w010X
+collisions,60,NOT_PRIVATE_PROPERTY,,,,,,,,,CHAR,1,indicates whether the collision occurred on private property,Not Private Property,d3lH3w010Y
+collisions,61,ALCOHOL_INVOLVED,,,,,,,,,CHAR,1,indicates whether the collision involved a party that had been drinking,Alcohol Involved,d3lH3w010Z
+collisions,62,STWD_VEHTYPE_AT_FAULT,,,,,,,,,CHAR,1,indicates the Statewide Vehicle Type of the party who is at fault,Statewide Vehicle Type At Fault,d3lH3w0110
+collisions,63,CHP_VEHTYPE_AT_FAULT,,,,,,,,,CHAR,2,indicates the CHP Vehicle Type of the party who is at fault,CHP Vehicle Type At Fault,d3lH3w0111
+collisions,64,COUNT_SEVERE_INJ,,,,,,,,,INTEGER,3,counts victims in the collision with degree of injury of 2,Severe Injury count,d3lH3w0112
+collisions,65,COUNT_VISIBLE_INJ,,,,,,,,,INTEGER,3,counts victims in the collision with degree of injury of 3,Other Visible Injury count,d3lH3w0113
+collisions,66,COUNT_COMPLAINT_PAIN,,,,,,,,,INTEGER,3,counts victims in the collision with degree of injury of 4,Complaint of Pain Injury count,d3lH3w0114
+collisions,67,COUNT_PED_KILLED,,,,,,,,,INTEGER,3,Counts the victims in the collision with party type of 2 and degree of injury is 1,Pedestrian Killed count,d3lH3w0115
+collisions,68,COUNT_PED_INJURED,,,,,,,,,INTEGER,3,"Counts the victims in the collision with party type of 2 and degree of injury is 2, 3, or 4",Pedestrian Injured count,d3lH3w0116
+collisions,69,COUNT_BICYCLIST_KILLED,,,,,,,,,INTEGER,3,Counts the victims in the collision with party type of 4 and degree of injury is 1,Bicyclist Killed count,d3lH3w0117
+collisions,70,COUNT_BICYCLIST_INJURED,,,,,,,,,INTEGER,3,"Counts the victims in the collision with party type of 4 and degree of injury is 2, 3, or 4",Bicyclist Injured count,d3lH3w0118
+collisions,71,COUNT_MC_KILLED,,,,,,,,,INTEGER,3,counts victims in the collision with statewide vehicle type of C or O and degree of injury of 1,Motorcyclist Killed count,d3lH3w0119
+collisions,72,COUNT_MC_INJURED,,,,,,,,,INTEGER,3,"counts victims in the collision with statewide vehicle type of C or O and degree of injury of 2, 3, or 4",Motorcyclist Injured count,d3lH3w011a
+collisions,73,PRIMARY_RAMP,,,,,,,,,CHAR,2,,Primary Ramp,d3lH3w011b
+collisions,74,SECONDARY_RAMP,,,,,,,,,CHAR,2,,Secondary Ramp,d3lH3w011c
+collisions,75,LATITUDE,,,,,,,,,REAL,,,Latitude,d3lH3w011d
+collisions,76,LONGITUDE,,,,,,,,,REAL,,,Longitude,d3lH3w011e
+,,,,,,,,,,,,,,,
+parties,1,CASE_ID,,1,,,,,,,VARCHAR,19,the unique identifier of the collision report (barcode beginning 2002; 19 digit code prior to 2002),Case Id,d3lH3w0201
+parties,2,PARTY_NUMBER,,,,,,,,,INTEGER,3,,Party Number,d3lH3w0202
+parties,3,PARTY_TYPE,,,1,,,,,,CHAR,1,,Party Type,d3lH3w0203
+parties,4,AT_FAULT,,,,1,,,,,CHAR,1,indicates whether the party was at fault in the collision,At Fault,d3lH3w0204
+parties,5,PARTY_SEX,,,,,1,,,,CHAR,1,the code of the sex of the party,Party Sex,d3lH3w0205
+parties,6,PARTY_AGE,,,,,,1,,,INTEGER,3,the age of the party at the time of the collision,Party Age,d3lH3w0206
+parties,7,PARTY_SOBRIETY,,,,,,,1,,CHAR,1,,Party Sobriety,d3lH3w0207
+parties,8,PARTY_DRUG_PHYSICAL,,,,,,,,,CHAR,1,,Party Drug Physical,d3lH3w0208
+parties,9,DIR_OF_TRAVEL,,,,,,,,,CHAR,1,,Direction Of Travel,d3lH3w0209
+parties,10,PARTY_SAFETY_EQUIP_1,,,,,,,,,CHAR,1,,Party Safety Equipment 1,d3lH3w020a
+parties,11,PARTY_SAFETY_EQUIP_2,,,,,,,,,CHAR,1,,Party Safety Equipment 2,d3lH3w020b
+parties,12,FINAN_RESPONS,,,,,,,,,CHAR,1,,Financial Responsibility,d3lH3w020c
+parties,13,SP_INFO_1,,,,,,,,,CHAR,1,,Special Information 1,d3lH3w020d
+parties,14,SP_INFO_2,,,,,,,,,CHAR,1,,Special Information 2,d3lH3w020e
+parties,15,SP_INFO_3,,,,,,,,,CHAR,1,,"Special Information
+3",d3lH3w020f
+parties,16,OAF_VIOLATION_CODE,,,,,,,,,CHAR,1,,OAF Violation Code,d3lH3w020g
+parties,17,OAF_VIOL_CAT,,,,,,,,,CHAR,2,,OAF Violation Category,d3lH3w020h
+parties,18,OAF_VIOL_SECTION,,,,,,,,,INTEGER,5,,OAF Violation Section,d3lH3w020i
+parties,19,OAF_VIOLATION_SUFFIX,,,,,,,,,CHAR,1,,OAF Violation Suffix,d3lH3w020j
+parties,20,OAF_1,,,,,,,,,CHAR,1,,Other Associated Factor 1,d3lH3w020k
+parties,21,OAF_2,,,,,,,,,CHAR,1,,Other Associated Factor 2,d3lH3w020l
+parties,22,PARTY_NUMBER_KILLED,,,,,,,,,INTEGER,3,counts victims in the party with degree of injury of 1,Party Number Killed,d3lH3w020m
+parties,23,PARTY_NUMBER_INJURED,,,,,,,,,INTEGER,3,"counts victims in the party with degree of injury of 2, 3, or 4",Party Number Injured,d3lH3w020n
+parties,24,MOVE_PRE_ACC,,,,,,,,,CHAR,1,,Movement Preceding Collision,d3lH3w020o
+parties,25,VEHICLE_YEAR,,,,,,,,,INTEGER,4,the model year of the party's vehicle,Vehicle Year,d3lH3w020p
+parties,26,VEHICLE_MAKE,,,,,,,,,VARCHAR,50,the full description of the make of the party's vehicle,Vehicle Make,d3lH3w020q
+parties,27,STWD_VEHICLE_TYPE,,,,,,,,,CHAR,1,,,d3lH3w020r
+parties,28,CHP_VEH_TYPE_TOWING,,,,,,,,,CHAR,2,,CHP Vehicle Type Towing,d3lH3w020s
+parties,29,CHP_VEH_TYPE_TOWED,,,,,,,,,CHAR,2,,CHP Vehicle Type Towed,d3lH3w020t
+parties,30,RACE,,,,,,,,,CHAR,1,,Party Race,d3lH3w020u
+parties,31,INATTENTION,,,,,,,,,TEXT,,,,
+parties,32,SPECIAL_INFO_F,,,,,,,,,TEXT,,,,
+parties,33,SPECIAL_INFO_G,,,,,,,,,TEXT,,,,
+,,,,,,,,,,,,,,,
+victims,1,CASE_ID,,1,,,,,,,VARCHAR,19,the unique identifier of the collision report (barcode beginning 2002; 19 digit code prior to 2002),Case Id,d3lH3w0301
+victims,2,PARTY_NUMBER,,,,,,,,,INTEGER,3,,Party Number,d3lH3w0302
+victims,3,VICTIM_ROLE,,1,,,,,,,CHAR,1,,Victim Role,d3lH3w0303
+victims,4,VICTIM_SEX,,,1,,,,,,CHAR,1,,Victim Sex,d3lH3w0304
+victims,5,VICTIM_AGE,,,,1,,,,,INTEGER,3,the age of the victim at the time of the collision,Victim Age,d3lH3w0305
+victims,6,VICTIM_DEGREE_OF_INJURY,,,,,,,,,CHAR,1,,Victim Degree of Injury,d3lH3w0306
+victims,7,VICTIM_SEATING_POSITION,,,,,,,,,CHAR,1,,Victim Seating Position,d3lH3w0307
+victims,8,VICTIM_SAFETY_EQUIP_1,,,,,,,,,CHAR,1,,Victim Safety Equipment 1,d3lH3w0308
+victims,9,VICTIM_SAFETY_EQUIP_2,,,,,,,,,CHAR,1,,Victim Safety Equipment 2,d3lH3w0309
+victims,10,VICTIM_EJECTED,,,,,,,,,CHAR,1,,Victim Ejected,d3lH3w030a

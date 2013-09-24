@@ -1,0 +1,35 @@
+about:
+    author: Eric Busboom
+    description: The Statewide Integrated Traffic Records System (SWITRS) is a database
+        that serves as a means to collect and process data gathered from a collision
+        scene.
+    license: other-open
+    maintainer: Eric Busboom
+    seealso:
+        collison_codes: http://tims.berkeley.edu/page.php?page=codebook
+        partyvictim_codes: http://tims.berkeley.edu/page.php?page=codebook2
+    tags:
+    - government
+    - transportation
+    title: Statewide Integrated Traffic Records System
+    url: http://iswitrs.chp.ca.gov/Reports/jsp/RawData.jsp
+build:
+    dependencies:
+        geocoder: clarinova.com-geocode-casnd-429e.segments
+    schema_file: meta/schema.csv
+    urls:
+        collisions: http://ds.civicknowledge.org.s3.amazonaws.com/iswitrs.chp.ca.gov/2000-2012/CollisionRecords.csv.zip
+        parties: http://ds.civicknowledge.org.s3.amazonaws.com/iswitrs.chp.ca.gov/2000-2012/PartyRecords.csv.zip
+        victims: http://ds.civicknowledge.org.s3.amazonaws.com/iswitrs.chp.ca.gov/2000-2012/VictimRecords.csv.zip
+identity:
+    creator: eric@sandiegodata.org
+    dataset: switrs
+    id: a3lH3w
+    name: chp.ca.gov-switrs-orig-429e
+    revision: 1
+    source: chp.ca.gov
+    variation: orig
+    vid: a3lH3w/001
+    vname: chp.ca.gov-switrs-orig-429e-r1
+partitions:
+- chp.ca.gov-switrs-orig-429e.collisions
